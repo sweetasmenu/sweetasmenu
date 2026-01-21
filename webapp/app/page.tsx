@@ -148,7 +148,7 @@ export default function HomePage() {
                 alt="SweetAsMenu"
                 width={600}
                 height={150}
-                className="h-14 lg:h-16 xl:h-18 w-auto opacity-90 group-hover:opacity-100 transition-opacity"
+                className="h-16 lg:h-20 xl:h-24 w-auto opacity-90 group-hover:opacity-100 transition-opacity"
                 priority
               />
             </button>
