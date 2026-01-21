@@ -247,7 +247,7 @@ export default function HomePage() {
         </div>
 
         <div className="max-w-7xl mx-auto px-6 lg:px-12 relative z-10 w-full">
-          <div className="grid lg:grid-cols-2 gap-16 lg:gap-20 items-center py-16 lg:py-0">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 xl:gap-20 items-center py-16 lg:py-0">
             {/* Left Content */}
             <div className="max-w-xl">
               {/* Premium Badge */}
@@ -260,9 +260,9 @@ export default function HomePage() {
                 </div>
               </div>
 
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-light text-white mb-6 sm:mb-8 leading-[1.15] tracking-tight">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-light text-white mb-6 sm:mb-8 leading-[1.1] tracking-tight">
                 Elevate Your
-                <span className="block font-semibold bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 bg-clip-text text-transparent mt-1">
+                <span className="block font-semibold bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 bg-clip-text text-transparent mt-1 sm:mt-2">
                   Restaurant Menu
                 </span>
               </h1>
@@ -378,14 +378,14 @@ export default function HomePage() {
               </div>
 
               {/* Floating Stats */}
-              <div className="absolute -bottom-8 -left-8 bg-neutral-900 border border-amber-800/30 p-5 hidden lg:block">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-amber-600 to-amber-500 flex items-center justify-center">
-                    <TrendingUp className="w-6 h-6 text-white" />
+              <div className="absolute -bottom-6 -left-6 xl:-bottom-8 xl:-left-8 bg-neutral-900 border border-amber-800/30 p-4 xl:p-5 hidden lg:block z-10">
+                <div className="flex items-center gap-3 xl:gap-4">
+                  <div className="w-10 h-10 xl:w-12 xl:h-12 bg-gradient-to-br from-amber-600 to-amber-500 flex items-center justify-center">
+                    <TrendingUp className="w-5 h-5 xl:w-6 xl:h-6 text-white" />
                   </div>
                   <div>
-                    <p className="text-2xl font-semibold text-white">+340%</p>
-                    <p className="text-neutral-500 text-sm">Menu Engagement</p>
+                    <p className="text-xl xl:text-2xl font-semibold text-white">+340%</p>
+                    <p className="text-neutral-500 text-xs xl:text-sm">Menu Engagement</p>
                   </div>
                 </div>
               </div>
@@ -625,7 +625,7 @@ export default function HomePage() {
               <div key={index} className="relative text-center">
                 {/* Connector Line */}
                 {index < 2 && (
-                  <div className="hidden sm:block absolute top-10 sm:top-12 left-[60%] w-[80%] h-px bg-gradient-to-r from-amber-700/30 to-transparent" />
+                  <div className="hidden sm:block absolute top-10 sm:top-12 left-[55%] w-[90%] lg:left-[60%] lg:w-[80%] h-px bg-gradient-to-r from-amber-700/30 to-transparent" />
                 )}
 
                 <div className="inline-flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 border border-amber-700/30 mb-6 sm:mb-8 relative">
@@ -781,8 +781,8 @@ export default function HomePage() {
             </div>
 
             {/* Professional - Featured */}
-            <div className="relative bg-neutral-900/50 border-2 border-amber-700/50 p-5 sm:p-6 lg:p-8 sm:col-span-2 lg:col-span-1 lg:-mt-4 lg:mb-4">
-              <div className="absolute -top-3 sm:-top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-600 to-amber-500 text-white px-4 sm:px-6 py-1 sm:py-1.5 text-xs font-semibold tracking-wider sm:tracking-widest uppercase whitespace-nowrap">
+            <div className="relative bg-neutral-900/50 border-2 border-amber-700/50 p-5 sm:p-6 lg:p-8 sm:col-span-2 lg:col-span-1 lg:-mt-6 lg:mb-6 xl:-mt-8 xl:mb-8">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-600 to-amber-500 text-white px-4 sm:px-6 py-1 sm:py-1.5 text-xs font-semibold tracking-wider sm:tracking-widest uppercase whitespace-nowrap z-10">
                 Most Popular
               </div>
 
@@ -888,9 +888,9 @@ export default function HomePage() {
       {/* Footer - Premium */}
       <footer className="bg-neutral-950 border-t border-neutral-800 py-12 sm:py-16 lg:py-20">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
-          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10 lg:gap-12 mb-10 sm:mb-12">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 sm:gap-10 lg:gap-12 mb-10 sm:mb-12">
             {/* Brand */}
-            <div className="col-span-2 sm:col-span-1">
+            <div className="col-span-2 md:col-span-1">
               <Image
                 src="/images/app-logo.png"
                 alt="SweetAsMenu"
@@ -922,7 +922,7 @@ export default function HomePage() {
             </div>
 
             {/* Contact */}
-            <div className="col-span-2 sm:col-span-1">
+            <div className="col-span-2 md:col-span-1">
               <h4 className="text-white font-medium mb-4 sm:mb-6 tracking-wide uppercase text-xs sm:text-sm">Contact</h4>
               <ul className="space-y-2 sm:space-y-3 text-neutral-500 text-xs sm:text-sm">
                 <li><a href="mailto:support@zestiotech.com" className="hover:text-amber-500 transition-colors break-all">support@zestiotech.com</a></li>
