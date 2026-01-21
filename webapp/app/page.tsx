@@ -148,7 +148,7 @@ export default function HomePage() {
                 alt="SweetAsMenu"
                 width={600}
                 height={150}
-                className="h-12 lg:h-14 w-auto opacity-90 group-hover:opacity-100 transition-opacity"
+                className="h-14 lg:h-16 xl:h-18 w-auto opacity-90 group-hover:opacity-100 transition-opacity"
                 priority
               />
             </button>
@@ -377,8 +377,8 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* Floating Stats */}
-              <div className="absolute -bottom-6 -left-6 xl:-bottom-8 xl:-left-8 bg-neutral-900 border border-amber-800/30 p-4 xl:p-5 hidden lg:block z-10">
+              {/* Floating Stats - positioned top right to avoid overlap */}
+              <div className="absolute -top-4 -right-4 xl:-top-6 xl:-right-6 bg-neutral-900 border border-amber-800/30 p-4 xl:p-5 hidden lg:block z-10">
                 <div className="flex items-center gap-3 xl:gap-4">
                   <div className="w-10 h-10 xl:w-12 xl:h-12 bg-gradient-to-br from-amber-600 to-amber-500 flex items-center justify-center">
                     <TrendingUp className="w-5 h-5 xl:w-6 xl:h-6 text-white" />
@@ -890,10 +890,11 @@ export default function HomePage() {
               <Image
                 src="/images/app-logo.png"
                 alt="SweetAsMenu"
-                width={300}
-                height={75}
-                className="h-10 sm:h-12 w-auto mb-4 sm:mb-6 opacity-80"
+                width={400}
+                height={100}
+                className="h-14 sm:h-16 w-auto mb-2 opacity-80"
               />
+              <p className="text-amber-500 font-semibold text-sm sm:text-base mb-4 tracking-wide">SweetAsMenu</p>
               <p className="text-neutral-500 text-xs sm:text-sm leading-relaxed mb-4 sm:mb-6">
                 AI-powered digital menus for discerning restaurants in New Zealand.
               </p>
