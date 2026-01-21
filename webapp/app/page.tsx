@@ -260,44 +260,44 @@ export default function HomePage() {
                 </div>
               </div>
 
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-light text-white mb-8 leading-[1.1] tracking-tight">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-light text-white mb-6 sm:mb-8 leading-[1.15] tracking-tight">
                 Elevate Your
-                <span className="block font-semibold bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 bg-clip-text text-transparent">
+                <span className="block font-semibold bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 bg-clip-text text-transparent mt-1">
                   Restaurant Menu
                 </span>
               </h1>
 
-              <p className="text-lg lg:text-xl text-neutral-400 mb-12 leading-relaxed font-light">
+              <p className="text-base sm:text-lg lg:text-xl text-neutral-400 mb-8 sm:mb-12 leading-relaxed font-light">
                 Transform ordinary food photography into extraordinary visual experiences.
                 AI-powered enhancement, seamless translations, and elegant digital menus.
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-4 mb-12">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-8 sm:mb-12">
                 <Link
                   href="/login?tab=signup"
-                  className="group inline-flex items-center justify-center bg-gradient-to-r from-amber-600 to-amber-500 text-white px-10 py-4 font-semibold tracking-wide uppercase text-sm transition-all duration-500 hover:from-amber-500 hover:to-amber-400 hover:shadow-lg hover:shadow-amber-500/20"
+                  className="group inline-flex items-center justify-center bg-gradient-to-r from-amber-600 to-amber-500 text-white px-8 sm:px-10 py-3.5 sm:py-4 font-semibold tracking-wide uppercase text-sm transition-all duration-500 hover:from-amber-500 hover:to-amber-400 hover:shadow-lg hover:shadow-amber-500/20"
                 >
                   Begin Free Trial
-                  <ArrowRight className="ml-3 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight className="ml-2 sm:ml-3 w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </Link>
                 <a
                   href="#showcase"
-                  className="group inline-flex items-center justify-center border border-neutral-700 text-white px-10 py-4 font-medium tracking-wide uppercase text-sm transition-all duration-500 hover:border-amber-700/50 hover:bg-amber-950/20"
+                  className="group inline-flex items-center justify-center border border-neutral-700 text-white px-8 sm:px-10 py-3.5 sm:py-4 font-medium tracking-wide uppercase text-sm transition-all duration-500 hover:border-amber-700/50 hover:bg-amber-950/20"
                 >
-                  <Play className="w-4 h-4 mr-3 text-amber-500" />
+                  <Play className="w-4 h-4 mr-2 sm:mr-3 text-amber-500" />
                   View Showcase
                 </a>
               </div>
 
               {/* Trust Indicators */}
-              <div className="flex items-center gap-8 text-sm text-neutral-500">
+              <div className="flex flex-wrap items-center gap-4 sm:gap-8 text-xs sm:text-sm text-neutral-500">
                 <div className="flex items-center">
-                  <CheckCircle className="w-4 h-4 text-amber-600 mr-2" />
-                  14-day free trial
+                  <CheckCircle className="w-4 h-4 text-amber-600 mr-2 flex-shrink-0" />
+                  <span>14-day free trial</span>
                 </div>
                 <div className="flex items-center">
-                  <CheckCircle className="w-4 h-4 text-amber-600 mr-2" />
-                  No credit card
+                  <CheckCircle className="w-4 h-4 text-amber-600 mr-2 flex-shrink-0" />
+                  <span>No credit card</span>
                 </div>
               </div>
             </div>
@@ -405,7 +405,7 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-gradient-to-r from-neutral-950 via-neutral-900 to-neutral-950" />
 
         <div className="max-w-7xl mx-auto px-6 lg:px-12 relative">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 lg:gap-12">
             {[
               { number: "500+", label: "Restaurants" },
               { number: "25,000+", label: "Photos Enhanced" },
@@ -413,11 +413,11 @@ export default function HomePage() {
               { number: "4.9", label: "Average Rating", suffix: "★" }
             ].map((stat, index) => (
               <div key={index} className="text-center">
-                <div className="text-3xl lg:text-4xl font-light text-white mb-2">
+                <div className="text-2xl sm:text-3xl lg:text-4xl font-light text-white mb-1 sm:mb-2">
                   {stat.number}
                   {stat.suffix && <span className="text-amber-500">{stat.suffix}</span>}
                 </div>
-                <div className="text-neutral-500 text-sm tracking-widest uppercase">{stat.label}</div>
+                <div className="text-neutral-500 text-xs sm:text-sm tracking-wider sm:tracking-widest uppercase">{stat.label}</div>
               </div>
             ))}
           </div>
@@ -430,37 +430,37 @@ export default function HomePage() {
 
         <div className="max-w-7xl mx-auto px-6 lg:px-12 relative">
           {/* Section Header */}
-          <div className="text-center mb-20">
-            <div className="inline-flex items-center justify-center mb-6">
-              <div className="w-12 h-px bg-amber-700/50" />
-              <span className="mx-4 text-amber-500 text-xs font-semibold tracking-[0.2em] uppercase">Features</span>
-              <div className="w-12 h-px bg-amber-700/50" />
+          <div className="text-center mb-12 sm:mb-16 lg:mb-20">
+            <div className="inline-flex items-center justify-center mb-4 sm:mb-6">
+              <div className="w-8 sm:w-12 h-px bg-amber-700/50" />
+              <span className="mx-3 sm:mx-4 text-amber-500 text-xs font-semibold tracking-[0.15em] sm:tracking-[0.2em] uppercase">Features</span>
+              <div className="w-8 sm:w-12 h-px bg-amber-700/50" />
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-light text-white mb-6">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light text-white mb-4 sm:mb-6 px-4">
               Exceptional <span className="font-semibold text-amber-400">Capabilities</span>
             </h2>
-            <p className="text-neutral-400 max-w-2xl mx-auto text-lg font-light">
+            <p className="text-neutral-400 max-w-2xl mx-auto text-base sm:text-lg font-light px-4">
               Everything you need to create a world-class digital menu experience
             </p>
           </div>
 
           {/* Features Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
             {features.map((feature, index) => (
               <div
                 key={index}
-                className="group relative bg-neutral-900/30 border border-neutral-800 p-8 transition-all duration-500 hover:border-amber-800/50 hover:bg-neutral-900/50"
+                className="group relative bg-neutral-900/30 border border-neutral-800 p-5 sm:p-6 lg:p-8 transition-all duration-500 hover:border-amber-800/50 hover:bg-neutral-900/50"
               >
                 {/* Corner Accent */}
-                <div className="absolute top-0 right-0 w-12 h-12 border-t border-r border-amber-700/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="absolute top-0 right-0 w-10 sm:w-12 h-10 sm:h-12 border-t border-r border-amber-700/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-                <div className="w-12 h-12 bg-gradient-to-br from-amber-600/20 to-amber-700/10 border border-amber-700/30 flex items-center justify-center mb-6 text-amber-500">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-amber-600/20 to-amber-700/10 border border-amber-700/30 flex items-center justify-center mb-4 sm:mb-6 text-amber-500">
                   {feature.icon}
                 </div>
-                <h3 className="text-xl font-medium text-white mb-3 group-hover:text-amber-400 transition-colors">
+                <h3 className="text-lg sm:text-xl font-medium text-white mb-2 sm:mb-3 group-hover:text-amber-400 transition-colors">
                   {feature.title}
                 </h3>
-                <p className="text-neutral-500 leading-relaxed font-light">
+                <p className="text-neutral-500 leading-relaxed font-light text-sm sm:text-base">
                   {feature.description}
                 </p>
               </div>
@@ -474,22 +474,22 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-gradient-to-b from-neutral-950 via-neutral-900 to-neutral-950" />
 
         <div className="max-w-7xl mx-auto px-6 lg:px-12 relative">
-          <div className="text-center mb-20">
-            <div className="inline-flex items-center justify-center mb-6">
-              <div className="w-12 h-px bg-amber-700/50" />
-              <span className="mx-4 text-amber-500 text-xs font-semibold tracking-[0.2em] uppercase">AI Showcase</span>
-              <div className="w-12 h-px bg-amber-700/50" />
+          <div className="text-center mb-12 sm:mb-16 lg:mb-20">
+            <div className="inline-flex items-center justify-center mb-4 sm:mb-6">
+              <div className="w-8 sm:w-12 h-px bg-amber-700/50" />
+              <span className="mx-3 sm:mx-4 text-amber-500 text-xs font-semibold tracking-[0.15em] sm:tracking-[0.2em] uppercase">AI Showcase</span>
+              <div className="w-8 sm:w-12 h-px bg-amber-700/50" />
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-light text-white mb-6">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light text-white mb-4 sm:mb-6 px-4">
               Before & After <span className="font-semibold text-amber-400">Transformations</span>
             </h2>
-            <p className="text-neutral-400 max-w-2xl mx-auto text-lg font-light">
+            <p className="text-neutral-400 max-w-2xl mx-auto text-base sm:text-lg font-light px-4">
               Witness the power of AI enhancement on real restaurant dishes
             </p>
           </div>
 
           {/* Gallery */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
             {enhancementExamples.map((example, index) => (
               <div
                 key={example.id}
@@ -531,9 +531,9 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                <div className="mt-4 text-center">
-                  <h3 className="text-white font-medium group-hover:text-amber-400 transition-colors">{example.name}</h3>
-                  <p className="text-neutral-500 text-sm">{example.cuisine}</p>
+                <div className="mt-3 sm:mt-4 text-center">
+                  <h3 className="text-white font-medium text-sm sm:text-base group-hover:text-amber-400 transition-colors truncate px-1">{example.name}</h3>
+                  <p className="text-neutral-500 text-xs sm:text-sm">{example.cuisine}</p>
                 </div>
               </div>
             ))}
@@ -590,83 +590,83 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-neutral-950" />
 
         <div className="max-w-7xl mx-auto px-6 lg:px-12 relative">
-          <div className="text-center mb-20">
-            <div className="inline-flex items-center justify-center mb-6">
-              <div className="w-12 h-px bg-amber-700/50" />
-              <span className="mx-4 text-amber-500 text-xs font-semibold tracking-[0.2em] uppercase">Process</span>
-              <div className="w-12 h-px bg-amber-700/50" />
+          <div className="text-center mb-12 sm:mb-16 lg:mb-20">
+            <div className="inline-flex items-center justify-center mb-4 sm:mb-6">
+              <div className="w-8 sm:w-12 h-px bg-amber-700/50" />
+              <span className="mx-3 sm:mx-4 text-amber-500 text-xs font-semibold tracking-[0.15em] sm:tracking-[0.2em] uppercase">Process</span>
+              <div className="w-8 sm:w-12 h-px bg-amber-700/50" />
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-light text-white mb-6">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light text-white mb-4 sm:mb-6">
               How It <span className="font-semibold text-amber-400">Works</span>
             </h2>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
+          <div className="grid sm:grid-cols-3 gap-8 lg:gap-12">
             {[
               {
                 step: "01",
                 title: "Upload Your Menu",
                 description: "Simply upload photos of your dishes. Our system accepts any quality - we'll make them shine.",
-                icon: <Upload className="w-6 h-6" />
+                icon: <Upload className="w-5 h-5 sm:w-6 sm:h-6" />
               },
               {
                 step: "02",
                 title: "AI Enhancement",
                 description: "Our AI automatically enhances photos, generates descriptions, and translates content.",
-                icon: <Sparkles className="w-6 h-6" />
+                icon: <Sparkles className="w-5 h-5 sm:w-6 sm:h-6" />
               },
               {
                 step: "03",
                 title: "Go Live",
                 description: "Get your elegant QR code, share your digital menu, and start receiving orders.",
-                icon: <QrCode className="w-6 h-6" />
+                icon: <QrCode className="w-5 h-5 sm:w-6 sm:h-6" />
               }
             ].map((step, index) => (
               <div key={index} className="relative text-center">
                 {/* Connector Line */}
                 {index < 2 && (
-                  <div className="hidden md:block absolute top-12 left-[60%] w-[80%] h-px bg-gradient-to-r from-amber-700/30 to-transparent" />
+                  <div className="hidden sm:block absolute top-10 sm:top-12 left-[60%] w-[80%] h-px bg-gradient-to-r from-amber-700/30 to-transparent" />
                 )}
 
-                <div className="inline-flex items-center justify-center w-24 h-24 border border-amber-700/30 mb-8 relative">
-                  <span className="absolute -top-3 -right-3 text-4xl font-light text-amber-700/30">{step.step}</span>
+                <div className="inline-flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 border border-amber-700/30 mb-6 sm:mb-8 relative">
+                  <span className="absolute -top-2 -right-2 sm:-top-3 sm:-right-3 text-3xl sm:text-4xl font-light text-amber-700/30">{step.step}</span>
                   <div className="text-amber-500">{step.icon}</div>
                 </div>
-                <h3 className="text-xl font-medium text-white mb-4">{step.title}</h3>
-                <p className="text-neutral-500 font-light leading-relaxed">{step.description}</p>
+                <h3 className="text-lg sm:text-xl font-medium text-white mb-3 sm:mb-4">{step.title}</h3>
+                <p className="text-neutral-500 font-light leading-relaxed text-sm sm:text-base">{step.description}</p>
               </div>
             ))}
           </div>
 
-          <div className="text-center mt-16">
+          <div className="text-center mt-10 sm:mt-16">
             <Link
               href="/login?tab=signup"
-              className="inline-flex items-center bg-gradient-to-r from-amber-600 to-amber-500 text-white px-10 py-4 font-semibold tracking-wide uppercase text-sm transition-all duration-500 hover:from-amber-500 hover:to-amber-400"
+              className="inline-flex items-center bg-gradient-to-r from-amber-600 to-amber-500 text-white px-8 sm:px-10 py-3.5 sm:py-4 font-semibold tracking-wide uppercase text-sm transition-all duration-500 hover:from-amber-500 hover:to-amber-400"
             >
               Get Started Now
-              <ArrowRight className="ml-3 w-4 h-4" />
+              <ArrowRight className="ml-2 sm:ml-3 w-4 h-4" />
             </Link>
           </div>
         </div>
       </section>
 
       {/* Testimonials */}
-      <section id="testimonials" className="py-24 lg:py-32 relative">
+      <section id="testimonials" className="py-16 sm:py-24 lg:py-32 relative">
         <div className="absolute inset-0 bg-gradient-to-b from-neutral-950 via-neutral-900 to-neutral-950" />
 
         <div className="max-w-7xl mx-auto px-6 lg:px-12 relative">
-          <div className="text-center mb-20">
-            <div className="inline-flex items-center justify-center mb-6">
-              <div className="w-12 h-px bg-amber-700/50" />
-              <span className="mx-4 text-amber-500 text-xs font-semibold tracking-[0.2em] uppercase">Testimonials</span>
-              <div className="w-12 h-px bg-amber-700/50" />
+          <div className="text-center mb-12 sm:mb-16 lg:mb-20">
+            <div className="inline-flex items-center justify-center mb-4 sm:mb-6">
+              <div className="w-8 sm:w-12 h-px bg-amber-700/50" />
+              <span className="mx-3 sm:mx-4 text-amber-500 text-xs font-semibold tracking-[0.15em] sm:tracking-[0.2em] uppercase">Testimonials</span>
+              <div className="w-8 sm:w-12 h-px bg-amber-700/50" />
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-light text-white mb-6">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light text-white mb-4 sm:mb-6 px-4">
               Trusted by <span className="font-semibold text-amber-400">Industry Leaders</span>
             </h2>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
             {[
               {
                 name: "Marco R.",
@@ -692,21 +692,21 @@ export default function HomePage() {
             ].map((testimonial, index) => (
               <div
                 key={index}
-                className="bg-neutral-900/30 border border-neutral-800 p-8"
+                className="bg-neutral-900/30 border border-neutral-800 p-5 sm:p-6 lg:p-8"
               >
                 {/* Stars */}
-                <div className="flex gap-1 mb-6">
+                <div className="flex gap-1 mb-4 sm:mb-6">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 text-amber-500 fill-current" />
+                    <Star key={i} className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500 fill-current" />
                   ))}
                 </div>
 
-                <p className="text-neutral-300 mb-8 leading-relaxed font-light italic">
-                  "{testimonial.text}"
+                <p className="text-neutral-300 mb-6 sm:mb-8 leading-relaxed font-light italic text-sm sm:text-base">
+                  &ldquo;{testimonial.text}&rdquo;
                 </p>
 
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full overflow-hidden border border-amber-700/30">
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden border border-amber-700/30 flex-shrink-0">
                     <Image
                       src={testimonial.avatar}
                       alt={testimonial.name}
@@ -715,9 +715,9 @@ export default function HomePage() {
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  <div>
-                    <div className="text-white font-medium">{testimonial.name}</div>
-                    <div className="text-neutral-500 text-sm">{testimonial.cuisine}</div>
+                  <div className="min-w-0">
+                    <div className="text-white font-medium text-sm sm:text-base truncate">{testimonial.name}</div>
+                    <div className="text-neutral-500 text-xs sm:text-sm truncate">{testimonial.cuisine}</div>
                     <div className="text-amber-600 text-xs">{testimonial.location}</div>
                   </div>
                 </div>
@@ -728,36 +728,36 @@ export default function HomePage() {
       </section>
 
       {/* Pricing */}
-      <section id="pricing" className="py-24 lg:py-32 relative">
+      <section id="pricing" className="py-16 sm:py-24 lg:py-32 relative">
         <div className="absolute inset-0 bg-neutral-950" />
 
         <div className="max-w-7xl mx-auto px-6 lg:px-12 relative">
-          <div className="text-center mb-20">
-            <div className="inline-flex items-center justify-center mb-6">
-              <div className="w-12 h-px bg-amber-700/50" />
-              <span className="mx-4 text-amber-500 text-xs font-semibold tracking-[0.2em] uppercase">Pricing</span>
-              <div className="w-12 h-px bg-amber-700/50" />
+          <div className="text-center mb-12 sm:mb-16 lg:mb-20">
+            <div className="inline-flex items-center justify-center mb-4 sm:mb-6">
+              <div className="w-8 sm:w-12 h-px bg-amber-700/50" />
+              <span className="mx-3 sm:mx-4 text-amber-500 text-xs font-semibold tracking-[0.15em] sm:tracking-[0.2em] uppercase">Pricing</span>
+              <div className="w-8 sm:w-12 h-px bg-amber-700/50" />
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-light text-white mb-6">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light text-white mb-4 sm:mb-6">
               Investment <span className="font-semibold text-amber-400">Plans</span>
             </h2>
-            <p className="text-neutral-400 max-w-2xl mx-auto text-lg font-light">
+            <p className="text-neutral-400 max-w-2xl mx-auto text-base sm:text-lg font-light px-4">
               Choose the plan that fits your establishment
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 items-start">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 items-start max-w-5xl mx-auto">
             {/* Starter */}
-            <div className="bg-neutral-900/30 border border-neutral-800 p-8">
-              <div className="text-center mb-8">
-                <h3 className="text-xl font-medium text-white mb-2">Starter</h3>
-                <div className="text-4xl font-light text-white mb-1">
-                  $39<span className="text-neutral-500 text-lg">/mo</span>
+            <div className="bg-neutral-900/30 border border-neutral-800 p-5 sm:p-6 lg:p-8">
+              <div className="text-center mb-6 sm:mb-8">
+                <h3 className="text-lg sm:text-xl font-medium text-white mb-2">Starter</h3>
+                <div className="text-3xl sm:text-4xl font-light text-white mb-1">
+                  $39<span className="text-neutral-500 text-base sm:text-lg">/mo</span>
                 </div>
-                <p className="text-neutral-500 text-sm">For small takeaways</p>
+                <p className="text-neutral-500 text-xs sm:text-sm">For small takeaways</p>
               </div>
 
-              <ul className="space-y-4 mb-8">
+              <ul className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
                 {[
                   "30 menu items",
                   "30 AI enhancements/month",
@@ -765,36 +765,36 @@ export default function HomePage() {
                   "QR Menu & POS",
                   "Custom logo"
                 ].map((feature, i) => (
-                  <li key={i} className="flex items-center text-neutral-400 text-sm">
-                    <CheckCircle className="w-4 h-4 text-amber-600 mr-3 flex-shrink-0" />
-                    {feature}
+                  <li key={i} className="flex items-center text-neutral-400 text-xs sm:text-sm">
+                    <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-600 mr-2 sm:mr-3 flex-shrink-0" />
+                    <span>{feature}</span>
                   </li>
                 ))}
               </ul>
 
               <Link
                 href="/pricing"
-                className="block text-center border border-neutral-700 text-white py-3 font-medium tracking-wide uppercase text-sm transition-all duration-300 hover:border-amber-700/50 hover:bg-amber-950/20"
+                className="block text-center border border-neutral-700 text-white py-2.5 sm:py-3 font-medium tracking-wide uppercase text-xs sm:text-sm transition-all duration-300 hover:border-amber-700/50 hover:bg-amber-950/20"
               >
                 Get Started
               </Link>
             </div>
 
             {/* Professional - Featured */}
-            <div className="relative bg-neutral-900/50 border-2 border-amber-700/50 p-8 md:-mt-4 md:mb-4">
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-600 to-amber-500 text-white px-6 py-1.5 text-xs font-semibold tracking-widest uppercase">
+            <div className="relative bg-neutral-900/50 border-2 border-amber-700/50 p-5 sm:p-6 lg:p-8 sm:col-span-2 lg:col-span-1 lg:-mt-4 lg:mb-4">
+              <div className="absolute -top-3 sm:-top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-600 to-amber-500 text-white px-4 sm:px-6 py-1 sm:py-1.5 text-xs font-semibold tracking-wider sm:tracking-widest uppercase whitespace-nowrap">
                 Most Popular
               </div>
 
-              <div className="text-center mb-8 pt-4">
-                <h3 className="text-xl font-medium text-white mb-2">Professional</h3>
-                <div className="text-4xl font-light text-amber-400 mb-1">
-                  $89<span className="text-neutral-500 text-lg">/mo</span>
+              <div className="text-center mb-6 sm:mb-8 pt-3 sm:pt-4">
+                <h3 className="text-lg sm:text-xl font-medium text-white mb-2">Professional</h3>
+                <div className="text-3xl sm:text-4xl font-light text-amber-400 mb-1">
+                  $89<span className="text-neutral-500 text-base sm:text-lg">/mo</span>
                 </div>
-                <p className="text-neutral-500 text-sm">For casual dining</p>
+                <p className="text-neutral-500 text-xs sm:text-sm">For casual dining</p>
               </div>
 
-              <ul className="space-y-4 mb-8">
+              <ul className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
                 {[
                   "Unlimited menu items",
                   "200 AI enhancements/month",
@@ -803,32 +803,32 @@ export default function HomePage() {
                   "Custom logo & theme",
                   "Cover image"
                 ].map((feature, i) => (
-                  <li key={i} className="flex items-center text-neutral-300 text-sm">
-                    <CheckCircle className="w-4 h-4 text-amber-500 mr-3 flex-shrink-0" />
-                    {feature}
+                  <li key={i} className="flex items-center text-neutral-300 text-xs sm:text-sm">
+                    <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500 mr-2 sm:mr-3 flex-shrink-0" />
+                    <span>{feature}</span>
                   </li>
                 ))}
               </ul>
 
               <Link
                 href="/pricing"
-                className="block text-center bg-gradient-to-r from-amber-600 to-amber-500 text-white py-3 font-semibold tracking-wide uppercase text-sm transition-all duration-300 hover:from-amber-500 hover:to-amber-400"
+                className="block text-center bg-gradient-to-r from-amber-600 to-amber-500 text-white py-2.5 sm:py-3 font-semibold tracking-wide uppercase text-xs sm:text-sm transition-all duration-300 hover:from-amber-500 hover:to-amber-400"
               >
                 Start Free Trial
               </Link>
             </div>
 
             {/* Enterprise */}
-            <div className="bg-neutral-900/30 border border-neutral-800 p-8">
-              <div className="text-center mb-8">
-                <h3 className="text-xl font-medium text-white mb-2">Enterprise</h3>
-                <div className="text-4xl font-light text-white mb-1">
-                  $199<span className="text-neutral-500 text-lg">/mo</span>
+            <div className="bg-neutral-900/30 border border-neutral-800 p-5 sm:p-6 lg:p-8">
+              <div className="text-center mb-6 sm:mb-8">
+                <h3 className="text-lg sm:text-xl font-medium text-white mb-2">Enterprise</h3>
+                <div className="text-3xl sm:text-4xl font-light text-white mb-1">
+                  $199<span className="text-neutral-500 text-base sm:text-lg">/mo</span>
                 </div>
-                <p className="text-neutral-500 text-sm">Fine dining & chains</p>
+                <p className="text-neutral-500 text-xs sm:text-sm">Fine dining & chains</p>
               </div>
 
-              <ul className="space-y-4 mb-8">
+              <ul className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
                 {[
                   "Unlimited everything",
                   "500 AI enhancements/month",
@@ -837,16 +837,16 @@ export default function HomePage() {
                   "Multi-branch support",
                   "Priority support"
                 ].map((feature, i) => (
-                  <li key={i} className="flex items-center text-neutral-400 text-sm">
-                    <CheckCircle className="w-4 h-4 text-amber-600 mr-3 flex-shrink-0" />
-                    {feature}
+                  <li key={i} className="flex items-center text-neutral-400 text-xs sm:text-sm">
+                    <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-600 mr-2 sm:mr-3 flex-shrink-0" />
+                    <span>{feature}</span>
                   </li>
                 ))}
               </ul>
 
               <Link
                 href="/login?tab=signup"
-                className="block text-center bg-gradient-to-r from-amber-600 to-amber-500 text-white py-3 font-semibold tracking-wide uppercase text-sm transition-all duration-300 hover:from-amber-500 hover:to-amber-400"
+                className="block text-center bg-gradient-to-r from-amber-600 to-amber-500 text-white py-2.5 sm:py-3 font-semibold tracking-wide uppercase text-xs sm:text-sm transition-all duration-300 hover:from-amber-500 hover:to-amber-400"
               >
                 Get Started
               </Link>
@@ -856,49 +856,49 @@ export default function HomePage() {
       </section>
 
       {/* Final CTA */}
-      <section className="py-24 lg:py-32 relative">
+      <section className="py-16 sm:py-24 lg:py-32 relative">
         <div className="absolute inset-0 bg-gradient-to-r from-amber-950/50 via-amber-900/30 to-amber-950/50" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-amber-900/20 via-transparent to-transparent" />
 
         <div className="max-w-4xl mx-auto px-6 lg:px-12 text-center relative">
-          <Utensils className="w-12 h-12 text-amber-600 mx-auto mb-8" />
+          <Utensils className="w-10 h-10 sm:w-12 sm:h-12 text-amber-600 mx-auto mb-6 sm:mb-8" />
 
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-light text-white mb-6">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light text-white mb-4 sm:mb-6 px-4">
             Ready to <span className="font-semibold text-amber-400">Transform</span> Your Restaurant?
           </h2>
-          <p className="text-neutral-400 mb-12 text-lg font-light max-w-2xl mx-auto">
+          <p className="text-neutral-400 mb-8 sm:mb-12 text-base sm:text-lg font-light max-w-2xl mx-auto px-4">
             Join hundreds of premium restaurants across New Zealand.
             Start your complimentary 14-day trial today.
           </p>
 
           <Link
             href="/login?tab=signup"
-            className="inline-flex items-center bg-white text-neutral-900 px-12 py-4 font-semibold tracking-wide uppercase text-sm transition-all duration-300 hover:bg-amber-400"
+            className="inline-flex items-center bg-white text-neutral-900 px-8 sm:px-12 py-3.5 sm:py-4 font-semibold tracking-wide uppercase text-sm transition-all duration-300 hover:bg-amber-400"
           >
             Begin Your Journey
-            <ArrowRight className="ml-3 w-4 h-4" />
+            <ArrowRight className="ml-2 sm:ml-3 w-4 h-4" />
           </Link>
 
-          <p className="text-neutral-500 text-sm mt-8">
+          <p className="text-neutral-500 text-xs sm:text-sm mt-6 sm:mt-8">
             No credit card required • Cancel anytime
           </p>
         </div>
       </section>
 
       {/* Footer - Premium */}
-      <footer className="bg-neutral-950 border-t border-neutral-800 py-16 lg:py-20">
+      <footer className="bg-neutral-950 border-t border-neutral-800 py-12 sm:py-16 lg:py-20">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10 lg:gap-12 mb-10 sm:mb-12">
             {/* Brand */}
-            <div>
+            <div className="col-span-2 sm:col-span-1">
               <Image
                 src="/images/app-logo.png"
                 alt="SweetAsMenu"
                 width={300}
                 height={75}
-                className="h-12 w-auto mb-6 opacity-80"
+                className="h-10 sm:h-12 w-auto mb-4 sm:mb-6 opacity-80"
               />
-              <p className="text-neutral-500 text-sm leading-relaxed mb-6">
+              <p className="text-neutral-500 text-xs sm:text-sm leading-relaxed mb-4 sm:mb-6">
                 AI-powered digital menus for discerning restaurants in New Zealand.
               </p>
               <a
@@ -913,51 +913,51 @@ export default function HomePage() {
 
             {/* Product */}
             <div>
-              <h4 className="text-white font-medium mb-6 tracking-wide uppercase text-sm">Product</h4>
-              <ul className="space-y-3">
-                <li><a href="#features" className="text-neutral-500 hover:text-amber-500 text-sm transition-colors">Features</a></li>
-                <li><Link href="/pricing" className="text-neutral-500 hover:text-amber-500 text-sm transition-colors">Pricing</Link></li>
-                <li><a href="#showcase" className="text-neutral-500 hover:text-amber-500 text-sm transition-colors">Showcase</a></li>
+              <h4 className="text-white font-medium mb-4 sm:mb-6 tracking-wide uppercase text-xs sm:text-sm">Product</h4>
+              <ul className="space-y-2 sm:space-y-3">
+                <li><a href="#features" className="text-neutral-500 hover:text-amber-500 text-xs sm:text-sm transition-colors">Features</a></li>
+                <li><Link href="/pricing" className="text-neutral-500 hover:text-amber-500 text-xs sm:text-sm transition-colors">Pricing</Link></li>
+                <li><a href="#showcase" className="text-neutral-500 hover:text-amber-500 text-xs sm:text-sm transition-colors">Showcase</a></li>
               </ul>
             </div>
 
             {/* Contact */}
-            <div>
-              <h4 className="text-white font-medium mb-6 tracking-wide uppercase text-sm">Contact</h4>
-              <ul className="space-y-3 text-neutral-500 text-sm">
-                <li><a href="mailto:support@zestiotech.com" className="hover:text-amber-500 transition-colors">support@zestiotech.com</a></li>
+            <div className="col-span-2 sm:col-span-1">
+              <h4 className="text-white font-medium mb-4 sm:mb-6 tracking-wide uppercase text-xs sm:text-sm">Contact</h4>
+              <ul className="space-y-2 sm:space-y-3 text-neutral-500 text-xs sm:text-sm">
+                <li><a href="mailto:support@zestiotech.com" className="hover:text-amber-500 transition-colors break-all">support@zestiotech.com</a></li>
                 <li>8/28 Setthasiri Rama 5</li>
                 <li>Nonthaburi, Thailand 11000</li>
               </ul>
 
               {/* Social Links */}
-              <div className="flex gap-4 mt-6">
-                <a href="https://www.facebook.com/profile.php?id=61586578678116" target="_blank" rel="noopener noreferrer" className="w-10 h-10 border border-neutral-800 flex items-center justify-center text-neutral-500 hover:text-amber-500 hover:border-amber-700/50 transition-all" aria-label="Facebook">
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+              <div className="flex gap-3 sm:gap-4 mt-4 sm:mt-6">
+                <a href="https://www.facebook.com/profile.php?id=61586578678116" target="_blank" rel="noopener noreferrer" className="w-8 h-8 sm:w-10 sm:h-10 border border-neutral-800 flex items-center justify-center text-neutral-500 hover:text-amber-500 hover:border-amber-700/50 transition-all" aria-label="Facebook">
+                  <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
                 </a>
-                <a href="https://www.instagram.com/zestiotech/" target="_blank" rel="noopener noreferrer" className="w-10 h-10 border border-neutral-800 flex items-center justify-center text-neutral-500 hover:text-amber-500 hover:border-amber-700/50 transition-all" aria-label="Instagram">
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                <a href="https://www.instagram.com/zestiotech/" target="_blank" rel="noopener noreferrer" className="w-8 h-8 sm:w-10 sm:h-10 border border-neutral-800 flex items-center justify-center text-neutral-500 hover:text-amber-500 hover:border-amber-700/50 transition-all" aria-label="Instagram">
+                  <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
                 </a>
-                <a href="https://www.linkedin.com/in/phawat-thirachotkonkasem-9057713a5/" target="_blank" rel="noopener noreferrer" className="w-10 h-10 border border-neutral-800 flex items-center justify-center text-neutral-500 hover:text-amber-500 hover:border-amber-700/50 transition-all" aria-label="LinkedIn">
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                <a href="https://www.linkedin.com/in/phawat-thirachotkonkasem-9057713a5/" target="_blank" rel="noopener noreferrer" className="w-8 h-8 sm:w-10 sm:h-10 border border-neutral-800 flex items-center justify-center text-neutral-500 hover:text-amber-500 hover:border-amber-700/50 transition-all" aria-label="LinkedIn">
+                  <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
                 </a>
               </div>
             </div>
 
             {/* Legal */}
             <div>
-              <h4 className="text-white font-medium mb-6 tracking-wide uppercase text-sm">Legal</h4>
-              <ul className="space-y-3">
-                <li><Link href="/privacy" className="text-neutral-500 hover:text-amber-500 text-sm transition-colors">Privacy Policy</Link></li>
-                <li><Link href="/terms" className="text-neutral-500 hover:text-amber-500 text-sm transition-colors">Terms of Service</Link></li>
-                <li><Link href="/refunds" className="text-neutral-500 hover:text-amber-500 text-sm transition-colors">Refund Policy</Link></li>
+              <h4 className="text-white font-medium mb-4 sm:mb-6 tracking-wide uppercase text-xs sm:text-sm">Legal</h4>
+              <ul className="space-y-2 sm:space-y-3">
+                <li><Link href="/privacy" className="text-neutral-500 hover:text-amber-500 text-xs sm:text-sm transition-colors">Privacy Policy</Link></li>
+                <li><Link href="/terms" className="text-neutral-500 hover:text-amber-500 text-xs sm:text-sm transition-colors">Terms of Service</Link></li>
+                <li><Link href="/refunds" className="text-neutral-500 hover:text-amber-500 text-xs sm:text-sm transition-colors">Refund Policy</Link></li>
               </ul>
             </div>
           </div>
 
           {/* Bottom */}
-          <div className="border-t border-neutral-800 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-neutral-600 text-sm">
+          <div className="border-t border-neutral-800 pt-6 sm:pt-8 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 text-center sm:text-left">
+            <p className="text-neutral-600 text-xs sm:text-sm">
               &copy; {new Date().getFullYear()} Zestio Tech Limited. All rights reserved.
             </p>
             <p className="text-neutral-700 text-xs">

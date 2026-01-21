@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase/client';
 import { signOut } from '@/lib/supabase/auth';
 import { SUBSCRIPTION_PLANS } from '@/lib/subscription/plans';
 import TrialLimitsCard from '@/components/TrialLimitsCard';
+import { dt, dtBilingual, DashboardLanguage } from '@/lib/dashboard-translations';
 import {
   ChefHat,
   LogOut,
@@ -46,7 +47,13 @@ export default function DashboardPage() {
   const [showBranchDropdown, setShowBranchDropdown] = useState(false);
   const [bestSellers, setBestSellers] = useState<any[]>([]);
   const [userRole, setUserRole] = useState<string>('free_trial');
+  const [primaryLanguage, setPrimaryLanguage] = useState<DashboardLanguage>('en');
   const isFetchingProfile = useRef(false);
+
+  // Helper function to get bilingual text
+  const t = (category: 'common' | 'nav' | 'dashboard' | 'upload' | 'menus' | 'settings' | 'customer' | 'alerts', key: string) => {
+    return dtBilingual(category, key, primaryLanguage);
+  };
 
   useEffect(() => {
     let pollInterval: NodeJS.Timeout | null = null;
@@ -316,7 +323,7 @@ export default function DashboardPage() {
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-      // Fetch restaurant details (including logo)
+      // Fetch restaurant details (including logo and primary_language)
       const restaurantResponse = await fetch(`${API_URL}/api/restaurant/${restaurantId}`);
       if (restaurantResponse.ok) {
         const restaurantData = await restaurantResponse.json();
@@ -325,6 +332,10 @@ export default function DashboardPage() {
           if (rest.name) setRestaurantName(rest.name);
           if (rest.logo_url) setRestaurantLogo(rest.logo_url);
           else setRestaurantLogo(null);
+          // Set primary language for bilingual UI
+          if (rest.primary_language) {
+            setPrimaryLanguage(rest.primary_language as DashboardLanguage);
+          }
         }
       }
 
@@ -501,7 +512,7 @@ export default function DashboardPage() {
                 className="flex items-center space-x-2 px-4 py-2 bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
               >
                 <Settings className="w-4 h-4" />
-                <span className="text-sm font-medium">Settings</span>
+                <span className="text-sm font-medium">{t('nav', 'settings')}</span>
               </Link>
               <div className="flex items-center space-x-2">
                 <User className="w-5 h-5 text-gray-500" />
@@ -514,7 +525,7 @@ export default function DashboardPage() {
                 className="flex items-center space-x-2 px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors"
               >
                 <LogOut className="w-4 h-4" />
-                <span className="text-sm font-medium">Sign Out</span>
+                <span className="text-sm font-medium">{primaryLanguage === 'en' ? 'Sign Out' : (primaryLanguage === 'th' ? 'ออกจากระบบ / Sign Out' : 'Sign Out')}</span>
               </button>
             </div>
           </div>
@@ -529,7 +540,7 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-4xl font-bold mb-2">
-                  Welcome back! 👋
+                  {t('dashboard', 'welcome')}! 👋
                 </h2>
                 <p className="text-orange-100 text-lg">
                   {user?.user_metadata?.full_name || user?.email}
@@ -543,7 +554,7 @@ export default function DashboardPage() {
                   className="flex items-center gap-3 px-6 py-3 bg-white text-orange-600 rounded-xl font-bold text-lg hover:bg-orange-50 transition-colors shadow-lg"
                 >
                   <ExternalLink className="w-6 h-6" />
-                  View Menu
+                  {primaryLanguage === 'en' ? 'View Menu' : (primaryLanguage === 'th' ? 'ดูเมนู / View Menu' : 'View Menu')}
                 </Link>
               )}
             </div>
@@ -577,7 +588,7 @@ export default function DashboardPage() {
                 href="/pricing"
                 className="w-full inline-block text-center px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold transition-colors text-sm"
               >
-                View Plans
+                {primaryLanguage === 'en' ? 'View Plans' : (primaryLanguage === 'th' ? 'ดูแพ็กเกจ / View Plans' : 'View Plans')}
               </Link>
             </div>
           </div>
@@ -596,8 +607,8 @@ export default function DashboardPage() {
                 <TrendingUp className="w-6 h-6 text-orange-600" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">Top 5 Best Selling Items</h3>
-                <p className="text-sm text-gray-500">Last 7 days</p>
+                <h3 className="text-lg font-semibold text-gray-900">{t('dashboard', 'bestSellers')}</h3>
+                <p className="text-sm text-gray-500">{primaryLanguage === 'en' ? 'Last 7 days' : (primaryLanguage === 'th' ? '7 วันที่ผ่านมา / Last 7 days' : 'Last 7 days')}</p>
               </div>
             </div>
             <div className="space-y-3">
@@ -628,7 +639,7 @@ export default function DashboardPage() {
         )}
 
         {/* Quick Actions */}
-        <h3 className="text-2xl font-bold text-gray-900 mb-4">Quick Actions</h3>
+        <h3 className="text-2xl font-bold text-gray-900 mb-4">{primaryLanguage === 'en' ? 'Quick Actions' : (primaryLanguage === 'th' ? 'ทางลัด / Quick Actions' : 'Quick Actions')}</h3>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           <Link
             href="/upload"
@@ -637,8 +648,8 @@ export default function DashboardPage() {
             <div className="bg-orange-100 w-14 h-14 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
               <Upload className="w-7 h-7 text-orange-600" />
             </div>
-            <h3 className="font-semibold text-gray-900 mb-1 text-lg">Upload Menu</h3>
-            <p className="text-sm text-gray-500">Upload and translate new menu</p>
+            <h3 className="font-semibold text-gray-900 mb-1 text-lg">{t('nav', 'upload')}</h3>
+            <p className="text-sm text-gray-500">{primaryLanguage === 'en' ? 'Upload and translate new menu' : (primaryLanguage === 'th' ? 'อัปโหลดและแปลเมนูใหม่ / Upload new menu' : 'Upload and translate new menu')}</p>
           </Link>
 
           <Link
@@ -648,8 +659,8 @@ export default function DashboardPage() {
             <div className="bg-blue-100 w-14 h-14 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
               <Menu className="w-7 h-7 text-blue-600" />
             </div>
-            <h3 className="font-semibold text-gray-900 mb-1 text-lg">My Menu</h3>
-            <p className="text-sm text-gray-500">View and manage your menu</p>
+            <h3 className="font-semibold text-gray-900 mb-1 text-lg">{t('nav', 'myMenu')}</h3>
+            <p className="text-sm text-gray-500">{primaryLanguage === 'en' ? 'View and manage your menu' : (primaryLanguage === 'th' ? 'ดูและจัดการเมนู / View and manage menu' : 'View and manage your menu')}</p>
           </Link>
 
           <Link
@@ -659,8 +670,8 @@ export default function DashboardPage() {
             <div className="bg-purple-100 w-14 h-14 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
               <Sparkles className="w-7 h-7 text-purple-600" />
             </div>
-            <h3 className="font-semibold text-gray-900 mb-1 text-lg">Upgrade</h3>
-            <p className="text-sm text-gray-500">View all plans</p>
+            <h3 className="font-semibold text-gray-900 mb-1 text-lg">{primaryLanguage === 'en' ? 'Upgrade' : (primaryLanguage === 'th' ? 'อัปเกรด / Upgrade' : 'Upgrade')}</h3>
+            <p className="text-sm text-gray-500">{primaryLanguage === 'en' ? 'View all plans' : (primaryLanguage === 'th' ? 'ดูแพ็กเกจทั้งหมด / View all plans' : 'View all plans')}</p>
           </Link>
 
           <Link
@@ -670,8 +681,8 @@ export default function DashboardPage() {
             <div className="bg-gray-100 w-14 h-14 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
               <Settings className="w-7 h-7 text-gray-600" />
             </div>
-            <h3 className="font-semibold text-gray-900 mb-1 text-lg">Settings</h3>
-            <p className="text-sm text-gray-500">Profile & Billing</p>
+            <h3 className="font-semibold text-gray-900 mb-1 text-lg">{t('nav', 'settings')}</h3>
+            <p className="text-sm text-gray-500">{primaryLanguage === 'en' ? 'Profile & Billing' : (primaryLanguage === 'th' ? 'โปรไฟล์และการชำระเงิน / Profile & Billing' : 'Profile & Billing')}</p>
           </Link>
 
           <Link
@@ -681,8 +692,8 @@ export default function DashboardPage() {
             <div className="bg-green-100 w-14 h-14 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
               <Receipt className="w-7 h-7 text-green-600" />
             </div>
-            <h3 className="font-semibold text-gray-900 mb-1 text-lg">Order Summary</h3>
-            <p className="text-sm text-gray-500">View orders & payments</p>
+            <h3 className="font-semibold text-gray-900 mb-1 text-lg">{t('nav', 'orders')}</h3>
+            <p className="text-sm text-gray-500">{primaryLanguage === 'en' ? 'View orders & payments' : (primaryLanguage === 'th' ? 'ดูออเดอร์และการชำระเงิน / View orders' : 'View orders & payments')}</p>
           </Link>
 
           {/* Admin Panel - Only visible for admin role */}
@@ -709,8 +720,8 @@ export default function DashboardPage() {
               </div>
             </div>
             <h4 className="text-3xl font-bold text-gray-900 mb-1">{usage.menusThisMonth}</h4>
-            <p className="text-gray-600">Menus Uploaded</p>
-            <p className="text-xs text-gray-500 mt-2">This month</p>
+            <p className="text-gray-600">{primaryLanguage === 'en' ? 'Menus Uploaded' : (primaryLanguage === 'th' ? 'เมนูที่อัปโหลด / Menus Uploaded' : 'Menus Uploaded')}</p>
+            <p className="text-xs text-gray-500 mt-2">{primaryLanguage === 'en' ? 'This month' : (primaryLanguage === 'th' ? 'เดือนนี้ / This month' : 'This month')}</p>
           </div>
 
           <div className="bg-white rounded-xl shadow-md p-6">
@@ -719,9 +730,9 @@ export default function DashboardPage() {
                 <Zap className="w-6 h-6 text-green-600" />
               </div>
             </div>
-            <h4 className="text-3xl font-bold text-gray-900 mb-1">Active</h4>
-            <p className="text-gray-600">Account Status</p>
-            <p className="text-xs text-green-600 mt-2">● All systems operational</p>
+            <h4 className="text-3xl font-bold text-gray-900 mb-1">{primaryLanguage === 'en' ? 'Active' : (primaryLanguage === 'th' ? 'ใช้งาน' : 'Active')}</h4>
+            <p className="text-gray-600">{primaryLanguage === 'en' ? 'Account Status' : (primaryLanguage === 'th' ? 'สถานะบัญชี / Account Status' : 'Account Status')}</p>
+            <p className="text-xs text-green-600 mt-2">{primaryLanguage === 'en' ? '● All systems operational' : (primaryLanguage === 'th' ? '● ระบบทำงานปกติ' : '● All systems operational')}</p>
           </div>
         </div>
       </main>
