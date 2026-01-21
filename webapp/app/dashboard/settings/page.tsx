@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Shield, Users, Utensils, Truck, Store, Plus, Trash2, Edit2, Save, X, Loader2, Globe, ExternalLink, MapPin, Navigation, CreditCard, Building2, QrCode } from 'lucide-react';
+import { Shield, Users, Utensils, Truck, Store, Plus, Trash2, Edit2, Save, X, Loader2, Globe, ExternalLink, MapPin, Navigation, CreditCard, Building2, QrCode, Key, Eye, EyeOff, CheckCircle, AlertCircle } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 
 interface ServiceOptions {
@@ -91,7 +91,7 @@ function SettingsContent() {
   const searchParams = useSearchParams();
   const initialTab = searchParams.get('tab') || 'profile';
 
-  const [activeTab, setActiveTab] = useState<'profile' | 'services' | 'staff' | 'payments' | 'billing'>(initialTab as any);
+  const [activeTab, setActiveTab] = useState<'profile' | 'services' | 'staff' | 'payments' | 'billing' | 'security'>(initialTab as any);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -211,6 +211,20 @@ function SettingsContent() {
     credit_card_surcharge_rate: 2.50
   });
   const [savingSurcharge, setSavingSurcharge] = useState(false);
+
+  // Password Change state
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [showPasswords, setShowPasswords] = useState({
+    current: false,
+    new: false,
+    confirm: false
+  });
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [passwordMessage, setPasswordMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   // Image optimization helper
   const optimizeImage = async (file: File, maxSize: number = 512): Promise<Blob> => {
@@ -959,10 +973,10 @@ function SettingsContent() {
         return;
       }
       const userId = session.user.id;
-      
+
       // TODO: Get customer_id from subscription data
       const customerId = 'cus_xxx'; // Replace with actual Stripe Customer ID
-      
+
       const response = await fetch(`${BACKEND_URL}/api/billing/create-portal-session`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -973,7 +987,7 @@ function SettingsContent() {
       });
 
       const data = await response.json();
-      
+
       if (data.success && data.portal_url) {
         window.location.href = data.portal_url;
       } else {
@@ -982,6 +996,52 @@ function SettingsContent() {
     } catch (error) {
       console.error('Failed to create portal session:', error);
       alert('Failed to open billing portal');
+    }
+  };
+
+  // Handle Password Change
+  const handleChangePassword = async () => {
+    setPasswordMessage(null);
+
+    // Validation
+    if (!passwordData.newPassword || !passwordData.confirmPassword) {
+      setPasswordMessage({ type: 'error', text: 'Please fill in all fields' });
+      return;
+    }
+
+    if (passwordData.newPassword.length < 6) {
+      setPasswordMessage({ type: 'error', text: 'Password must be at least 6 characters' });
+      return;
+    }
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      setPasswordMessage({ type: 'error', text: 'New passwords do not match' });
+      return;
+    }
+
+    try {
+      setChangingPassword(true);
+
+      // Use Supabase to update password
+      const { error } = await supabase.auth.updateUser({
+        password: passwordData.newPassword
+      });
+
+      if (error) {
+        console.error('Password change error:', error);
+        setPasswordMessage({ type: 'error', text: error.message || 'Failed to change password' });
+        return;
+      }
+
+      // Success
+      setPasswordMessage({ type: 'success', text: 'Password changed successfully!' });
+      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+
+    } catch (error) {
+      console.error('Password change error:', error);
+      setPasswordMessage({ type: 'error', text: 'An error occurred. Please try again.' });
+    } finally {
+      setChangingPassword(false);
     }
   };
 
@@ -1246,6 +1306,17 @@ function SettingsContent() {
               }`}
             >
               Subscription & Billing
+            </button>
+            <button
+              onClick={() => setActiveTab('security')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap flex items-center gap-2 ${
+                activeTab === 'security'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <Key className="w-4 h-4" />
+              Security
             </button>
           </nav>
         </div>
@@ -2897,6 +2968,115 @@ function SettingsContent() {
                 </a>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Security Tab */}
+        {activeTab === 'security' && (
+          <div className="bg-white shadow rounded-lg p-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">Security Settings</h2>
+
+            {/* Change Password Section */}
+            <div className="max-w-md">
+              <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
+                <Key className="w-5 h-5 text-gray-500" />
+                Change Password
+              </h3>
+
+              {/* Message Alert */}
+              {passwordMessage && (
+                <div className={`mb-4 p-4 rounded-lg flex items-center gap-3 ${
+                  passwordMessage.type === 'success'
+                    ? 'bg-green-50 text-green-800 border border-green-200'
+                    : 'bg-red-50 text-red-800 border border-red-200'
+                }`}>
+                  {passwordMessage.type === 'success'
+                    ? <CheckCircle className="w-5 h-5 text-green-600" />
+                    : <AlertCircle className="w-5 h-5 text-red-600" />
+                  }
+                  <span>{passwordMessage.text}</span>
+                </div>
+              )}
+
+              <div className="space-y-4">
+                {/* New Password */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    New Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showPasswords.new ? 'text' : 'password'}
+                      value={passwordData.newPassword}
+                      onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                      placeholder="Enter new password"
+                      className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPasswords({ ...showPasswords, new: !showPasswords.new })}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                    >
+                      {showPasswords.new ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                  </div>
+                  <p className="mt-1 text-xs text-gray-500">Minimum 6 characters</p>
+                </div>
+
+                {/* Confirm Password */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Confirm New Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showPasswords.confirm ? 'text' : 'password'}
+                      value={passwordData.confirmPassword}
+                      onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                      placeholder="Confirm new password"
+                      className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPasswords({ ...showPasswords, confirm: !showPasswords.confirm })}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                    >
+                      {showPasswords.confirm ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Submit Button */}
+                <button
+                  onClick={handleChangePassword}
+                  disabled={changingPassword || !passwordData.newPassword || !passwordData.confirmPassword}
+                  className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {changingPassword ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Changing Password...
+                    </>
+                  ) : (
+                    <>
+                      <Key className="w-4 h-4" />
+                      Change Password
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {/* Security Tips */}
+              <div className="mt-8 p-4 bg-gray-50 rounded-lg">
+                <h4 className="font-medium text-gray-900 mb-2">Password Tips</h4>
+                <ul className="text-sm text-gray-600 space-y-1">
+                  <li>• Use at least 6 characters</li>
+                  <li>• Include uppercase and lowercase letters</li>
+                  <li>• Add numbers and special characters</li>
+                  <li>• Don&apos;t reuse passwords from other sites</li>
+                </ul>
+              </div>
+            </div>
           </div>
         )}
       </div>
