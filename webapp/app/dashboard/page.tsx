@@ -97,8 +97,8 @@ export default function DashboardPage() {
             setRestaurantId(restId);
             if (restSlug) setRestaurantSlug(restSlug);
             if (restName) setRestaurantName(restName);
-            // Sync to global key for other pages
-            localStorage.setItem('selected_restaurant_id', restId);
+            // Save to user-scoped localStorage key only
+            localStorage.setItem(`selected_restaurant_${userId}`, restId);
             await fetchRestaurantAndBestSellers(restId);
             await fetchUsageData(restId);
           }
@@ -133,9 +133,8 @@ export default function DashboardPage() {
         if (!restaurantId && !isFetchingProfile.current) {
           isFetchingProfile.current = true;
           try {
-            // Check localStorage for selected restaurant (multi-branch support)
-            const savedRestaurantId = localStorage.getItem(`selected_restaurant_${userId}`) ||
-                                      localStorage.getItem('selected_restaurant_id');
+            // Check localStorage for selected restaurant (user-scoped only)
+            const savedRestaurantId = localStorage.getItem(`selected_restaurant_${userId}`);
             const userProfile = await fetchUserPlan(userId, savedRestaurantId || undefined);
 
             // Fetch best sellers and usage if we have a restaurant ID
@@ -145,8 +144,8 @@ export default function DashboardPage() {
             if (restId) {
               setRestaurantId(restId);
               if (restSlug) setRestaurantSlug(restSlug);
-              // Sync to global key for other pages
-              localStorage.setItem('selected_restaurant_id', restId);
+              // Save to user-scoped localStorage key only
+              localStorage.setItem(`selected_restaurant_${userId}`, restId);
               await fetchRestaurantAndBestSellers(restId);
               await fetchUsageData(restId);
             }
@@ -255,9 +254,7 @@ export default function DashboardPage() {
           if (plan) {
             console.log('✅ Dashboard: Setting plan to:', plan.name);
             setCurrentPlan(plan);
-            // Save to localStorage for consistency
-            localStorage.setItem('selected_plan', plan.id);
-            localStorage.setItem('user_role', role || 'free_trial');
+            // Don't save to global localStorage - values are fetched per session
             // Set user role state for admin button visibility
             setUserRole(role || 'free_trial');
           } else {
@@ -382,9 +379,8 @@ export default function DashboardPage() {
   const handleBranchSwitch = async (restaurant: {id: string; name: string; slug?: string; logo_url?: string}) => {
     if (!currentUserId) return;
 
-    // Save selected restaurant to localStorage (both formats for compatibility)
+    // Save selected restaurant to user-scoped localStorage only (no global key)
     localStorage.setItem(`selected_restaurant_${currentUserId}`, restaurant.id);
-    localStorage.setItem('selected_restaurant_id', restaurant.id); // Global key for other pages
 
     // Update state
     setRestaurantId(restaurant.id);

@@ -196,10 +196,9 @@ export default function OrderSummaryPage() {
     const userId = session.user.id;
     setCurrentUserId(userId);
 
-    // Get restaurant ID from profile (check both localStorage keys for compatibility)
+    // Get restaurant ID from profile (user-scoped localStorage only)
     try {
-      const savedRestaurantId = localStorage.getItem('selected_restaurant_id') ||
-                                localStorage.getItem(`selected_restaurant_${userId}`);
+      const savedRestaurantId = localStorage.getItem(`selected_restaurant_${userId}`);
       const url = savedRestaurantId
         ? `${API_URL}/api/user/profile?user_id=${userId}&restaurant_id=${savedRestaurantId}`
         : `${API_URL}/api/user/profile?user_id=${userId}`;
@@ -243,8 +242,7 @@ export default function OrderSummaryPage() {
   const handleBranchSwitch = async (restaurant: Restaurant) => {
     if (!currentUserId) return;
 
-    // Save to localStorage
-    localStorage.setItem('selected_restaurant_id', restaurant.id);
+    // Save to user-scoped localStorage only (no global key)
     localStorage.setItem(`selected_restaurant_${currentUserId}`, restaurant.id);
 
     // Update state

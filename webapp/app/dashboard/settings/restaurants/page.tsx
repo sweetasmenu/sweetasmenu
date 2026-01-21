@@ -90,9 +90,8 @@ export default function RestaurantsManagementPage() {
       if (data.success) {
         setRestaurants(data.restaurants || []);
 
-        // Get current restaurant from localStorage first, then fallback to profile
-        const savedRestaurantId = localStorage.getItem('selected_restaurant_id') ||
-                                  localStorage.getItem(`selected_restaurant_${session.user.id}`);
+        // Get current restaurant from user-scoped localStorage only
+        const savedRestaurantId = localStorage.getItem(`selected_restaurant_${session.user.id}`);
 
         if (savedRestaurantId) {
           setCurrentRestaurantId(savedRestaurantId);
@@ -232,8 +231,7 @@ export default function RestaurantsManagementPage() {
         // Update state without reloading page - keeps card positions
         setCurrentRestaurantId(restaurantId);
 
-        // Save to localStorage for sync across pages
-        localStorage.setItem('selected_restaurant_id', restaurantId);
+        // Save to user-scoped localStorage only (no global key)
         if (userId) {
           localStorage.setItem(`selected_restaurant_${userId}`, restaurantId);
         }

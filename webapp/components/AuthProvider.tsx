@@ -49,10 +49,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.log('Token refreshed');
         }
 
-        // Handle sign out
+        // Handle sign out - clear all user-specific localStorage data
         if (event === 'SIGNED_OUT') {
           setUser(null);
           setSession(null);
+
+          // Clear ALL localStorage keys to prevent data mixing between accounts
+          // Remove user-scoped keys
+          const keysToRemove: string[] = [];
+          for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && (
+              key.startsWith('selected_restaurant_') ||
+              key === 'selected_restaurant_id' ||
+              key === 'user_role' ||
+              key === 'selected_plan' ||
+              key === 'user_role_changed'
+            )) {
+              keysToRemove.push(key);
+            }
+          }
+          keysToRemove.forEach(key => localStorage.removeItem(key));
+          console.log('🧹 AuthProvider: Cleared localStorage on sign out');
         }
       }
     );

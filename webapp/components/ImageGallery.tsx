@@ -56,10 +56,11 @@ export default function ImageGallery({
   const [userRestaurants, setUserRestaurants] = useState<Restaurant[]>([]);
   const [loadingRestaurants, setLoadingRestaurants] = useState(false);
 
-  // Get selected restaurant from localStorage (synced with Dashboard)
+  // Get selected restaurant from user-scoped localStorage (synced with Dashboard)
   const getSelectedRestaurantFromStorage = () => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('selected_restaurant_id') || currentRestaurantId;
+      // Use user-scoped localStorage key only - userId is passed as prop
+      return localStorage.getItem(`selected_restaurant_${userId}`) || currentRestaurantId;
     }
     return currentRestaurantId;
   };

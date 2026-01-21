@@ -282,8 +282,8 @@ function SettingsContent() {
       }
       const userId = session.user.id;
 
-      // Check for selected restaurant from Dashboard
-      const selectedRestaurantId = localStorage.getItem('selected_restaurant_id');
+      // Check for selected restaurant from user-scoped localStorage only
+      const selectedRestaurantId = localStorage.getItem(`selected_restaurant_${userId}`);
       console.log('✅ Settings: Loading profile for user:', userId, 'selected restaurant:', selectedRestaurantId);
 
       // Build URL with optional restaurant_id parameter
@@ -305,7 +305,7 @@ function SettingsContent() {
         if (data.subscription?.role) {
           console.log('✅ Settings: Setting role from profile:', data.subscription.role);
           setUserRole(data.subscription.role);
-          localStorage.setItem('user_role', data.subscription.role);
+          // Don't save to global localStorage - role is fetched per session
         }
       }
     } catch (error) {
@@ -334,7 +334,7 @@ function SettingsContent() {
       if (data.success) {
         console.log('✅ Settings: User role loaded:', data.role);
         setUserRole(data.role);
-        localStorage.setItem('user_role', data.role);
+        // Don't save to global localStorage - role is fetched per session
       } else {
         console.warn('⚠️ Settings: Failed to load role, using default');
         setUserRole('admin'); // Default to admin for testing
