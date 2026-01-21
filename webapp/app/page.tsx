@@ -227,7 +227,7 @@ export default function HomePage() {
       </nav>
 
       {/* Hero Section - Premium & Elegant */}
-      <section className="relative min-h-screen flex items-center pt-24 lg:pt-0">
+      <section className="relative min-h-screen flex items-center pt-28 lg:pt-24">
         {/* Premium Background */}
         <div className="absolute inset-0">
           {/* Gradient Overlays */}
@@ -250,11 +250,11 @@ export default function HomePage() {
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 xl:gap-20 items-center py-16 lg:py-0">
             {/* Left Content */}
             <div className="max-w-xl">
-              {/* Premium Badge */}
-              <div className="inline-flex items-center mb-8">
-                <div className="flex items-center bg-neutral-900/80 border border-amber-800/30 px-5 py-2">
-                  <Award className="w-4 h-4 text-amber-500 mr-2" />
-                  <span className="text-amber-500 text-xs font-semibold tracking-[0.2em] uppercase">
+              {/* Premium Badge - positioned below navbar */}
+              <div className="inline-flex items-center mb-6 lg:mb-8 mt-4 lg:mt-0">
+                <div className="flex items-center bg-neutral-900/80 border border-amber-800/30 px-4 lg:px-5 py-1.5 lg:py-2">
+                  <Award className="w-3.5 h-3.5 lg:w-4 lg:h-4 text-amber-500 mr-2" />
+                  <span className="text-amber-500 text-[10px] lg:text-xs font-semibold tracking-[0.15em] lg:tracking-[0.2em] uppercase">
                     Premium AI Technology
                   </span>
                 </div>
@@ -393,8 +393,8 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Scroll Indicator */}
-        <div className="absolute bottom-12 left-1/2 -translate-x-1/2 hidden lg:flex flex-col items-center gap-3 text-neutral-600">
+        {/* Scroll Indicator - positioned to the right to avoid floating stats */}
+        <div className="absolute bottom-8 right-12 xl:right-16 hidden lg:flex flex-col items-center gap-3 text-neutral-600">
           <span className="text-xs tracking-widest uppercase">Scroll</span>
           <div className="w-px h-12 bg-gradient-to-b from-amber-700/50 to-transparent" />
         </div>
