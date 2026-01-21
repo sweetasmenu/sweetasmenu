@@ -1,0 +1,87 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+/lib/
+/lib64/
+!webapp/lib/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv/
+smartmenu/venv/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+env.private
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# FastAPI
+*.db
+*.sqlite
+
+# Data storage
+data/
+*.json
+!package.json
+!package-lock.json
+!tsconfig.json
+!jsconfig.json
+!netlify.toml
+!vercel.json
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+temp/
+tmp/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Project specific
+storage/
+uploads/
+*.pdf
+*.zip
+
+# Images (but allow webapp/public images)
+*.jpg
+*.png
+*.jpeg
+!webapp/public/**/*.jpg
+!webapp/public/**/*.png
+!webapp/public/**/*.jpeg
+!webapp/public/*.ico
+!webapp/public/images/**
+
+nul
