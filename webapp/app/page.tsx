@@ -393,11 +393,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Scroll Indicator - positioned to the right to avoid floating stats */}
-        <div className="absolute bottom-8 right-12 xl:right-16 hidden lg:flex flex-col items-center gap-3 text-neutral-600">
-          <span className="text-xs tracking-widest uppercase">Scroll</span>
-          <div className="w-px h-12 bg-gradient-to-b from-amber-700/50 to-transparent" />
-        </div>
+{/* Scroll Indicator removed - was overlapping with floating stats */}
       </section>
 
       {/* Stats Bar - Premium */}
