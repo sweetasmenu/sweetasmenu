@@ -583,13 +583,13 @@ export default function RestaurantMenuPage() {
         let translationIndex = 0;
 
         menuStructure.forEach(({ menu, meatCount, addOnCount }) => {
-          const rawTranslatedName = cleanTranslation(translations[translationIndex] || menu.name);
+          const rawTranslatedName = cleanTranslation(translations[translationIndex] || menu.name || '');
           // If name translation is too long (>200 chars), use original
           const translatedName = rawTranslatedName.length > 200 ? menu.name : rawTranslatedName;
           translationIndex++;
-          const translatedDesc = cleanTranslation(translations[translationIndex] || menu.description);
+          const translatedDesc = cleanTranslation(translations[translationIndex] || menu.description || '');
           translationIndex++;
-          const rawTranslatedCategory = cleanTranslation(translations[translationIndex] || menu.category);
+          const rawTranslatedCategory = cleanTranslation(translations[translationIndex] || menu.category || '');
           // If category translation is too long (>50 chars), use original
           const translatedCategory = rawTranslatedCategory.length > 50 ? menu.category : rawTranslatedCategory;
           translationIndex++;
