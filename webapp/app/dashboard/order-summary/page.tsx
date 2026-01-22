@@ -1132,10 +1132,10 @@ export default function OrderSummaryPage() {
               {/* Customer Info */}
               <div className="bg-gray-50 rounded-lg p-4">
                 <h3 className="font-semibold text-gray-900 mb-2">Customer Information</h3>
-                <div className="space-y-1 text-sm">
+                <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Service Type:</span>
-                    <span className="font-medium flex items-center gap-1">
+                    <span className="font-semibold text-gray-900 flex items-center gap-1">
                       {getServiceTypeIcon(selectedOrder.service_type)}
                       {getServiceTypeLabel(selectedOrder.service_type)}
                     </span>
@@ -1143,30 +1143,30 @@ export default function OrderSummaryPage() {
                   {selectedOrder.service_type === 'dine_in' ? (
                     <div className="flex justify-between">
                       <span className="text-gray-600">Table No:</span>
-                      <span className="font-medium">{selectedOrder.customer_details?.table_no || selectedOrder.table_no || '-'}</span>
+                      <span className="font-semibold text-gray-900">{selectedOrder.customer_details?.table_no || selectedOrder.table_no || '-'}</span>
                     </div>
                   ) : (
                     <>
                       <div className="flex justify-between">
                         <span className="text-gray-600">Name:</span>
-                        <span className="font-medium">{selectedOrder.customer_details?.name || selectedOrder.customer_name || '-'}</span>
+                        <span className="font-semibold text-gray-900">{selectedOrder.customer_details?.name || selectedOrder.customer_name || '-'}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">Phone:</span>
-                        <span className="font-medium">{selectedOrder.customer_details?.phone || selectedOrder.customer_phone || '-'}</span>
+                        <span className="font-semibold text-gray-900">{selectedOrder.customer_details?.phone || selectedOrder.customer_phone || '-'}</span>
                       </div>
                     </>
                   )}
                   {selectedOrder.service_type === 'delivery' && selectedOrder.customer_details?.address && (
                     <div className="flex justify-between">
                       <span className="text-gray-600">Address:</span>
-                      <span className="font-medium text-right max-w-[200px]">{selectedOrder.customer_details.address}</span>
+                      <span className="font-semibold text-gray-900 text-right max-w-[200px]">{selectedOrder.customer_details.address}</span>
                     </div>
                   )}
                   {selectedOrder.service_type === 'pickup' && selectedOrder.customer_details?.pickup_time && (
                     <div className="flex justify-between">
                       <span className="text-gray-600">Pickup Time:</span>
-                      <span className="font-medium">{new Date(selectedOrder.customer_details.pickup_time).toLocaleTimeString('en-NZ', { hour: '2-digit', minute: '2-digit' })}</span>
+                      <span className="font-semibold text-gray-900">{new Date(selectedOrder.customer_details.pickup_time).toLocaleTimeString('en-NZ', { hour: '2-digit', minute: '2-digit' })}</span>
                     </div>
                   )}
                 </div>
@@ -1175,14 +1175,14 @@ export default function OrderSummaryPage() {
               {/* Payment Info */}
               <div className="bg-gray-50 rounded-lg p-4">
                 <h3 className="font-semibold text-gray-900 mb-2">Payment Information</h3>
-                <div className="space-y-1 text-sm">
+                <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Status:</span>
                     {getPaymentStatusBadge(selectedOrder.payment_status)}
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Method:</span>
-                    <span className="font-medium">{getPaymentMethodLabel(selectedOrder.payment_method)}</span>
+                    <span className="font-semibold text-gray-900">{getPaymentMethodLabel(selectedOrder.payment_method)}</span>
                   </div>
                 </div>
               </div>
@@ -1195,22 +1195,22 @@ export default function OrderSummaryPage() {
                     selectedOrder.items.map((item, idx) => (
                       <div key={idx} className="flex justify-between items-start p-3 bg-gray-50 rounded-lg">
                         <div className="flex-1">
-                          <p className="font-medium text-gray-900">
+                          <p className="font-semibold text-gray-900">
                             {item.quantity}x {item.nameEn || item.name}
                           </p>
-                          {item.selectedMeat && (
-                            <p className="text-xs text-gray-500">
+                          {item.selectedMeat && (item.selectedMeat.name || item.selectedMeat.nameEn) && (
+                            <p className="text-sm text-gray-600">
                               + {item.selectedMeat.nameEn || item.selectedMeat.name}
                               {item.selectedMeat.price > 0 && ` (+$${item.selectedMeat.price.toFixed(2)})`}
                             </p>
                           )}
-                          {item.selectedAddOns && item.selectedAddOns.length > 0 && (
-                            <p className="text-xs text-gray-500">
-                              + {item.selectedAddOns.map(a => a.nameEn || a.name).join(', ')}
+                          {item.selectedAddOns && item.selectedAddOns.length > 0 && item.selectedAddOns.some(a => a.name || a.nameEn) && (
+                            <p className="text-sm text-gray-600">
+                              + {item.selectedAddOns.filter(a => a.name || a.nameEn).map(a => a.nameEn || a.name).join(', ')}
                             </p>
                           )}
                         </div>
-                        <span className="font-medium text-gray-900">${(item.itemTotal || (item.price * item.quantity)).toFixed(2)}</span>
+                        <span className="font-semibold text-gray-900">${(item.itemTotal || (item.price * item.quantity)).toFixed(2)}</span>
                       </div>
                     ))
                   ) : (
@@ -1231,22 +1231,22 @@ export default function OrderSummaryPage() {
               <div className="border-t border-gray-200 pt-4 space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Subtotal:</span>
-                  <span>${selectedOrder.subtotal.toFixed(2)}</span>
+                  <span className="font-semibold text-gray-900">${selectedOrder.subtotal.toFixed(2)}</span>
                 </div>
                 {selectedOrder.tax > 0 && (
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Tax:</span>
-                    <span>${selectedOrder.tax.toFixed(2)}</span>
+                    <span className="font-semibold text-gray-900">${selectedOrder.tax.toFixed(2)}</span>
                   </div>
                 )}
                 {selectedOrder.delivery_fee && selectedOrder.delivery_fee > 0 && (
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Delivery Fee:</span>
-                    <span>${selectedOrder.delivery_fee.toFixed(2)}</span>
+                    <span className="font-semibold text-gray-900">${selectedOrder.delivery_fee.toFixed(2)}</span>
                   </div>
                 )}
                 <div className="flex justify-between text-lg font-bold pt-2 border-t border-gray-200">
-                  <span>Total:</span>
+                  <span className="text-gray-900">Total:</span>
                   <span className="text-green-600">${selectedOrder.total_price.toFixed(2)}</span>
                 </div>
               </div>

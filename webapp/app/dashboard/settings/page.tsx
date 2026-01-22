@@ -555,13 +555,13 @@ function SettingsContent() {
 
     // Validate: at least one payment method must be enabled
     if (!paymentSettings.accept_card && !paymentSettings.accept_bank_transfer) {
-      alert('ต้องเปิดใช้งานอย่างน้อย 1 วิธีการชำระเงิน');
+      alert('At least one payment method must be enabled');
       return;
     }
 
     // Validate: if bank transfer enabled, must have at least one bank account
     if (paymentSettings.accept_bank_transfer && paymentSettings.bank_accounts.length === 0) {
-      alert('กรุณาเพิ่มบัญชีธนาคารอย่างน้อย 1 บัญชี');
+      alert('Please add at least one bank account');
       return;
     }
 
@@ -811,11 +811,11 @@ function SettingsContent() {
 
   const getRoleDisplayName = (role: string) => {
     const roleNames: Record<string, string> = {
-      owner: 'เจ้าของร้าน (Owner)',
-      manager: 'ผู้จัดการ (Manager)',
-      chef: 'พ่อครัว (Chef)',
-      waiter: 'พนักงานเสิร์ฟ (Waiter)',
-      cashier: 'แคชเชียร์ (Cashier)'
+      owner: 'Owner',
+      manager: 'Manager',
+      chef: 'Chef',
+      waiter: 'Waiter',
+      cashier: 'Cashier'
     };
     return roleNames[role] || role;
   };
@@ -2355,9 +2355,9 @@ function SettingsContent() {
               <div>
                 <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
                   <Users className="w-6 h-6 text-blue-500" />
-                  Staff Management / จัดการพนักงาน
+                  Staff Management
                 </h2>
-                <p className="text-sm text-gray-500 mt-1">จัดการพนักงานในร้านของคุณ / Manage your restaurant staff</p>
+                <p className="text-sm text-gray-500 mt-1">Manage your restaurant staff</p>
               </div>
               <button
                 onClick={() => setShowAddStaff(true)}
@@ -2371,34 +2371,34 @@ function SettingsContent() {
             {/* Add Staff Modal */}
             {showAddStaff && (
               <div className="mb-6 p-4 bg-blue-50 rounded-xl border-2 border-blue-200">
-                <h3 className="font-semibold text-gray-900 mb-4">เพิ่มพนักงานใหม่ / Add New Staff</h3>
+                <h3 className="font-semibold text-gray-900 mb-4">Add New Staff</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">ชื่อ / Name *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Name *</label>
                     <input
                       type="text"
                       value={newStaff.name}
                       onChange={(e) => setNewStaff({...newStaff, name: e.target.value})}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white"
-                      placeholder="ชื่อพนักงาน / Staff name"
+                      placeholder="Staff name"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">ตำแหน่ง / Role</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
                     <select
                       value={newStaff.role}
                       onChange={(e) => setNewStaff({...newStaff, role: e.target.value as Staff['role']})}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white"
                     >
-                      <option value="owner">เจ้าของร้าน (Owner)</option>
-                      <option value="manager">ผู้จัดการ (Manager)</option>
-                      <option value="chef">พ่อครัว (Chef)</option>
-                      <option value="waiter">พนักงานเสิร์ฟ (Waiter)</option>
-                      <option value="cashier">แคชเชียร์ (Cashier)</option>
+                      <option value="owner">Owner</option>
+                      <option value="manager">Manager</option>
+                      <option value="chef">Chef</option>
+                      <option value="waiter">Waiter</option>
+                      <option value="cashier">Cashier</option>
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">อีเมล</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                     <input
                       type="email"
                       value={newStaff.email}
@@ -2408,7 +2408,7 @@ function SettingsContent() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">เบอร์โทร</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
                     <input
                       type="tel"
                       value={newStaff.phone}
@@ -2418,7 +2418,7 @@ function SettingsContent() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">PIN Code (6 หลัก)</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">PIN Code (6 digits)</label>
                     <input
                       type="text"
                       value={newStaff.pin_code}
@@ -2427,7 +2427,7 @@ function SettingsContent() {
                       placeholder="123456"
                       maxLength={6}
                     />
-                    <p className="text-xs text-gray-500 mt-1">สำหรับ login เข้าระบบ POS</p>
+                    <p className="text-xs text-gray-500 mt-1">For POS login</p>
                   </div>
                 </div>
                 <div className="mt-4 flex gap-2">
@@ -2460,8 +2460,8 @@ function SettingsContent() {
             ) : staffList.length === 0 ? (
               <div className="text-center py-12 bg-gray-50 rounded-xl">
                 <Users className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-600 font-semibold">ยังไม่มีพนักงาน</p>
-                <p className="text-gray-500 text-sm mt-1">เพิ่มพนักงานเพื่อเริ่มต้นใช้งาน</p>
+                <p className="text-gray-600 font-semibold">No staff members</p>
+                <p className="text-gray-500 text-sm mt-1">Add staff to get started</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -2611,7 +2611,7 @@ function SettingsContent() {
               Payment Settings
             </h2>
             <p className="text-sm text-gray-600 mb-6">
-              ตั้งค่าวิธีการชำระเงินที่ร้านของคุณรองรับ ลูกค้าจะเห็นเฉพาะตัวเลือกที่คุณเปิดใช้งาน
+              Configure the payment methods your restaurant accepts. Customers will only see the options you enable.
             </p>
 
             {/* Card Payments (Stripe) */}
@@ -2624,7 +2624,7 @@ function SettingsContent() {
                   <div>
                     <h3 className="font-semibold text-gray-900">Card Payments</h3>
                     <p className="text-sm text-gray-600">
-                      รับชำระผ่าน Visa, Mastercard, Amex, Apple Pay, Google Pay
+                      Accept Visa, Mastercard, Amex, Apple Pay, Google Pay
                     </p>
                   </div>
                 </div>
@@ -2644,7 +2644,7 @@ function SettingsContent() {
               {paymentSettings.accept_card && (
                 <div className="mt-3 ml-13 p-3 bg-blue-50 rounded-lg">
                   <p className="text-sm text-blue-800">
-                    ✓ ลูกค้าจะสามารถชำระเงินผ่าน Stripe Checkout ได้
+                    ✓ Customers can pay via Stripe Checkout
                   </p>
                 </div>
               )}
@@ -2746,7 +2746,7 @@ function SettingsContent() {
                   <div>
                     <h3 className="font-semibold text-gray-900">Bank Transfer</h3>
                     <p className="text-sm text-gray-600">
-                      รับชำระผ่านการโอนเงิน + QR Code
+                      Accept bank transfers + QR Code payments
                     </p>
                   </div>
                 </div>
@@ -2782,8 +2782,8 @@ function SettingsContent() {
                   {paymentSettings.bank_accounts.length === 0 ? (
                     <div className="text-center py-4 bg-gray-50 rounded-lg">
                       <Building2 className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                      <p className="text-sm text-gray-500">ยังไม่มีบัญชีธนาคาร</p>
-                      <p className="text-xs text-gray-400">กรุณาเพิ่มบัญชีธนาคารเพื่อรับการโอนเงิน</p>
+                      <p className="text-sm text-gray-500">No bank accounts added</p>
+                      <p className="text-xs text-gray-400">Please add a bank account to receive transfers</p>
                     </div>
                   ) : (
                     <div className="space-y-2">
@@ -2868,10 +2868,10 @@ function SettingsContent() {
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
               <h4 className="font-medium text-yellow-800 mb-2">📋 How it works</h4>
               <ul className="text-sm text-yellow-700 space-y-1">
-                <li>• ลูกค้าต้องชำระเงินก่อนที่ออร์เดอร์จะเข้าครัว</li>
-                <li>• หากเปิด Bank Transfer ลูกค้าจะเห็น QR Code และเลขบัญชี</li>
-                <li>• คุณต้องตรวจสอบการโอนเงินด้วยตัวเองใน Orders Dashboard</li>
-                <li>• ต้องเปิดใช้งานอย่างน้อย 1 วิธีการชำระเงิน</li>
+                <li>• Customers must pay before the order goes to kitchen</li>
+                <li>• If Bank Transfer is enabled, customers will see QR Code and account number</li>
+                <li>• You must manually verify transfers in the Orders Dashboard</li>
+                <li>• At least one payment method must be enabled</li>
               </ul>
             </div>
 
