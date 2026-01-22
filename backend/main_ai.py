@@ -190,6 +190,8 @@ class CreateCheckoutSessionRequest(BaseModel):
     interval: str = "monthly"
     payment_method: str = "card"  # card, apple_pay, google_pay
     coupon_code: Optional[str] = None
+    success_url: Optional[str] = None  # Custom success URL from frontend
+    cancel_url: Optional[str] = None   # Custom cancel URL from frontend
 
 class VerifySessionRequest(BaseModel):
     session_id: str
@@ -1680,6 +1682,8 @@ async def create_checkout_session(request: CreateCheckoutSessionRequest):
             plan_id=request.plan_id,
             interval=request.interval,
             payment_method=request.payment_method,
+            success_url=request.success_url,
+            cancel_url=request.cancel_url,
         )
 
         return {

@@ -137,6 +137,9 @@ function CheckoutContent() {
         throw new Error(`Price ID not configured for plan: ${planId}, interval: ${billingInterval}`);
       }
 
+      // Use current origin for redirect URLs (works for both localhost and production)
+      const origin = window.location.origin;
+
       const response = await fetch(`${API_URL}/api/stripe/create-checkout-session`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -148,6 +151,8 @@ function CheckoutContent() {
           interval: billingInterval,
           payment_method: paymentMethod, // 'card', 'apple_pay', 'google_pay'
           coupon_code: appliedCoupon?.code || null,
+          success_url: `${origin}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+          cancel_url: `${origin}/pricing`,  // Return to pricing page on cancel
         }),
       });
 
