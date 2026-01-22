@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Shield, Users, Utensils, Truck, Store, Plus, Trash2, Edit2, Save, X, Loader2, Globe, ExternalLink, MapPin, Navigation, CreditCard, Building2, QrCode, Key, Eye, EyeOff, CheckCircle, AlertCircle } from 'lucide-react';
+import { Shield, Users, Utensils, Truck, Store, Plus, Trash2, Edit2, Save, X, Loader2, Globe, ExternalLink, MapPin, Navigation, CreditCard, Building2, QrCode, Key, Eye, EyeOff, CheckCircle, AlertCircle, ArrowUpRight } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 
 interface ServiceOptions {
@@ -69,6 +69,14 @@ interface Restaurant {
   ird_number?: string;
 }
 
+interface PaymentMethodInfo {
+  type: string;
+  brand: string;
+  last4: string;
+  exp_month: number;
+  exp_year: number;
+}
+
 interface Subscription {
   plan: string;
   status: string;
@@ -79,6 +87,9 @@ interface Subscription {
   next_billing_date: string | null;
   cancel_at_period_end: boolean;
   role?: string; // User role from some API responses
+  stripe_customer_id?: string | null;
+  stripe_subscription_id?: string | null;
+  payment_method?: PaymentMethodInfo | null;
 }
 
 interface UserProfile {
@@ -1015,8 +1026,15 @@ function SettingsContent() {
       }
       const userId = session.user.id;
 
-      // TODO: Get customer_id from subscription data
-      const customerId = 'cus_xxx'; // Replace with actual Stripe Customer ID
+      // Get stripe_customer_id from profile subscription data
+      const customerId = profile?.subscription?.stripe_customer_id;
+
+      if (!customerId) {
+        // If no Stripe customer yet, redirect to pricing page to subscribe
+        alert('No active subscription found. Please subscribe to manage billing.');
+        window.location.href = '/pricing';
+        return;
+      }
 
       const response = await fetch(`${BACKEND_URL}/api/billing/create-portal-session`, {
         method: 'POST',
@@ -1032,11 +1050,11 @@ function SettingsContent() {
       if (data.success && data.portal_url) {
         window.location.href = data.portal_url;
       } else {
-        alert('Failed to create portal session');
+        alert(data.detail || 'Failed to create portal session. Please try again.');
       }
     } catch (error) {
       console.error('Failed to create portal session:', error);
-      alert('Failed to open billing portal');
+      alert('Failed to open billing portal. Please try again.');
     }
   };
 
@@ -3039,6 +3057,18 @@ function SettingsContent() {
                     </div>
                   )}
 
+                  {/* Payment Method */}
+                  {profile.subscription.payment_method && (
+                    <div className="flex justify-between py-3 border-b border-gray-200">
+                      <span className="text-gray-600">Payment Method</span>
+                      <span className="font-medium flex items-center gap-2">
+                        <CreditCard className="w-4 h-4 text-gray-500" />
+                        <span className="capitalize">{profile.subscription.payment_method.brand}</span>
+                        <span className="text-gray-500">•••• {profile.subscription.payment_method.last4}</span>
+                      </span>
+                    </div>
+                  )}
+
                   {profile.subscription.cancel_at_period_end && (
                     <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
                       <p className="text-sm text-yellow-800">
@@ -3060,30 +3090,45 @@ function SettingsContent() {
               )}
             </div>
 
-            {/* Manage Billing Button */}
-            <div className="pt-6 border-t border-gray-200">
-              <button
-                onClick={handleManageBilling}
-                className="w-full px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium"
-              >
-                Manage Payment Method / Cancel Subscription
-              </button>
-            </div>
-
-            {/* Upgrade/Downgrade (Optional) */}
-            {!profile.subscription.is_subscribed && (
-              <div className="mt-6 pt-6 border-t border-gray-200">
-                <p className="text-sm text-gray-600 mb-4">
-                  Upgrade to unlock all features and remove limitations
-                </p>
+            {/* Action Buttons */}
+            <div className="pt-6 border-t border-gray-200 space-y-4">
+              {profile.subscription.is_subscribed && profile.subscription.stripe_customer_id ? (
+                // Subscribed users with Stripe - show Manage Subscription button
+                <button
+                  onClick={handleManageBilling}
+                  className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium flex items-center justify-center gap-2 transition-colors"
+                >
+                  <CreditCard className="w-5 h-5" />
+                  Manage Subscription
+                </button>
+              ) : (
+                // Not subscribed or no Stripe customer - show Upgrade button
                 <a
                   href="/pricing"
-                  className="inline-block px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                  className="w-full px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 font-medium flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg"
                 >
-                  View Plans & Upgrade
+                  <ArrowUpRight className="w-5 h-5" />
+                  Upgrade to Pro
                 </a>
-              </div>
-            )}
+              )}
+
+              {/* Additional info for Stripe Customer Portal */}
+              {profile.subscription.is_subscribed && profile.subscription.stripe_customer_id && (
+                <p className="text-xs text-gray-500 text-center">
+                  Manage your payment methods, view invoices, and cancel subscription via Stripe Customer Portal
+                </p>
+              )}
+
+              {/* If subscribed but no Stripe (e.g., bank transfer) */}
+              {profile.subscription.is_subscribed && !profile.subscription.stripe_customer_id && (
+                <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                  <p className="text-sm text-gray-700">
+                    <strong>Bank Transfer Subscription</strong><br />
+                    To manage your subscription or update payment details, please contact our support team.
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         )}
 

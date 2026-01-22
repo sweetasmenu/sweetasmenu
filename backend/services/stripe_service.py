@@ -285,6 +285,62 @@ class StripeService:
         except Exception as e:
             raise Exception(f"Failed to create portal session: {str(e)}")
 
+    def get_customer_payment_methods(self, customer_id: str) -> Dict[str, Any]:
+        """
+        Get default payment method for a Stripe customer
+
+        Args:
+            customer_id: Stripe Customer ID
+
+        Returns:
+            Dictionary with payment method details (brand, last4)
+        """
+        try:
+            if not self.api_key:
+                raise Exception("Stripe API key not configured")
+
+            # Get customer to find default payment method
+            customer = stripe.Customer.retrieve(customer_id)
+
+            default_pm_id = customer.invoice_settings.default_payment_method
+
+            if default_pm_id:
+                pm = stripe.PaymentMethod.retrieve(default_pm_id)
+                if pm.type == 'card':
+                    return {
+                        'type': 'card',
+                        'brand': pm.card.brand,  # visa, mastercard, amex, etc.
+                        'last4': pm.card.last4,
+                        'exp_month': pm.card.exp_month,
+                        'exp_year': pm.card.exp_year,
+                    }
+
+            # Fallback: Get the first payment method attached to customer
+            payment_methods = stripe.PaymentMethod.list(
+                customer=customer_id,
+                type='card',
+                limit=1
+            )
+
+            if payment_methods.data:
+                pm = payment_methods.data[0]
+                return {
+                    'type': 'card',
+                    'brand': pm.card.brand,
+                    'last4': pm.card.last4,
+                    'exp_month': pm.card.exp_month,
+                    'exp_year': pm.card.exp_year,
+                }
+
+            return None
+
+        except stripe.error.StripeError as e:
+            print(f"Stripe error getting payment method: {str(e)}")
+            return None
+        except Exception as e:
+            print(f"Failed to get payment method: {str(e)}")
+            return None
+
     # =============================================
     # Payment Intent Methods (for one-time payments)
     # =============================================

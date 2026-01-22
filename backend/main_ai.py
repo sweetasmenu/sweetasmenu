@@ -2731,21 +2731,41 @@ async def get_user_profile(
         
         # Get subscription status
         user_status = trial_limits_service.get_user_status(user_id)
-        
+
         # Determine if subscribed based on role (not trial)
         is_subscribed = user_role not in ['free_trial', None]
-        
-        # TODO: Get subscription from Stripe or database
-        # For now, return based on user_role
+
+        # Get full user profile for Stripe data
+        user_profile = user_role_service.get_user_profile(user_id)
+
+        # Extract Stripe and subscription data from user_profiles table
+        stripe_customer_id = user_profile.get('stripe_customer_id') if user_profile else None
+        stripe_subscription_id = user_profile.get('stripe_subscription_id') if user_profile else None
+        subscription_start_date = user_profile.get('subscription_start_date') if user_profile else None
+        subscription_end_date = user_profile.get('subscription_end_date') if user_profile else None
+        next_billing_date = user_profile.get('next_billing_date') if user_profile else None
+
+        # Get payment method from Stripe if customer exists
+        payment_method_info = None
+        if stripe_customer_id:
+            try:
+                payment_method_info = stripe_service.get_customer_payment_methods(stripe_customer_id)
+            except Exception as pm_error:
+                print(f"⚠️ Could not fetch payment method: {pm_error}")
+
         subscription_data = {
             "plan": plan_from_role,
             "role": user_role,  # Include role in response
             "status": "active" if is_subscribed else ("trial" if user_role == 'free_trial' else "expired"),
             "is_subscribed": is_subscribed,
             "trial_days_remaining": user_status.get('trial_days_remaining', 0) if user_role == 'free_trial' else 0,
-            "current_period_end": None,  # TODO: Get from Stripe subscription
-            "next_billing_date": None,  # TODO: Get from Stripe subscription
-            "cancel_at_period_end": False  # TODO: Get from Stripe subscription
+            "current_period_start": subscription_start_date,
+            "current_period_end": subscription_end_date,
+            "next_billing_date": next_billing_date,
+            "cancel_at_period_end": False,  # TODO: Get from Stripe subscription
+            "stripe_customer_id": stripe_customer_id,
+            "stripe_subscription_id": stripe_subscription_id,
+            "payment_method": payment_method_info
         }
         
         return {
