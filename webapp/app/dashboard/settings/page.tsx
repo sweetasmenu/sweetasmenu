@@ -164,19 +164,57 @@ function SettingsContent() {
   ];
 
   const AVAILABLE_LANGUAGES = [
-    { code: 'th', name: 'ไทย (Thai)', flag: '🇹🇭' },
-    { code: 'en', name: 'English', flag: '🇬🇧' },
-    { code: 'zh', name: '中文 (Chinese)', flag: '🇨🇳' },
-    { code: 'ja', name: '日本語 (Japanese)', flag: '🇯🇵' },
-    { code: 'ko', name: '한국어 (Korean)', flag: '🇰🇷' },
-    { code: 'vi', name: 'Tiếng Việt (Vietnamese)', flag: '🇻🇳' },
-    { code: 'hi', name: 'हिंदी (Hindi)', flag: '🇮🇳' },
-    { code: 'es', name: 'Español (Spanish)', flag: '🇪🇸' },
-    { code: 'fr', name: 'Français (French)', flag: '🇫🇷' },
-    { code: 'de', name: 'Deutsch (German)', flag: '🇩🇪' },
-    { code: 'id', name: 'Bahasa Indonesia', flag: '🇮🇩' },
-    { code: 'ms', name: 'Bahasa Melayu', flag: '🇲🇾' },
+    { code: 'th', name: 'Thai', nativeName: 'ไทย', flag: '🇹🇭' },
+    { code: 'en', name: 'English', nativeName: 'English', flag: '🇬🇧' },
+    { code: 'zh', name: 'Chinese', nativeName: '中文', flag: '🇨🇳' },
+    { code: 'ja', name: 'Japanese', nativeName: '日本語', flag: '🇯🇵' },
+    { code: 'ko', name: 'Korean', nativeName: '한국어', flag: '🇰🇷' },
+    { code: 'vi', name: 'Vietnamese', nativeName: 'Tiếng Việt', flag: '🇻🇳' },
+    { code: 'hi', name: 'Hindi', nativeName: 'हिंदी', flag: '🇮🇳' },
+    { code: 'es', name: 'Spanish', nativeName: 'Español', flag: '🇪🇸' },
+    { code: 'fr', name: 'French', nativeName: 'Français', flag: '🇫🇷' },
+    { code: 'de', name: 'German', nativeName: 'Deutsch', flag: '🇩🇪' },
+    { code: 'id', name: 'Indonesian', nativeName: 'Bahasa Indonesia', flag: '🇮🇩' },
+    { code: 'ms', name: 'Malay', nativeName: 'Bahasa Melayu', flag: '🇲🇾' },
   ];
+
+  // Get description text based on selected primary language
+  const getPrimaryLanguageDescription = (langCode: string) => {
+    const descriptions: Record<string, string> = {
+      'th': 'เลือกภาษาที่ใช้ในร้านของคุณ ระบบจะแปลข้อความและคำขอจากลูกค้าเป็นภาษานี้โดยอัตโนมัติ เพื่อให้พนักงานและครัวเข้าใจได้ง่าย',
+      'en': 'Select your restaurant\'s primary language. The system will automatically translate customer messages and requests to this language for staff and kitchen.',
+      'zh': '选择您餐厅的主要语言。系统将自动将顾客的消息和请求翻译成此语言，以便员工和厨房理解。',
+      'ja': 'レストランの主要言語を選択してください。システムはお客様のメッセージとリクエストを自動的にこの言語に翻訳し、スタッフとキッチンが理解しやすくします。',
+      'ko': '레스토랑의 주 언어를 선택하세요. 시스템이 고객의 메시지와 요청을 이 언어로 자동 번역하여 직원과 주방이 쉽게 이해할 수 있습니다.',
+      'vi': 'Chọn ngôn ngữ chính của nhà hàng. Hệ thống sẽ tự động dịch tin nhắn và yêu cầu của khách hàng sang ngôn ngữ này để nhân viên và bếp dễ hiểu.',
+      'hi': 'अपने रेस्तरां की मुख्य भाषा चुनें। सिस्टम स्वचालित रूप से ग्राहकों के संदेशों और अनुरोधों को इस भाषा में अनुवाद करेगा ताकि स्टाफ और किचन समझ सकें।',
+      'es': 'Seleccione el idioma principal de su restaurante. El sistema traducirá automáticamente los mensajes y solicitudes de los clientes a este idioma para el personal y la cocina.',
+      'fr': 'Sélectionnez la langue principale de votre restaurant. Le système traduira automatiquement les messages et demandes des clients dans cette langue pour le personnel et la cuisine.',
+      'de': 'Wählen Sie die Hauptsprache Ihres Restaurants. Das System übersetzt Kundennachrichten und -anfragen automatisch in diese Sprache für Personal und Küche.',
+      'id': 'Pilih bahasa utama restoran Anda. Sistem akan secara otomatis menerjemahkan pesan dan permintaan pelanggan ke bahasa ini untuk staf dan dapur.',
+      'ms': 'Pilih bahasa utama restoran anda. Sistem akan menterjemah mesej dan permintaan pelanggan ke bahasa ini secara automatik untuk kakitangan dan dapur.',
+    };
+    return descriptions[langCode] || descriptions['en'];
+  };
+
+  // Get section title based on selected primary language
+  const getPrimaryLanguageTitle = (langCode: string) => {
+    const titles: Record<string, string> = {
+      'th': 'ภาษาหลักของร้าน',
+      'en': 'Primary Language',
+      'zh': '主要语言',
+      'ja': '主要言語',
+      'ko': '주 언어',
+      'vi': 'Ngôn ngữ chính',
+      'hi': 'मुख्य भाषा',
+      'es': 'Idioma principal',
+      'fr': 'Langue principale',
+      'de': 'Hauptsprache',
+      'id': 'Bahasa utama',
+      'ms': 'Bahasa utama',
+    };
+    return titles[langCode] || titles['en'];
+  };
 
   // Staff Management state
   const [staffList, setStaffList] = useState<Staff[]>([]);
@@ -2199,7 +2237,7 @@ function SettingsContent() {
 
                       {deliveryRates.length === 0 && (
                         <p className="text-sm text-gray-500 mt-3 italic">
-                          ยังไม่มีการกำหนดค่าส่ง กรุณาเพิ่มอัตราค่าส่งเพื่อให้ลูกค้าเห็นค่าส่งเมื่อสั่ง Delivery
+                          No delivery rates set. Please add delivery rates so customers can see shipping costs when ordering Delivery.
                         </p>
                       )}
                     </div>
@@ -2212,7 +2250,7 @@ function SettingsContent() {
             {!serviceOptions.dine_in && !serviceOptions.pickup && !serviceOptions.delivery && (
               <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                 <p className="text-yellow-800 text-sm">
-                  ⚠️ คำเตือน: คุณปิดบริการทั้งหมดแล้ว ลูกค้าจะไม่สามารถสั่งอาหารได้ / Warning: All services are disabled. Customers cannot place orders.
+                  ⚠️ Warning: All services are disabled. Customers cannot place orders.
                 </p>
               </div>
             )}
@@ -2223,12 +2261,10 @@ function SettingsContent() {
             {/* Primary Language Setting */}
             <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <Globe className="w-6 h-6 text-indigo-500" />
-              ภาษาหลักของร้าน (Primary Language)
+              Primary Language ({getPrimaryLanguageTitle(primaryLanguage)})
             </h2>
             <p className="text-gray-600 mb-6">
-              เลือกภาษาที่ใช้ในร้านของคุณ ระบบจะแปลข้อความและคำขอจากลูกค้าเป็นภาษานี้โดยอัตโนมัติ เพื่อให้พนักงานและครัวเข้าใจได้ง่าย
-              <br />
-              <span className="text-gray-500">Select your restaurant&apos;s language. The system will automatically translate customer messages to this language for staff and kitchen.</span>
+              {getPrimaryLanguageDescription(primaryLanguage)}
             </p>
 
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -2243,10 +2279,11 @@ function SettingsContent() {
                   }`}
                 >
                   <span className="text-3xl">{lang.flag}</span>
-                  <span className={`text-sm font-medium ${
+                  <span className={`text-sm font-medium text-center ${
                     primaryLanguage === lang.code ? 'text-indigo-700' : 'text-gray-700'
                   }`}>
                     {lang.name}
+                    {lang.name !== lang.nativeName && <span className="block text-xs opacity-75">({lang.nativeName})</span>}
                   </span>
                 </button>
               ))}
@@ -2254,9 +2291,7 @@ function SettingsContent() {
 
             <div className="mt-4 p-4 bg-indigo-50 border border-indigo-200 rounded-lg">
               <p className="text-indigo-800 text-sm">
-                💡 <strong>ตัวอย่าง / Example:</strong> ถ้าเลือก &quot;ไทย&quot; เมื่อลูกค้าพิมพ์ &quot;No spicy please&quot; ในช่อง Special Instructions ระบบจะแปลเป็น &quot;ไม่เผ็ดครับ&quot; แสดงในหน้าครัวและพนักงาน
-                <br />
-                <span className="text-indigo-600">If you select &quot;Thai&quot;, when a customer types &quot;No spicy please&quot; in Special Instructions, it will be translated to &quot;ไม่เผ็ดครับ&quot; for kitchen and staff.</span>
+                💡 <strong>Example:</strong> If you select &quot;Thai&quot;, when a customer types &quot;No spicy please&quot; in Special Instructions, it will be translated to &quot;ไม่เผ็ดครับ&quot; for kitchen and staff.
               </p>
             </div>
 
@@ -2266,12 +2301,10 @@ function SettingsContent() {
             {/* POS Theme Color Setting */}
             <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <span className="w-6 h-6 rounded-full bg-gradient-to-r from-orange-500 to-red-500"></span>
-              ธีมสีหน้า POS (POS Theme Color)
+              POS Theme Color
             </h2>
             <p className="text-gray-600 mb-6">
-              เลือกธีมสีสำหรับหน้า POS ของร้านคุณ สีจะแสดงในหน้าครัว, พนักงาน และแคชเชียร์
-              <br />
-              <span className="text-gray-500">Select theme color for your POS pages. The color will appear in Kitchen, Staff, and Cashier pages.</span>
+              Select theme color for your POS pages. The color will appear in Kitchen, Staff, and Cashier pages.
             </p>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -2297,9 +2330,7 @@ function SettingsContent() {
 
             <div className="mt-4 p-4 bg-gray-50 border border-gray-200 rounded-lg">
               <p className="text-gray-700 text-sm">
-                🎨 <strong>หมายเหตุ / Note:</strong> ธีมสีจะเปลี่ยนแปลงทันทีในหน้า POS ทุกหน้า (Kitchen, Orders, Cashier) หลังจากบันทึก
-                <br />
-                <span className="text-gray-500">Theme color will change immediately on all POS pages after saving.</span>
+                🎨 <strong>Note:</strong> Theme color will change immediately on all POS pages (Kitchen, Orders, Cashier) after saving.
               </p>
             </div>
 
