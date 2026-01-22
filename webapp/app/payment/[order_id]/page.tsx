@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { CreditCard, Building2, Loader2, CheckCircle, AlertCircle, ArrowLeft, QrCode, Upload, Copy, Check, Banknote } from 'lucide-react';
 import Link from 'next/link';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
@@ -370,7 +370,12 @@ function BankTransferPayment({
 export default function PaymentPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const orderId = params.order_id as string;
+
+  // Get language and restaurant from query params (passed from restaurant menu page)
+  const selectedLanguage = searchParams.get('lang') || 'en';
+  const restaurantSlug = searchParams.get('restaurant') || '';
 
   const [loading, setLoading] = useState(true);
   const [order, setOrder] = useState<Order | null>(null);
@@ -538,8 +543,11 @@ export default function PaymentPage() {
 
         const data = await response.json();
         if (data.success) {
-          // Redirect to order status page
-          router.push(`/order-status/${order.id}`);
+          // Redirect to order status page with language and restaurant params
+          const statusParams = new URLSearchParams();
+          statusParams.set('lang', selectedLanguage);
+          statusParams.set('restaurant', restaurantSlug || order.restaurant_id);
+          router.push(`/order-status/${order.id}?${statusParams.toString()}`);
         } else {
           setError(data.detail || 'Failed to upload slip');
         }
@@ -576,8 +584,12 @@ export default function PaymentPage() {
       const data = await response.json();
 
       if (data.success) {
-        // Redirect to order status page
-        router.push(`/order-status/${order.id}&payment=counter`);
+        // Redirect to order status page with language and restaurant params
+        const statusParams = new URLSearchParams();
+        statusParams.set('lang', selectedLanguage);
+        statusParams.set('restaurant', restaurantSlug || order.restaurant_id);
+        statusParams.set('payment', 'counter');
+        router.push(`/order-status/${order.id}?${statusParams.toString()}`);
       } else {
         setError(data.detail || 'Failed to confirm order');
       }
@@ -619,8 +631,11 @@ export default function PaymentPage() {
   }
 
   if (paymentSuccess) {
-    const orderTrackingUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/order-status/${order?.id}`;
-    const menuUrl = `/restaurant/${restaurant?.slug || order?.restaurant_id}`;
+    const statusParams = new URLSearchParams();
+    statusParams.set('lang', selectedLanguage);
+    statusParams.set('restaurant', restaurantSlug || restaurant?.slug || order?.restaurant_id || '');
+    const orderTrackingUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/order-status/${order?.id}?${statusParams.toString()}`;
+    const menuUrl = `/restaurant/${restaurantSlug || restaurant?.slug || order?.restaurant_id}`;
 
     // Save order ID to localStorage for order history
     if (typeof window !== 'undefined' && order?.id) {
@@ -673,7 +688,7 @@ export default function PaymentPage() {
 
           {/* Track Your Order */}
           <Link
-            href={`/order-status/${order?.id}`}
+            href={`/order-status/${order?.id}?${statusParams.toString()}`}
             className="inline-block w-full px-6 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 mb-3"
           >
             Track Your Order

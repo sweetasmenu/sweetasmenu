@@ -485,17 +485,23 @@ class OrdersService:
             pickup_count = len([o for o in orders if o.get('service_type') == 'pickup'])
             delivery_count = len([o for o in orders if o.get('service_type') == 'delivery'])
 
-            # Count by payment method
-            card_count = len([o for o in orders if o.get('payment_method') == 'card' and o.get('payment_status') == 'paid'])
-            bank_transfer_count = len([o for o in orders if o.get('payment_method') == 'bank_transfer' and o.get('payment_status') == 'paid'])
+            # Count by payment method (all orders, not just paid)
+            card_count = len([o for o in orders if o.get('payment_method') == 'card' and not o.get('is_voided') and o.get('status') != 'voided'])
+            bank_transfer_count = len([o for o in orders if o.get('payment_method') == 'bank_transfer' and not o.get('is_voided') and o.get('status') != 'voided'])
+            cash_count = len([o for o in orders if o.get('payment_method') == 'cash' and not o.get('is_voided') and o.get('status') != 'voided'])
 
-            # Revenue by payment method
+            # Revenue by payment method (only paid orders)
             card_revenue = sum(o.get('total_price', 0) or 0 for o in orders if o.get('payment_method') == 'card' and o.get('payment_status') == 'paid')
             bank_transfer_revenue = sum(o.get('total_price', 0) or 0 for o in orders if o.get('payment_method') == 'bank_transfer' and o.get('payment_status') == 'paid')
+            cash_revenue = sum(o.get('total_price', 0) or 0 for o in orders if o.get('payment_method') == 'cash' and o.get('payment_status') == 'paid')
+
+            # Calculate total tax from paid orders
+            total_tax = sum(o.get('tax', 0) or 0 for o in orders if o.get('payment_status') == 'paid' and not o.get('is_voided') and o.get('status') != 'voided')
 
             summary = {
                 "total_orders": total_orders,
                 "total_revenue": total_revenue,
+                "total_tax": total_tax,
                 "payment_status": {
                     "paid": paid_count,
                     "pending": pending_count,
@@ -508,7 +514,8 @@ class OrdersService:
                 },
                 "payment_method": {
                     "card": {"count": card_count, "revenue": card_revenue},
-                    "bank_transfer": {"count": bank_transfer_count, "revenue": bank_transfer_revenue}
+                    "bank_transfer": {"count": bank_transfer_count, "revenue": bank_transfer_revenue},
+                    "cash": {"count": cash_count, "revenue": cash_revenue}
                 }
             }
 

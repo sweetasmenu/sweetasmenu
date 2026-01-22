@@ -709,7 +709,7 @@ export default function RestaurantMenuPage() {
     setShowItemModal(true);
   };
 
-  const addToCart = (menu: MenuItem, selectedMeat?: string, selectedAddOns?: string[], notes?: string) => {
+  const addToCart = (menu: MenuItem, selectedMeat?: string, selectedAddOns?: string[], notes?: string, quantity: number = 1) => {
     // Safely parse price - handle undefined, empty string, or invalid values
     const basePrice = parseFloat(menu.price) || 0;
     let totalPrice = basePrice;
@@ -742,7 +742,7 @@ export default function RestaurantMenuPage() {
       name: originalName, // Always use original language for kitchen
       nameEn: originalNameEn,
       price: totalPrice,
-      quantity: 1,
+      quantity: quantity, // Use the quantity from ItemModal
       selectedMeat,
       selectedAddOns,
       notes,
@@ -957,8 +957,11 @@ export default function RestaurantMenuPage() {
         // Redirect to payment page after 2 seconds
         setTimeout(() => {
           if (orderId) {
-            // Redirect to payment page for customer to pay before kitchen
-            router.push(`/payment/${orderId}`);
+            // Redirect to payment page with language and restaurant slug for back navigation
+            const params = new URLSearchParams();
+            params.set('lang', selectedLanguage);
+            params.set('restaurant', restaurant_id);
+            router.push(`/payment/${orderId}?${params.toString()}`);
           } else {
             setOrderPlaced(false);
             setShowCart(false);
@@ -1971,8 +1974,8 @@ export default function RestaurantMenuPage() {
             setShowItemModal(false);
             setSelectedItem(null);
           }}
-          onAddToCart={(meat, addOns, notes) => {
-            addToCart(selectedItem, meat, addOns, notes);
+          onAddToCart={(meat, addOns, notes, quantity) => {
+            addToCart(selectedItem, meat, addOns, notes, quantity);
           }}
           onImageClick={(imageUrl) => setPreviewImage(imageUrl)}
         />
@@ -2041,7 +2044,7 @@ function ItemModal({
   themeColor: string;
   branding: any;
   onClose: () => void;
-  onAddToCart: (meat?: string, addOns?: string[], notes?: string) => void;
+  onAddToCart: (meat?: string, addOns?: string[], notes?: string, quantity?: number) => void;
   onImageClick?: (imageUrl: string) => void;
 }) {
   const [selectedMeat, setSelectedMeat] = useState<string>('');
@@ -2072,9 +2075,8 @@ function ItemModal({
   };
 
   const handleAddToCart = () => {
-    for (let i = 0; i < quantity; i++) {
-      onAddToCart(selectedMeat || undefined, selectedAddOns.length > 0 ? selectedAddOns : undefined, notes || undefined);
-    }
+    // Pass quantity directly instead of calling multiple times
+    onAddToCart(selectedMeat || undefined, selectedAddOns.length > 0 ? selectedAddOns : undefined, notes || undefined, quantity);
   };
 
   return (

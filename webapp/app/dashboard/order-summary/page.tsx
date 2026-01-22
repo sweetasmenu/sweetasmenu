@@ -27,7 +27,9 @@ import {
   FileText,
   Lock,
   Building2,
-  ChevronDown
+  ChevronDown,
+  Printer,
+  Coins
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 
@@ -77,6 +79,7 @@ interface Order {
 interface Summary {
   total_orders: number;
   total_revenue: number;
+  total_tax?: number;
   payment_status: {
     paid: number;
     pending: number;
@@ -90,6 +93,7 @@ interface Summary {
   payment_method: {
     card: { count: number; revenue: number };
     bank_transfer: { count: number; revenue: number };
+    cash?: { count: number; revenue: number };
   };
   // Voided orders
   voided_orders?: number;
@@ -121,6 +125,9 @@ export default function OrderSummaryPage() {
   // Card view modal
   const [viewType, setViewType] = useState<ViewType>(null);
   const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
+
+  // Daily Sales Summary modal
+  const [showDailySummary, setShowDailySummary] = useState(false);
 
   // Filters
   const [startDate, setStartDate] = useState(() => {
@@ -511,6 +518,7 @@ export default function OrderSummaryPage() {
     switch (method) {
       case 'card': return 'Card';
       case 'bank_transfer': return 'Bank Transfer';
+      case 'cash': return 'Cash';
       default: return '-';
     }
   };
@@ -578,6 +586,106 @@ export default function OrderSummaryPage() {
   const voidedOrders = orders.filter(o => o.is_voided || o.status === 'voided');
   const voidedCount = voidedOrders.length;
   const voidedAmount = voidedOrders.reduce((sum, o) => sum + o.total_price, 0);
+
+  // Print Daily Sales Summary
+  const printDailySummary = () => {
+    const printWindow = window.open('', '', 'width=400,height=600');
+    if (!printWindow) {
+      alert('Please allow popups to print');
+      return;
+    }
+
+    // Calculate totals for paid orders only
+    const paidOrders = orders.filter(o => o.payment_status === 'paid' && !o.is_voided && o.status !== 'voided');
+    const totalRevenue = summary?.total_revenue || 0;
+    const totalTax = summary?.total_tax || paidOrders.reduce((sum, o) => sum + (o.tax || 0), 0);
+    const netRevenue = totalRevenue - totalTax;
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Daily Sales Summary</title>
+        <style>
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          body {
+            font-family: 'Courier New', monospace;
+            padding: 10mm;
+            max-width: 80mm;
+            margin: 0 auto;
+            font-size: 12px;
+          }
+          .header { text-align: center; margin-bottom: 15px; border-bottom: 1px dashed #000; padding-bottom: 10px; }
+          .header h1 { font-size: 16px; margin-bottom: 5px; }
+          .header p { font-size: 11px; color: #333; }
+          .section { margin-bottom: 15px; }
+          .section-title { font-weight: bold; margin-bottom: 5px; border-bottom: 1px solid #000; padding-bottom: 3px; }
+          .row { display: flex; justify-content: space-between; margin-bottom: 3px; }
+          .row.total { font-weight: bold; border-top: 1px solid #000; padding-top: 5px; margin-top: 5px; }
+          .row.grand-total { font-size: 14px; border-top: 2px solid #000; padding-top: 8px; margin-top: 8px; }
+          .footer { text-align: center; margin-top: 20px; font-size: 10px; border-top: 1px dashed #000; padding-top: 10px; }
+          @media print {
+            body { padding: 5mm; }
+            .no-print { display: none; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>${restaurantName || 'Restaurant'}</h1>
+          <p>Daily Sales Summary</p>
+          <p>${startDate === endDate ? startDate : `${startDate} to ${endDate}`}</p>
+        </div>
+
+        <div class="section">
+          <div class="section-title">ORDER SUMMARY</div>
+          <div class="row"><span>Total Orders:</span><span>${summary?.total_orders || 0}</span></div>
+          <div class="row"><span>Paid Orders:</span><span>${summary?.payment_status?.paid || 0}</span></div>
+          <div class="row"><span>Pending Orders:</span><span>${summary?.payment_status?.pending || 0}</span></div>
+          ${voidedCount > 0 ? `<div class="row"><span>Voided Orders:</span><span>${voidedCount}</span></div>` : ''}
+        </div>
+
+        <div class="section">
+          <div class="section-title">PAYMENT METHODS</div>
+          <div class="row"><span>Card:</span><span>${summary?.payment_method?.card?.count || 0} orders ($${(summary?.payment_method?.card?.revenue || 0).toFixed(2)})</span></div>
+          <div class="row"><span>Bank Transfer:</span><span>${summary?.payment_method?.bank_transfer?.count || 0} orders ($${(summary?.payment_method?.bank_transfer?.revenue || 0).toFixed(2)})</span></div>
+          ${summary?.payment_method?.cash?.count ? `<div class="row"><span>Cash:</span><span>${summary.payment_method.cash.count} orders ($${(summary.payment_method.cash.revenue || 0).toFixed(2)})</span></div>` : ''}
+        </div>
+
+        <div class="section">
+          <div class="section-title">SERVICE TYPES</div>
+          <div class="row"><span>Dine In:</span><span>${summary?.service_type?.dine_in || 0} orders</span></div>
+          <div class="row"><span>Pickup:</span><span>${summary?.service_type?.pickup || 0} orders</span></div>
+          <div class="row"><span>Delivery:</span><span>${summary?.service_type?.delivery || 0} orders</span></div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">REVENUE (Paid Orders Only)</div>
+          <div class="row"><span>Gross Revenue:</span><span>$${totalRevenue.toFixed(2)}</span></div>
+          <div class="row"><span>GST (15%):</span><span>$${totalTax.toFixed(2)}</span></div>
+          <div class="row total"><span>Net Revenue:</span><span>$${netRevenue.toFixed(2)}</span></div>
+          ${voidedCount > 0 ? `<div class="row"><span>Voided Amount:</span><span>-$${voidedAmount.toFixed(2)}</span></div>` : ''}
+          <div class="row grand-total"><span>TOTAL REVENUE:</span><span>$${totalRevenue.toFixed(2)} NZD</span></div>
+        </div>
+
+        <div class="footer">
+          <p>Printed: ${new Date().toLocaleString('en-NZ')}</p>
+          <p>Generated by Smart Menu</p>
+        </div>
+
+        <script>
+          window.onload = function() {
+            window.print();
+            window.onafterprint = function() { window.close(); }
+          }
+        </script>
+      </body>
+      </html>
+    `;
+
+    printWindow.document.write(html);
+    printWindow.document.close();
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 py-8">
@@ -647,8 +755,18 @@ export default function OrderSummaryPage() {
             )}
           </div>
 
-          {/* Export Buttons */}
-          <div className="flex items-center gap-2">
+          {/* Export & Print Buttons */}
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Daily Sales Summary Button - Available to all users */}
+            <button
+              onClick={printDailySummary}
+              disabled={orders.length === 0}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white rounded-lg text-sm font-semibold transition-colors"
+            >
+              <Printer className="w-4 h-4" />
+              Print Summary
+            </button>
+
             {canExport ? (
               <>
                 <button
@@ -837,12 +955,18 @@ export default function OrderSummaryPage() {
               <div className="space-y-1">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Card:</span>
-                  <span className="font-medium">{summary.payment_method.card.count} (${summary.payment_method.card.revenue.toFixed(2)})</span>
+                  <span className="font-medium">{summary.payment_method.card.count} orders</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Bank Transfer:</span>
-                  <span className="font-medium">{summary.payment_method.bank_transfer.count} (${summary.payment_method.bank_transfer.revenue.toFixed(2)})</span>
+                  <span className="font-medium">{summary.payment_method.bank_transfer.count} orders</span>
                 </div>
+                {summary.payment_method.cash && summary.payment_method.cash.count > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Cash:</span>
+                    <span className="font-medium">{summary.payment_method.cash.count} orders</span>
+                  </div>
+                )}
               </div>
               <div className="mt-2 text-xs text-blue-500 flex items-center gap-1">
                 <Eye className="w-3 h-3" /> Click to view
