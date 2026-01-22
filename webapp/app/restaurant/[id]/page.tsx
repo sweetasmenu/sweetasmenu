@@ -408,6 +408,16 @@ export default function RestaurantMenuPage() {
     return () => clearTimeout(timeoutId);
   }, [customerDetails.address, serviceType, restaurantLocation.latitude, restaurantLocation.longitude, restaurantId]);
 
+  // Helper function to clean markdown/formatting artifacts from translations
+  const cleanTranslation = (text: string): string => {
+    if (!text) return text;
+    // Remove markdown bold/italic markers
+    let cleaned = text.replace(/\*\*/g, '').replace(/\*/g, '').replace(/__/g, '').replace(/_/g, '');
+    // Remove any leading/trailing whitespace
+    cleaned = cleaned.trim();
+    return cleaned;
+  };
+
   // Helper function to generate a simple hash for cache invalidation detection
   const generateSourceHash = (menu: MenuItem): string => {
     const sourceText = [
@@ -506,16 +516,16 @@ export default function RestaurantMenuPage() {
           const cached = cachedTranslations[menu.menu_id];
           return {
             ...menu,
-            name: cached.translated_name || menu.name,
-            description: cached.translated_description || menu.description,
-            category: cached.translated_category || menu.category,
+            name: cleanTranslation(cached.translated_name) || menu.name,
+            description: cleanTranslation(cached.translated_description) || menu.description,
+            category: cleanTranslation(cached.translated_category) || menu.category,
             meats: menu.meats?.map((meat, idx) => ({
               ...meat,
-              name: cached.translated_meats?.[idx] || meat.name,
+              name: cleanTranslation(cached.translated_meats?.[idx]) || meat.name,
             })),
             addOns: menu.addOns?.map((addon, idx) => ({
               ...addon,
-              name: cached.translated_addons?.[idx] || addon.name,
+              name: cleanTranslation(cached.translated_addons?.[idx]) || addon.name,
             })),
             originalName: menu.name,
             originalDescription: menu.description,
@@ -573,32 +583,32 @@ export default function RestaurantMenuPage() {
         let translationIndex = 0;
 
         menuStructure.forEach(({ menu, meatCount, addOnCount }) => {
-          const rawTranslatedName = translations[translationIndex] || menu.name;
+          const rawTranslatedName = cleanTranslation(translations[translationIndex] || menu.name);
           // If name translation is too long (>200 chars), use original
           const translatedName = rawTranslatedName.length > 200 ? menu.name : rawTranslatedName;
           translationIndex++;
-          const translatedDesc = translations[translationIndex] || menu.description;
+          const translatedDesc = cleanTranslation(translations[translationIndex] || menu.description);
           translationIndex++;
-          const rawTranslatedCategory = translations[translationIndex] || menu.category;
+          const rawTranslatedCategory = cleanTranslation(translations[translationIndex] || menu.category);
           // If category translation is too long (>50 chars), use original
           const translatedCategory = rawTranslatedCategory.length > 50 ? menu.category : rawTranslatedCategory;
           translationIndex++;
 
           const translatedMeats: string[] = [];
           for (let i = 0; i < meatCount; i++) {
-            const translatedMeat = translations[translationIndex + i] || '';
+            const rawMeat = cleanTranslation(translations[translationIndex + i] || '');
             const originalMeat = menu.meats?.[i]?.name || '';
             // If translation is too long (likely corrupted/description), use original
-            translatedMeats.push(translatedMeat.length > 50 ? originalMeat : (translatedMeat || originalMeat));
+            translatedMeats.push(rawMeat.length > 50 ? originalMeat : (rawMeat || originalMeat));
           }
           translationIndex += meatCount;
 
           const translatedAddons: string[] = [];
           for (let i = 0; i < addOnCount; i++) {
-            const translatedAddon = translations[translationIndex + i] || '';
+            const rawAddon = cleanTranslation(translations[translationIndex + i] || '');
             const originalAddon = menu.addOns?.[i]?.name || '';
             // If translation is too long (likely corrupted/description), use original
-            translatedAddons.push(translatedAddon.length > 50 ? originalAddon : (translatedAddon || originalAddon));
+            translatedAddons.push(rawAddon.length > 50 ? originalAddon : (rawAddon || originalAddon));
           }
           translationIndex += addOnCount;
 
@@ -648,16 +658,16 @@ export default function RestaurantMenuPage() {
           if (trans) {
             return {
               ...menu,
-              name: trans.translated_name || menu.name,
-              description: trans.translated_description || menu.description,
-              category: trans.translated_category || menu.category,
+              name: cleanTranslation(trans.translated_name) || menu.name,
+              description: cleanTranslation(trans.translated_description) || menu.description,
+              category: cleanTranslation(trans.translated_category) || menu.category,
               meats: menu.meats?.map((meat, idx) => ({
                 ...meat,
-                name: trans.translated_meats?.[idx] || meat.name,
+                name: cleanTranslation(trans.translated_meats?.[idx]) || meat.name,
               })),
               addOns: menu.addOns?.map((addon, idx) => ({
                 ...addon,
-                name: trans.translated_addons?.[idx] || addon.name,
+                name: cleanTranslation(trans.translated_addons?.[idx]) || addon.name,
               })),
               originalName: menu.name,
               originalDescription: menu.description,

@@ -381,6 +381,7 @@ export default function KitchenDisplayPage() {
 
   // Update order status
   const updateOrderStatus = async (orderId: string, newStatus: Order['status']) => {
+    console.log(`🔄 Updating order ${orderId} to status: ${newStatus}`);
     try {
       const response = await fetch(`${BACKEND_URL}/api/orders/${orderId}/status`, {
         method: 'PUT',
@@ -388,14 +389,35 @@ export default function KitchenDisplayPage() {
         body: JSON.stringify({ status: newStatus })
       });
 
+      console.log(`📡 API Response status: ${response.status}`);
+
       if (response.ok) {
-        // Update will come through real-time subscription
+        const data = await response.json();
+        console.log(`✅ Order updated successfully:`, data);
+
+        // Immediately update local state for better UX (don't wait for real-time)
         if (newStatus === 'completed' || newStatus === 'cancelled') {
           setOrders((prev) => prev.filter((o) => o.id !== orderId));
+        } else {
+          // Update the order status in local state immediately
+          setOrders((prev) =>
+            prev.map((o) =>
+              o.id === orderId ? { ...o, status: newStatus } : o
+            )
+          );
         }
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        console.error(`❌ Failed to update order: ${response.status}`, errorData);
+        alert(lang === 'th'
+          ? `ไม่สามารถอัปเดตสถานะได้: ${errorData.detail || response.statusText}`
+          : `Failed to update status: ${errorData.detail || response.statusText}`);
       }
     } catch (error) {
-      console.error('Failed to update order:', error);
+      console.error('❌ Failed to update order:', error);
+      alert(lang === 'th'
+        ? 'เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่'
+        : 'Connection error. Please try again.');
     }
   };
 
