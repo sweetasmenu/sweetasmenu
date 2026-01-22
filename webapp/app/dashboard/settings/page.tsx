@@ -1741,10 +1741,12 @@ function SettingsContent() {
           <div className="bg-white shadow rounded-lg p-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
               <Utensils className="w-6 h-6 text-orange-500" />
-              Service Options
+              Service Options / ตัวเลือกบริการ
             </h2>
             <p className="text-gray-600 mb-6">
               เลือกประเภทบริการที่ต้องการเปิดให้ลูกค้า เมื่อปิดบริการใด ลูกค้าจะไม่สามารถเลือกได้ในหน้าสั่งอาหาร
+              <br />
+              <span className="text-gray-500">Select service types for customers. Disabled services will not be available on the ordering page.</span>
             </p>
 
             <div className="space-y-4">
@@ -1755,8 +1757,8 @@ function SettingsContent() {
                     <Utensils className="w-6 h-6 text-orange-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">กินที่ร้าน (Dine-in)</h3>
-                    <p className="text-sm text-gray-500">ลูกค้าสามารถสั่งอาหารและนั่งทานที่ร้านได้</p>
+                    <h3 className="font-semibold text-gray-900">กินที่ร้าน / Dine-in</h3>
+                    <p className="text-sm text-gray-500">ลูกค้าสามารถสั่งอาหารและนั่งทานที่ร้านได้ / Customers can order and dine at the restaurant</p>
                   </div>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
@@ -1777,8 +1779,8 @@ function SettingsContent() {
                     <Store className="w-6 h-6 text-blue-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">รับเอง (Pickup)</h3>
-                    <p className="text-sm text-gray-500">ลูกค้าสั่งล่วงหน้าและมารับที่ร้าน</p>
+                    <h3 className="font-semibold text-gray-900">รับเอง / Pickup</h3>
+                    <p className="text-sm text-gray-500">ลูกค้าสั่งล่วงหน้าและมารับที่ร้าน / Customers order ahead and pick up at the restaurant</p>
                   </div>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
@@ -1799,8 +1801,8 @@ function SettingsContent() {
                     <Truck className="w-6 h-6 text-green-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">ส่ง Delivery</h3>
-                    <p className="text-sm text-gray-500">ลูกค้าสั่งอาหารและให้ร้านจัดส่ง</p>
+                    <h3 className="font-semibold text-gray-900">จัดส่ง / Delivery</h3>
+                    <p className="text-sm text-gray-500">ลูกค้าสั่งอาหารและให้ร้านจัดส่ง / Customers order and have it delivered</p>
                   </div>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
@@ -1819,10 +1821,10 @@ function SettingsContent() {
                 <div className="mt-4 ml-16 p-4 bg-blue-50 rounded-xl border border-blue-200 mb-4">
                   <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
                     <MapPin className="w-5 h-5 text-blue-600" />
-                    พิกัดร้าน (สำหรับคำนวณระยะทาง)
+                    พิกัดร้าน / Restaurant Location (for distance calculation)
                   </h4>
                   <p className="text-sm text-gray-600 mb-4">
-                    กรอกที่อยู่ร้านเพื่อใช้คำนวณระยะทางและค่าส่งอัตโนมัติ
+                    กรอกที่อยู่ร้านเพื่อใช้คำนวณระยะทางและค่าส่งอัตโนมัติ / Enter address for automatic distance and delivery fee calculation
                   </p>
 
                   {/* Current Location Status */}
@@ -1830,14 +1832,14 @@ function SettingsContent() {
                     <div className="flex items-center gap-2 p-3 bg-green-100 rounded-lg mb-4">
                       <Navigation className="w-5 h-5 text-green-600" />
                       <span className="text-sm text-green-800">
-                        พิกัดปัจจุบัน: {restaurantLocation.latitude.toFixed(6)}, {restaurantLocation.longitude.toFixed(6)}
+                        พิกัดปัจจุบัน / Current location: {restaurantLocation.latitude.toFixed(6)}, {restaurantLocation.longitude.toFixed(6)}
                       </span>
                     </div>
                   ) : (
                     <div className="flex items-center gap-2 p-3 bg-yellow-100 rounded-lg mb-4">
                       <MapPin className="w-5 h-5 text-yellow-600" />
                       <span className="text-sm text-yellow-800">
-                        ยังไม่ได้ตั้งค่าพิกัดร้าน - ระบบจะไม่สามารถคำนวณค่าส่งอัตโนมัติได้
+                        ยังไม่ได้ตั้งค่าพิกัดร้าน / Location not set - auto delivery fee calculation unavailable
                       </span>
                     </div>
                   )}
@@ -1846,13 +1848,13 @@ function SettingsContent() {
                   <div className="space-y-3">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        ที่อยู่ร้าน (Google จะแปลงเป็นพิกัดให้อัตโนมัติ)
+                        ที่อยู่ร้าน / Restaurant Address (Google will auto-convert to coordinates)
                       </label>
                       <input
                         type="text"
                         value={restaurantLocation.address}
                         onChange={(e) => setRestaurantLocation({...restaurantLocation, address: e.target.value})}
-                        placeholder="เช่น 123 Queen Street, Auckland CBD, New Zealand"
+                        placeholder="e.g. 123 Queen Street, Auckland CBD, New Zealand"
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>
@@ -1860,7 +1862,7 @@ function SettingsContent() {
                     {/* Or Manual Coordinates */}
                     <div className="flex items-center gap-2 text-sm text-gray-500">
                       <span className="flex-1 border-t border-gray-300"></span>
-                      <span>หรือกรอกพิกัดเอง</span>
+                      <span>หรือกรอกพิกัดเอง / Or enter coordinates manually</span>
                       <span className="flex-1 border-t border-gray-300"></span>
                     </div>
 
@@ -1905,12 +1907,12 @@ function SettingsContent() {
                       {locationLoading ? (
                         <>
                           <Loader2 className="w-4 h-4 animate-spin" />
-                          กำลังบันทึก...
+                          กำลังบันทึก... / Saving...
                         </>
                       ) : (
                         <>
                           <MapPin className="w-4 h-4" />
-                          บันทึกพิกัดร้าน
+                          บันทึกพิกัดร้าน / Save Location
                         </>
                       )}
                     </button>
@@ -1928,7 +1930,7 @@ function SettingsContent() {
 
                   {/* Pricing Mode Toggle */}
                   <div className="mb-4">
-                    <p className="text-sm text-gray-600 mb-3">เลือกวิธีคำนวณค่าส่ง:</p>
+                    <p className="text-sm text-gray-600 mb-3">เลือกวิธีคำนวณค่าส่ง / Select delivery fee calculation:</p>
                     <div className="flex gap-3">
                       <button
                         onClick={() => setDeliverySettings({...deliverySettings, pricing_mode: 'per_km'})}
@@ -1938,8 +1940,8 @@ function SettingsContent() {
                             : 'border-gray-200 bg-white hover:border-green-300'
                         }`}
                       >
-                        <div className="font-medium text-gray-900">คิดตามกิโลเมตร</div>
-                        <div className="text-xs text-gray-500 mt-1">ค่าพื้นฐาน + (ระยะทาง × ราคาต่อ km)</div>
+                        <div className="font-medium text-gray-900">คิดตามกิโลเมตร / Per Kilometer</div>
+                        <div className="text-xs text-gray-500 mt-1">ค่าพื้นฐาน + (ระยะทาง × ราคาต่อ km) / Base fee + (distance × rate/km)</div>
                       </button>
                       <button
                         onClick={() => setDeliverySettings({...deliverySettings, pricing_mode: 'tier'})}
@@ -1949,8 +1951,8 @@ function SettingsContent() {
                             : 'border-gray-200 bg-white hover:border-green-300'
                         }`}
                       >
-                        <div className="font-medium text-gray-900">คิดตามระยะทาง (ขั้นบันได)</div>
-                        <div className="text-xs text-gray-500 mt-1">กำหนดราคาตามช่วงระยะทาง</div>
+                        <div className="font-medium text-gray-900">คิดตามระยะทาง (ขั้นบันได) / Distance Tiers</div>
+                        <div className="text-xs text-gray-500 mt-1">กำหนดราคาตามช่วงระยะทาง / Set prices by distance range</div>
                       </button>
                     </div>
                   </div>
@@ -1974,11 +1976,11 @@ function SettingsContent() {
                               min="0"
                             />
                           </div>
-                          <p className="text-xs text-gray-500 mt-1">ค่าส่งขั้นต่ำที่เก็บทุกออเดอร์</p>
+                          <p className="text-xs text-gray-500 mt-1">ค่าส่งขั้นต่ำที่เก็บทุกออเดอร์ / Minimum fee for all orders</p>
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
-                            ราคาต่อกิโลเมตร
+                            ราคาต่อกิโลเมตร / Price per km
                           </label>
                           <div className="flex items-center gap-2">
                             <span className="text-gray-500">$</span>
@@ -1995,7 +1997,7 @@ function SettingsContent() {
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
-                            ระยะทางสูงสุดที่จัดส่ง
+                            ระยะทางสูงสุดที่จัดส่ง / Max delivery distance
                           </label>
                           <div className="flex items-center gap-2">
                             <input
@@ -2011,7 +2013,7 @@ function SettingsContent() {
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
-                            ส่งฟรีเมื่อยอดสั่งเกิน
+                            ส่งฟรีเมื่อยอดสั่งเกิน / Free delivery above
                           </label>
                           <div className="flex items-center gap-2">
                             <span className="text-gray-500">$</span>
@@ -2024,18 +2026,18 @@ function SettingsContent() {
                               min="0"
                             />
                           </div>
-                          <p className="text-xs text-gray-500 mt-1">0 = ไม่มีส่งฟรี</p>
+                          <p className="text-xs text-gray-500 mt-1">0 = ไม่มีส่งฟรี / 0 = No free delivery</p>
                         </div>
                       </div>
 
                       {/* Preview Calculation */}
                       <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
-                        <p className="text-sm font-medium text-green-800 mb-2">ตัวอย่างการคำนวณ:</p>
+                        <p className="text-sm font-medium text-green-800 mb-2">ตัวอย่างการคำนวณ / Example calculation:</p>
                         <div className="text-sm text-green-700 space-y-1">
                           <p>• 5 km = ${(deliverySettings.base_fee + (5 * deliverySettings.price_per_km)).toFixed(2)} (${deliverySettings.base_fee} + 5 × ${deliverySettings.price_per_km})</p>
                           <p>• 10 km = ${(deliverySettings.base_fee + (10 * deliverySettings.price_per_km)).toFixed(2)} (${deliverySettings.base_fee} + 10 × ${deliverySettings.price_per_km})</p>
                           {deliverySettings.free_delivery_above > 0 && (
-                            <p className="text-green-600 font-medium">• ส่งฟรีเมื่อยอดสั่งเกิน ${deliverySettings.free_delivery_above}</p>
+                            <p className="text-green-600 font-medium">• ส่งฟรีเมื่อยอดสั่งเกิน / Free delivery above ${deliverySettings.free_delivery_above}</p>
                           )}
                         </div>
                       </div>
@@ -2046,7 +2048,7 @@ function SettingsContent() {
                   {deliverySettings.pricing_mode === 'tier' && (
                     <div className="space-y-3">
                       <p className="text-sm text-gray-600">
-                        กำหนดค่าส่งตามช่วงระยะทาง (กิโลเมตร) จากร้านถึงลูกค้า
+                        กำหนดค่าส่งตามช่วงระยะทาง (กิโลเมตร) จากร้านถึงลูกค้า / Set delivery fee by distance range (km) from restaurant to customer
                       </p>
 
                       {/* Delivery Rates List */}
@@ -2103,7 +2105,7 @@ function SettingsContent() {
                                 <>
                                   <div className="flex items-center gap-3">
                                     <span className="text-sm font-medium text-gray-700">
-                                      ระยะทางไม่เกิน <span className="text-green-600 font-bold">{rate.distance_km}</span> km
+                                      ระยะทางไม่เกิน / Up to <span className="text-green-600 font-bold">{rate.distance_km}</span> km
                                     </span>
                                     <span className="text-gray-400">=</span>
                                     <span className="text-sm font-bold text-green-600">
@@ -2174,7 +2176,7 @@ function SettingsContent() {
                               }}
                               className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
                             >
-                              เพิ่ม
+                              เพิ่ม / Add
                             </button>
                             <button
                               onClick={() => {
@@ -2183,7 +2185,7 @@ function SettingsContent() {
                               }}
                               className="px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded hover:bg-gray-300"
                             >
-                              ยกเลิก
+                              ยกเลิก / Cancel
                             </button>
                           </div>
                         </div>
@@ -2193,7 +2195,7 @@ function SettingsContent() {
                           className="flex items-center gap-2 px-4 py-2 text-green-600 border border-green-300 rounded-lg hover:bg-green-50 transition-colors"
                         >
                           <Plus className="w-4 h-4" />
-                          เพิ่มอัตราค่าส่ง
+                          เพิ่มอัตราค่าส่ง / Add delivery rate
                         </button>
                       )}
 
@@ -2212,7 +2214,7 @@ function SettingsContent() {
             {!serviceOptions.dine_in && !serviceOptions.pickup && !serviceOptions.delivery && (
               <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                 <p className="text-yellow-800 text-sm">
-                  ⚠️ คำเตือน: คุณปิดบริการทั้งหมดแล้ว ลูกค้าจะไม่สามารถสั่งอาหารได้
+                  ⚠️ คำเตือน: คุณปิดบริการทั้งหมดแล้ว ลูกค้าจะไม่สามารถสั่งอาหารได้ / Warning: All services are disabled. Customers cannot place orders.
                 </p>
               </div>
             )}
@@ -2226,8 +2228,9 @@ function SettingsContent() {
               ภาษาหลักของร้าน (Primary Language)
             </h2>
             <p className="text-gray-600 mb-6">
-              เลือกภาษาที่ใช้ในร้านของคุณ ระบบจะแปลข้อความและคำขอจากลูกค้าเป็นภาษานี้โดยอัตโนมัติ
-              เพื่อให้พนักงานและครัวเข้าใจได้ง่าย
+              เลือกภาษาที่ใช้ในร้านของคุณ ระบบจะแปลข้อความและคำขอจากลูกค้าเป็นภาษานี้โดยอัตโนมัติ เพื่อให้พนักงานและครัวเข้าใจได้ง่าย
+              <br />
+              <span className="text-gray-500">Select your restaurant&apos;s language. The system will automatically translate customer messages to this language for staff and kitchen.</span>
             </p>
 
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -2253,8 +2256,9 @@ function SettingsContent() {
 
             <div className="mt-4 p-4 bg-indigo-50 border border-indigo-200 rounded-lg">
               <p className="text-indigo-800 text-sm">
-                💡 <strong>ตัวอย่าง:</strong> ถ้าเลือก "ไทย" เมื่อลูกค้าพิมพ์ "No spicy please" ในช่อง Special Instructions
-                ระบบจะแปลเป็น "ไม่เผ็ดครับ" แสดงในหน้าครัวและพนักงาน
+                💡 <strong>ตัวอย่าง / Example:</strong> ถ้าเลือก &quot;ไทย&quot; เมื่อลูกค้าพิมพ์ &quot;No spicy please&quot; ในช่อง Special Instructions ระบบจะแปลเป็น &quot;ไม่เผ็ดครับ&quot; แสดงในหน้าครัวและพนักงาน
+                <br />
+                <span className="text-indigo-600">If you select &quot;Thai&quot;, when a customer types &quot;No spicy please&quot; in Special Instructions, it will be translated to &quot;ไม่เผ็ดครับ&quot; for kitchen and staff.</span>
               </p>
             </div>
 
@@ -2268,6 +2272,8 @@ function SettingsContent() {
             </h2>
             <p className="text-gray-600 mb-6">
               เลือกธีมสีสำหรับหน้า POS ของร้านคุณ สีจะแสดงในหน้าครัว, พนักงาน และแคชเชียร์
+              <br />
+              <span className="text-gray-500">Select theme color for your POS pages. The color will appear in Kitchen, Staff, and Cashier pages.</span>
             </p>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -2293,8 +2299,9 @@ function SettingsContent() {
 
             <div className="mt-4 p-4 bg-gray-50 border border-gray-200 rounded-lg">
               <p className="text-gray-700 text-sm">
-                🎨 <strong>หมายเหตุ:</strong> ธีมสีจะเปลี่ยนแปลงทันทีในหน้า POS ทุกหน้า (Kitchen, Orders, Cashier)
-                หลังจากบันทึก
+                🎨 <strong>หมายเหตุ / Note:</strong> ธีมสีจะเปลี่ยนแปลงทันทีในหน้า POS ทุกหน้า (Kitchen, Orders, Cashier) หลังจากบันทึก
+                <br />
+                <span className="text-gray-500">Theme color will change immediately on all POS pages after saving.</span>
               </p>
             </div>
 
@@ -2319,9 +2326,9 @@ function SettingsContent() {
               <div>
                 <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
                   <Users className="w-6 h-6 text-blue-500" />
-                  Staff Management
+                  Staff Management / จัดการพนักงาน
                 </h2>
-                <p className="text-sm text-gray-500 mt-1">จัดการพนักงานในร้านของคุณ</p>
+                <p className="text-sm text-gray-500 mt-1">จัดการพนักงานในร้านของคุณ / Manage your restaurant staff</p>
               </div>
               <button
                 onClick={() => setShowAddStaff(true)}
@@ -2335,20 +2342,20 @@ function SettingsContent() {
             {/* Add Staff Modal */}
             {showAddStaff && (
               <div className="mb-6 p-4 bg-blue-50 rounded-xl border-2 border-blue-200">
-                <h3 className="font-semibold text-gray-900 mb-4">เพิ่มพนักงานใหม่</h3>
+                <h3 className="font-semibold text-gray-900 mb-4">เพิ่มพนักงานใหม่ / Add New Staff</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">ชื่อ *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">ชื่อ / Name *</label>
                     <input
                       type="text"
                       value={newStaff.name}
                       onChange={(e) => setNewStaff({...newStaff, name: e.target.value})}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white"
-                      placeholder="ชื่อพนักงาน"
+                      placeholder="ชื่อพนักงาน / Staff name"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">ตำแหน่ง</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">ตำแหน่ง / Role</label>
                     <select
                       value={newStaff.role}
                       onChange={(e) => setNewStaff({...newStaff, role: e.target.value as Staff['role']})}
