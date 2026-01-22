@@ -20,6 +20,7 @@ interface BankAccount {
 interface PaymentSettings {
   accept_card: boolean;
   accept_bank_transfer: boolean;
+  accept_qr_code: boolean;
   bank_accounts: BankAccount[];
 }
 
@@ -73,6 +74,7 @@ interface Subscription {
   status: string;
   is_subscribed: boolean;
   trial_days_remaining: number;
+  current_period_start: string | null;
   current_period_end: string | null;
   next_billing_date: string | null;
   cancel_at_period_end: boolean;
@@ -233,6 +235,7 @@ function SettingsContent() {
   const [paymentSettings, setPaymentSettings] = useState<PaymentSettings>({
     accept_card: true,
     accept_bank_transfer: false,
+    accept_qr_code: true,
     bank_accounts: []
   });
   const [savingPayment, setSavingPayment] = useState(false);
@@ -2860,6 +2863,36 @@ function SettingsContent() {
                       </div>
                     </div>
                   )}
+
+                  {/* QR Code Toggle */}
+                  <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                          <QrCode className="w-4 h-4 text-purple-600" />
+                        </div>
+                        <div>
+                          <h5 className="font-medium text-gray-900">QR Code Payments</h5>
+                          <p className="text-xs text-gray-500">Show QR code for customers to scan and pay</p>
+                        </div>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={paymentSettings.accept_qr_code}
+                          onChange={(e) => setPaymentSettings({
+                            ...paymentSettings,
+                            accept_qr_code: e.target.checked
+                          })}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                      </label>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-2 ml-11">
+                      Note: QR Code feature may not be available in all regions. Disable if not supported in your area.
+                    </p>
+                  </div>
                 </div>
               )}
             </div>
@@ -2869,7 +2902,8 @@ function SettingsContent() {
               <h4 className="font-medium text-yellow-800 mb-2">📋 How it works</h4>
               <ul className="text-sm text-yellow-700 space-y-1">
                 <li>• Customers must pay before the order goes to kitchen</li>
-                <li>• If Bank Transfer is enabled, customers will see QR Code and account number</li>
+                <li>• If Bank Transfer is enabled, customers will see the account number</li>
+                <li>• If QR Code is enabled, customers will also see a QR code to scan</li>
                 <li>• You must manually verify transfers in the Orders Dashboard</li>
                 <li>• At least one payment method must be enabled</li>
               </ul>
@@ -2948,7 +2982,52 @@ function SettingsContent() {
                 <span className="text-gray-600">Plan Status</span>
                 <span className="font-medium">{getStatusBadge(profile.subscription.status)}</span>
               </div>
-              
+
+              {/* Payment Status */}
+              <div className="flex justify-between py-3 border-b border-gray-200">
+                <span className="text-gray-600">Payment Status</span>
+                <span className="font-medium">
+                  {profile.subscription.is_subscribed ? (
+                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded-full text-sm">
+                      <CheckCircle className="w-4 h-4" />
+                      Paid
+                    </span>
+                  ) : profile.subscription.trial_days_remaining > 0 ? (
+                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
+                      <AlertCircle className="w-4 h-4" />
+                      Trial (Free)
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm">
+                      <AlertCircle className="w-4 h-4" />
+                      No Active Subscription
+                    </span>
+                  )}
+                </span>
+              </div>
+
+              {/* Subscription Start Date */}
+              {profile.subscription.current_period_start && (
+                <div className="flex justify-between py-3 border-b border-gray-200">
+                  <span className="text-gray-600">Subscription Started</span>
+                  <span className="font-medium">
+                    {formatDate(profile.subscription.current_period_start)}
+                  </span>
+                </div>
+              )}
+
+              {/* Subscription End/Expiry Date */}
+              {profile.subscription.current_period_end && (
+                <div className="flex justify-between py-3 border-b border-gray-200">
+                  <span className="text-gray-600">
+                    {profile.subscription.is_subscribed ? 'Current Period Ends' : 'Expires On'}
+                  </span>
+                  <span className="font-medium">
+                    {formatDate(profile.subscription.current_period_end)}
+                  </span>
+                </div>
+              )}
+
               {profile.subscription.is_subscribed && (
                 <>
                   {profile.subscription.next_billing_date && (
@@ -2959,16 +3038,7 @@ function SettingsContent() {
                       </span>
                     </div>
                   )}
-                  
-                  {profile.subscription.current_period_end && (
-                    <div className="flex justify-between py-3 border-b border-gray-200">
-                      <span className="text-gray-600">Current Period Ends</span>
-                      <span className="font-medium">
-                        {formatDate(profile.subscription.current_period_end)}
-                      </span>
-                    </div>
-                  )}
-                  
+
                   {profile.subscription.cancel_at_period_end && (
                     <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
                       <p className="text-sm text-yellow-800">
@@ -2977,6 +3047,16 @@ function SettingsContent() {
                     </div>
                   )}
                 </>
+              )}
+
+              {/* Trial Info */}
+              {!profile.subscription.is_subscribed && profile.subscription.trial_days_remaining > 0 && (
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-md">
+                  <p className="text-sm text-blue-800">
+                    🎁 You have <strong>{profile.subscription.trial_days_remaining} days</strong> left in your free trial.
+                    Subscribe now to continue using all features after your trial ends.
+                  </p>
+                </div>
               )}
             </div>
 
