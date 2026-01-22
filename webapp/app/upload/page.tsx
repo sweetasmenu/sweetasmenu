@@ -1418,8 +1418,8 @@ export default function AddMenuItemPage() {
 
               {/* Choose from Image Library */}
               <div className="mt-4 text-center">
-                <p className="text-sm text-gray-500 mb-3">หรือเลือกรูปจากรูปที่มีอยู่แล้ว</p>
-                
+                <p className="text-sm text-gray-500 mb-3">Or select from existing images</p>
+
                 {/* All Plans: Can select from own restaurant */}
                 <button
                   onClick={() => setShowImageGallery(true)}
@@ -1427,10 +1427,10 @@ export default function AddMenuItemPage() {
                   className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Camera className="w-5 h-5 mr-2" />
-                  เลือกจากรูปที่สร้างไว้แล้ว
+                  Select from Library
                 </button>
                 <p className="text-xs text-gray-500 mt-2">
-                  💡 ใช้รูปที่เคยสร้างหรือ enhancement ไว้ในร้านนี้
+                  💡 Use images you have created or enhanced for this restaurant
                 </p>
                 
                 {/* Enterprise: Additional option for cross-restaurant */}

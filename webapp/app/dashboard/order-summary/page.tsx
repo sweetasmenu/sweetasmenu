@@ -955,16 +955,16 @@ export default function OrderSummaryPage() {
               <div className="space-y-1">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Card:</span>
-                  <span className="font-medium">{summary.payment_method.card.count} orders</span>
+                  <span className="font-bold text-purple-700">{summary.payment_method.card.count} orders</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Bank Transfer:</span>
-                  <span className="font-medium">{summary.payment_method.bank_transfer.count} orders</span>
+                  <span className="font-bold text-purple-700">{summary.payment_method.bank_transfer.count} orders</span>
                 </div>
                 {summary.payment_method.cash && summary.payment_method.cash.count > 0 && (
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Cash:</span>
-                    <span className="font-medium">{summary.payment_method.cash.count} orders</span>
+                    <span className="font-bold text-purple-700">{summary.payment_method.cash.count} orders</span>
                   </div>
                 )}
               </div>
@@ -987,15 +987,15 @@ export default function OrderSummaryPage() {
               <div className="space-y-1">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Dine In:</span>
-                  <span className="font-medium">{summary.service_type.dine_in}</span>
+                  <span className="font-bold text-orange-700">{summary.service_type.dine_in}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Pickup:</span>
-                  <span className="font-medium">{summary.service_type.pickup}</span>
+                  <span className="font-bold text-orange-700">{summary.service_type.pickup}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Delivery:</span>
-                  <span className="font-medium">{summary.service_type.delivery}</span>
+                  <span className="font-bold text-orange-700">{summary.service_type.delivery}</span>
                 </div>
               </div>
               <div className="mt-2 text-xs text-blue-500 flex items-center gap-1">
@@ -1191,27 +1191,31 @@ export default function OrderSummaryPage() {
               <div>
                 <h3 className="font-semibold text-gray-900 mb-3">Order Items</h3>
                 <div className="space-y-3">
-                  {selectedOrder.items.map((item, idx) => (
-                    <div key={idx} className="flex justify-between items-start p-3 bg-gray-50 rounded-lg">
-                      <div className="flex-1">
-                        <p className="font-medium text-gray-900">
-                          {item.quantity}x {item.nameEn || item.name}
-                        </p>
-                        {item.selectedMeat && (
-                          <p className="text-xs text-gray-500">
-                            + {item.selectedMeat.nameEn || item.selectedMeat.name}
-                            {item.selectedMeat.price > 0 && ` (+$${item.selectedMeat.price.toFixed(2)})`}
+                  {selectedOrder.items && selectedOrder.items.length > 0 ? (
+                    selectedOrder.items.map((item, idx) => (
+                      <div key={idx} className="flex justify-between items-start p-3 bg-gray-50 rounded-lg">
+                        <div className="flex-1">
+                          <p className="font-medium text-gray-900">
+                            {item.quantity}x {item.nameEn || item.name}
                           </p>
-                        )}
-                        {item.selectedAddOns && item.selectedAddOns.length > 0 && (
-                          <p className="text-xs text-gray-500">
-                            + {item.selectedAddOns.map(a => a.nameEn || a.name).join(', ')}
-                          </p>
-                        )}
+                          {item.selectedMeat && (
+                            <p className="text-xs text-gray-500">
+                              + {item.selectedMeat.nameEn || item.selectedMeat.name}
+                              {item.selectedMeat.price > 0 && ` (+$${item.selectedMeat.price.toFixed(2)})`}
+                            </p>
+                          )}
+                          {item.selectedAddOns && item.selectedAddOns.length > 0 && (
+                            <p className="text-xs text-gray-500">
+                              + {item.selectedAddOns.map(a => a.nameEn || a.name).join(', ')}
+                            </p>
+                          )}
+                        </div>
+                        <span className="font-medium text-gray-900">${(item.itemTotal || (item.price * item.quantity)).toFixed(2)}</span>
                       </div>
-                      <span className="font-medium text-gray-900">${item.itemTotal.toFixed(2)}</span>
-                    </div>
-                  ))}
+                    ))
+                  ) : (
+                    <p className="text-gray-500 text-sm italic">No items data available</p>
+                  )}
                 </div>
               </div>
 
