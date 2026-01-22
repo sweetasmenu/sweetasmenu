@@ -3092,8 +3092,10 @@ function SettingsContent() {
 
             {/* Action Buttons */}
             <div className="pt-6 border-t border-gray-200 space-y-4">
-              {profile.subscription.is_subscribed && profile.subscription.stripe_customer_id ? (
-                // Subscribed users with Stripe - show Manage Subscription button
+              {/* Show "Manage Subscription" if status is active AND plan is not free */}
+              {profile.subscription.status === 'active' &&
+               profile.subscription.plan?.toLowerCase() !== 'free' &&
+               profile.subscription.stripe_customer_id ? (
                 <button
                   onClick={handleManageBilling}
                   className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium flex items-center justify-center gap-2 transition-colors"
@@ -3102,31 +3104,27 @@ function SettingsContent() {
                   Manage Subscription
                 </button>
               ) : (
-                // Not subscribed or no Stripe customer - show Upgrade button
-                <a
-                  href="/pricing"
-                  className="w-full px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 font-medium flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg"
-                >
-                  <ArrowUpRight className="w-5 h-5" />
-                  Upgrade to Pro
-                </a>
+                /* Show "Upgrade to Pro" if plan is free OR status is canceled */
+                (profile.subscription.plan?.toLowerCase() === 'free' ||
+                 profile.subscription.status === 'canceled' ||
+                 !profile.subscription.stripe_customer_id) && (
+                  <a
+                    href="/pricing"
+                    className="w-full px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 font-medium flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg"
+                  >
+                    <ArrowUpRight className="w-5 h-5" />
+                    Upgrade to Pro
+                  </a>
+                )
               )}
 
               {/* Additional info for Stripe Customer Portal */}
-              {profile.subscription.is_subscribed && profile.subscription.stripe_customer_id && (
+              {profile.subscription.status === 'active' &&
+               profile.subscription.plan?.toLowerCase() !== 'free' &&
+               profile.subscription.stripe_customer_id && (
                 <p className="text-xs text-gray-500 text-center">
                   Manage your payment methods, view invoices, and cancel subscription via Stripe Customer Portal
                 </p>
-              )}
-
-              {/* If subscribed but no Stripe (e.g., bank transfer) */}
-              {profile.subscription.is_subscribed && !profile.subscription.stripe_customer_id && (
-                <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                  <p className="text-sm text-gray-700">
-                    <strong>Bank Transfer Subscription</strong><br />
-                    To manage your subscription or update payment details, please contact our support team.
-                  </p>
-                </div>
               )}
             </div>
           </div>
