@@ -54,6 +54,13 @@ All notable changes to this project will be documented in this file.
 - **Files Changed**:
   - `backend/services/orders_service.py`
 
+#### 4. TypeScript Build Error in cleanTranslation Function
+- **Problem**: Build failed with "Argument of type 'string | undefined' is not assignable to parameter of type 'string'"
+- **Root Cause**: `cleanTranslation` function expected `string` but `menu.description` could be `undefined`
+- **Solution**: Updated function signature to accept `string | undefined` and return empty string for falsy input
+- **Files Changed**:
+  - `webapp/app/restaurant/[id]/page.tsx`
+
 ### Changes
 
 #### 1. "Back to Home" Changed to "Back to Menu"

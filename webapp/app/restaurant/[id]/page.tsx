@@ -409,8 +409,8 @@ export default function RestaurantMenuPage() {
   }, [customerDetails.address, serviceType, restaurantLocation.latitude, restaurantLocation.longitude, restaurantId]);
 
   // Helper function to clean markdown/formatting artifacts from translations
-  const cleanTranslation = (text: string): string => {
-    if (!text) return text;
+  const cleanTranslation = (text: string | undefined): string => {
+    if (!text) return '';
     // Remove markdown bold/italic markers
     let cleaned = text.replace(/\*\*/g, '').replace(/\*/g, '').replace(/__/g, '').replace(/_/g, '');
     // Remove any leading/trailing whitespace
