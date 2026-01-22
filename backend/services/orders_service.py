@@ -407,6 +407,11 @@ class OrdersService:
             if status == 'cancelled' and cancel_reason:
                 update_data["cancel_reason"] = cancel_reason
 
+            # Auto-update payment_status when order is completed
+            if status == 'completed':
+                update_data["payment_status"] = "paid"
+                update_data["completed_at"] = datetime.now().isoformat()
+
             result = self.supabase_client.table('orders').update(update_data).eq('id', order_id).execute()
 
             if result.data and len(result.data) > 0:
