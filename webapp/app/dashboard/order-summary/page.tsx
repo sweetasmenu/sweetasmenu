@@ -687,6 +687,126 @@ export default function OrderSummaryPage() {
     printWindow.document.close();
   };
 
+  // Print Order Receipt
+  const printOrderReceipt = (order: Order) => {
+    const printWindow = window.open('', '', 'width=400,height=600');
+    if (!printWindow) {
+      alert('Please allow popups to print');
+      return;
+    }
+
+    const orderDate = new Date(order.created_at).toLocaleString('en-NZ', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+
+    const customerInfo = order.service_type === 'dine_in'
+      ? `Table: ${order.customer_details?.table_no || order.table_no || '-'}`
+      : `Name: ${order.customer_details?.name || order.customer_name || '-'}<br/>Phone: ${order.customer_details?.phone || order.customer_phone || '-'}`;
+
+    const itemsHtml = order.items && order.items.length > 0
+      ? order.items.map(item => {
+          const meatInfo = item.selectedMeat && (item.selectedMeat.name || item.selectedMeat.nameEn)
+            ? `<br/><span style="font-size:10px;margin-left:10px;">+ ${item.selectedMeat.nameEn || item.selectedMeat.name}${item.selectedMeat.price > 0 ? ` (+$${item.selectedMeat.price.toFixed(2)})` : ''}</span>`
+            : '';
+          const addOnsInfo = item.selectedAddOns && item.selectedAddOns.length > 0 && item.selectedAddOns.some(a => a.name || a.nameEn)
+            ? `<br/><span style="font-size:10px;margin-left:10px;">+ ${item.selectedAddOns.filter(a => a.name || a.nameEn).map(a => a.nameEn || a.name).join(', ')}</span>`
+            : '';
+          return `<div class="item"><span>${item.quantity}x ${item.nameEn || item.name}${meatInfo}${addOnsInfo}</span><span>$${(item.itemTotal || (item.price * item.quantity)).toFixed(2)}</span></div>`;
+        }).join('')
+      : '<p style="text-align:center;color:#666;">No items</p>';
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Order Receipt</title>
+        <style>
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          body {
+            font-family: 'Courier New', monospace;
+            padding: 10mm;
+            max-width: 80mm;
+            margin: 0 auto;
+            font-size: 12px;
+          }
+          .header { text-align: center; margin-bottom: 15px; border-bottom: 1px dashed #000; padding-bottom: 10px; }
+          .header h1 { font-size: 16px; margin-bottom: 5px; }
+          .header p { font-size: 11px; color: #333; }
+          .section { margin-bottom: 12px; }
+          .section-title { font-weight: bold; margin-bottom: 5px; border-bottom: 1px solid #000; padding-bottom: 3px; font-size: 11px; }
+          .row { display: flex; justify-content: space-between; margin-bottom: 3px; }
+          .item { display: flex; justify-content: space-between; margin-bottom: 5px; align-items: flex-start; }
+          .item span:first-child { flex: 1; padding-right: 10px; }
+          .totals { border-top: 1px dashed #000; padding-top: 8px; margin-top: 8px; }
+          .totals .row { margin-bottom: 4px; }
+          .totals .total { font-size: 14px; font-weight: bold; border-top: 1px solid #000; padding-top: 5px; margin-top: 5px; }
+          .footer { text-align: center; margin-top: 15px; font-size: 10px; border-top: 1px dashed #000; padding-top: 10px; }
+          .special { background: #fff3cd; padding: 5px; margin: 8px 0; border-radius: 3px; font-size: 11px; }
+          @media print {
+            body { padding: 5mm; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>${restaurantName || 'Restaurant'}</h1>
+          <p>ORDER RECEIPT</p>
+          <p>${orderDate}</p>
+        </div>
+
+        <div class="section">
+          <div class="section-title">${getServiceTypeLabel(order.service_type).toUpperCase()}</div>
+          <p style="font-size:11px;">${customerInfo}</p>
+          ${order.service_type === 'pickup' && order.customer_details?.pickup_time
+            ? `<p style="font-size:11px;">Pickup: ${new Date(order.customer_details.pickup_time).toLocaleTimeString('en-NZ', { hour: '2-digit', minute: '2-digit' })}</p>`
+            : ''}
+          ${order.service_type === 'delivery' && order.customer_details?.address
+            ? `<p style="font-size:11px;">Address: ${order.customer_details.address}</p>`
+            : ''}
+        </div>
+
+        <div class="section">
+          <div class="section-title">ORDER ITEMS</div>
+          ${itemsHtml}
+        </div>
+
+        ${order.special_instructions ? `<div class="special"><strong>Note:</strong> ${order.special_instructions}</div>` : ''}
+
+        <div class="totals">
+          <div class="row"><span>Subtotal:</span><span>$${order.subtotal.toFixed(2)}</span></div>
+          ${order.tax > 0 ? `<div class="row"><span>GST (15%):</span><span>$${order.tax.toFixed(2)}</span></div>` : ''}
+          ${order.delivery_fee && order.delivery_fee > 0 ? `<div class="row"><span>Delivery:</span><span>$${order.delivery_fee.toFixed(2)}</span></div>` : ''}
+          <div class="row total"><span>TOTAL:</span><span>$${order.total_price.toFixed(2)} NZD</span></div>
+        </div>
+
+        <div class="section" style="margin-top:10px;">
+          <div class="row"><span>Payment:</span><span>${getPaymentMethodLabel(order.payment_method)}</span></div>
+          <div class="row"><span>Status:</span><span>${order.payment_status === 'paid' ? 'PAID' : order.payment_status?.toUpperCase() || '-'}</span></div>
+        </div>
+
+        <div class="footer">
+          <p>Thank you for your order!</p>
+          <p>Generated by Smart Menu</p>
+        </div>
+
+        <script>
+          window.onload = function() {
+            window.print();
+            window.onafterprint = function() { window.close(); }
+          }
+        </script>
+      </body>
+      </html>
+    `;
+
+    printWindow.document.write(html);
+    printWindow.document.close();
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 py-8">
       <div className="container mx-auto px-4 max-w-7xl">
@@ -1253,10 +1373,17 @@ export default function OrderSummaryPage() {
             </div>
 
             {/* Modal Footer */}
-            <div className="sticky bottom-0 bg-white border-t border-gray-200 px-6 py-4 rounded-b-2xl">
+            <div className="sticky bottom-0 bg-white border-t border-gray-200 px-6 py-4 rounded-b-2xl flex gap-3">
+              <button
+                onClick={() => printOrderReceipt(selectedOrder)}
+                className="flex-1 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+              >
+                <Printer className="w-4 h-4" />
+                Print
+              </button>
               <button
                 onClick={() => setSelectedOrder(null)}
-                className="w-full py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-semibold transition-colors"
+                className="flex-1 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-semibold transition-colors"
               >
                 Close
               </button>
