@@ -237,10 +237,15 @@ class UserRoleService:
             return None
         
         try:
-            result = self.supabase_client.table('user_profiles').select('*').eq('user_id', user_id).limit(1).execute()
+            # ⚡ OPTIMIZED: Select only needed columns instead of '*'
+            result = self.supabase_client.table('user_profiles').select(
+                'user_id, role, email, restaurant_name, stripe_customer_id, stripe_subscription_id, '
+                'subscription_start_date, subscription_end_date, next_billing_date, '
+                'trial_start_date, trial_end_date, subscription_status, plan, billing_interval'
+            ).eq('user_id', user_id).limit(1).execute()
             if result.data and len(result.data) > 0:
                 profile = result.data[0]
-                
+
                 # If restaurant_name is missing, try to get from restaurants
                 if not profile.get('restaurant_name'):
                     try:
@@ -249,7 +254,7 @@ class UserRoleService:
                             profile['restaurant_name'] = restaurant_result.data[0].get('name')
                     except:
                         pass
-                
+
                 return profile
             return None
         except Exception as e:

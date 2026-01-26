@@ -132,8 +132,12 @@ class RestaurantService:
             return []
         
         try:
-            # Query all restaurants for this user
-            result = self.supabase_client.table('restaurants').select('*').eq('user_id', user_id).execute()
+            # ⚡ OPTIMIZED: Select only needed columns instead of '*'
+            result = self.supabase_client.table('restaurants').select(
+                'id, slug, name, phone, email, address, logo_url, theme_color, '
+                'cover_image_url, menu_template, service_options, primary_language, '
+                'pos_theme_color, delivery_rates, is_active'
+            ).eq('user_id', user_id).execute()
             
             if result.data:
                 print(f"✅ Restaurant Service: Found {len(result.data)} restaurant(s) for user {user_id}")
@@ -163,7 +167,12 @@ class RestaurantService:
             return None
         
         try:
-            result = self.supabase_client.table('restaurants').select('*').eq('id', restaurant_id).limit(1).execute()
+            # ⚡ OPTIMIZED: Select only needed columns instead of '*'
+            result = self.supabase_client.table('restaurants').select(
+                'id, slug, name, phone, email, address, logo_url, theme_color, '
+                'cover_image_url, menu_template, service_options, primary_language, '
+                'pos_theme_color, delivery_rates, is_active, payment_settings'
+            ).eq('id', restaurant_id).limit(1).execute()
             
             if result.data and len(result.data) > 0:
                 restaurant = result.data[0]

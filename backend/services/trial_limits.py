@@ -151,18 +151,20 @@ class TrialLimitsService:
         
         return self.get_user_status(user_id)
     
-    def get_user_status(self, user_id: str) -> Dict[str, Any]:
+    def get_user_status(self, user_id: str, user_role: str = None) -> Dict[str, Any]:
         """
         ดึงสถานะ trial ของ user
-        
+
         Args:
             user_id: User ID
-            
+            user_role: Optional - pass role to avoid duplicate DB call
+
         Returns:
             Dictionary with user status and limits
         """
-        # Get user role from Supabase
-        user_role = user_role_service.get_user_role(user_id)
+        # ⚡ OPTIMIZED: Use passed role if available, otherwise fetch
+        if user_role is None:
+            user_role = user_role_service.get_user_role(user_id)
         
         # Map role to subscription plan
         role_to_plan = {

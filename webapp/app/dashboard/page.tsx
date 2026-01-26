@@ -99,12 +99,17 @@ export default function DashboardPage() {
             if (restName) setRestaurantName(restName);
             // Save to user-scoped localStorage key only
             localStorage.setItem(`selected_restaurant_${userId}`, restId);
-            await fetchRestaurantAndBestSellers(restId);
-            await fetchUsageData(restId);
-          }
 
-          // Fetch all restaurants for branch switching
-          await fetchAllRestaurants(userId);
+            // ⚡ OPTIMIZED: Run all data fetches in parallel instead of sequentially
+            await Promise.all([
+              fetchRestaurantAndBestSellers(restId),
+              fetchUsageData(restId),
+              fetchAllRestaurants(userId)
+            ]);
+          } else {
+            // No restaurant - just fetch restaurants list
+            await fetchAllRestaurants(userId);
+          }
         } finally {
           isFetchingProfile.current = false;
           setLoading(false);
@@ -146,8 +151,11 @@ export default function DashboardPage() {
               if (restSlug) setRestaurantSlug(restSlug);
               // Save to user-scoped localStorage key only
               localStorage.setItem(`selected_restaurant_${userId}`, restId);
-              await fetchRestaurantAndBestSellers(restId);
-              await fetchUsageData(restId);
+              // ⚡ OPTIMIZED: Run in parallel
+              await Promise.all([
+                fetchRestaurantAndBestSellers(restId),
+                fetchUsageData(restId)
+              ]);
             }
           } finally {
             isFetchingProfile.current = false;
@@ -320,8 +328,13 @@ export default function DashboardPage() {
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-      // Fetch restaurant details (including logo and primary_language)
-      const restaurantResponse = await fetch(`${API_URL}/api/restaurant/${restaurantId}`);
+      // ⚡ OPTIMIZED: Fetch restaurant details and best sellers in PARALLEL
+      const [restaurantResponse, bestSellersResponse] = await Promise.all([
+        fetch(`${API_URL}/api/restaurant/${restaurantId}`),
+        fetch(`${API_URL}/api/best-sellers?restaurant_id=${restaurantId}`)
+      ]);
+
+      // Process restaurant data
       if (restaurantResponse.ok) {
         const restaurantData = await restaurantResponse.json();
         if (restaurantData.success && restaurantData.restaurant) {
@@ -336,8 +349,7 @@ export default function DashboardPage() {
         }
       }
 
-      // Fetch best sellers for this restaurant
-      const bestSellersResponse = await fetch(`${API_URL}/api/best-sellers?restaurant_id=${restaurantId}`);
+      // Process best sellers data
       if (bestSellersResponse.ok) {
         const bestSellersData = await bestSellersResponse.json();
         if (bestSellersData.success && bestSellersData.items) {
@@ -390,9 +402,11 @@ export default function DashboardPage() {
     else setRestaurantLogo(null);
     setShowBranchDropdown(false);
 
-    // Refresh data for new restaurant (this will also update logo from API)
-    await fetchRestaurantAndBestSellers(restaurant.id);
-    await fetchUsageData(restaurant.id);
+    // ⚡ OPTIMIZED: Refresh data for new restaurant in parallel
+    await Promise.all([
+      fetchRestaurantAndBestSellers(restaurant.id),
+      fetchUsageData(restaurant.id)
+    ]);
 
     // Trigger refresh event for other components (Settings page listens for this)
     window.dispatchEvent(new CustomEvent('branchChanged', { detail: { restaurantId: restaurant.id } }));

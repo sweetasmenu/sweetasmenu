@@ -2719,9 +2719,12 @@ async def get_user_profile(
                 "delivery_rates": []
             }
         
-        # Get user role from Supabase
-        user_role = user_role_service.get_user_role(user_id)
-        
+        # ⚡ OPTIMIZED: Get user profile first (includes role) - single DB call instead of multiple
+        user_profile = user_role_service.get_user_profile(user_id)
+
+        # Extract role from profile (avoids duplicate DB call)
+        user_role = user_profile.get('role', 'free_trial') if user_profile else 'free_trial'
+
         # Map role to subscription plan
         role_to_plan = {
             'free_trial': 'trial',
@@ -2730,17 +2733,14 @@ async def get_user_profile(
             'enterprise': 'premium',
             'admin': 'premium'  # Admin gets premium features
         }
-        
+
         plan_from_role = role_to_plan.get(user_role, 'trial')
-        
-        # Get subscription status
-        user_status = trial_limits_service.get_user_status(user_id)
+
+        # ⚡ OPTIMIZED: Pass role to avoid another duplicate DB call inside get_user_status
+        user_status = trial_limits_service.get_user_status(user_id, user_role=user_role)
 
         # Determine if subscribed based on role (not trial)
         is_subscribed = user_role not in ['free_trial', None]
-
-        # Get full user profile for Stripe data
-        user_profile = user_role_service.get_user_profile(user_id)
 
         # Extract Stripe and subscription data from user_profiles table
         stripe_customer_id = user_profile.get('stripe_customer_id') if user_profile else None
