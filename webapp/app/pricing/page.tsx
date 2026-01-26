@@ -198,7 +198,7 @@ export default function PricingPage() {
                     </div>
                     {interval === 'year' && plan.price > 0 && (
                       <p className="text-xs text-green-600 mt-1 font-semibold">
-                        Save ${(plan.price * 12 * 0.2).toFixed(0)}/year
+                        Save ${(plan.price * 12 * 0.1).toFixed(0)}/year
                       </p>
                     )}
                   </div>
