@@ -1,5 +1,7 @@
 """
 Trial Limits Service - จัดการข้อจำกัดสำหรับ Free Trial และ Subscription Plans
+Updated to use Supabase for persistent storage
+
 Updated pricing structure:
 - Trial: 20 menus, 5 gen, 5 enhance
 - Starter ($39): 30 menus, 30 gen, 30 enhance
@@ -9,42 +11,43 @@ Updated pricing structure:
 from typing import Dict, Any, Optional
 from datetime import datetime, timedelta
 from collections import defaultdict
-import json
 import os
-from pathlib import Path
 from .user_role_service import user_role_service
+
+# Import Supabase client
+try:
+    from supabase import create_client, Client
+    SUPABASE_URL = os.getenv("SUPABASE_URL")
+    SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY") or os.getenv("SUPABASE_KEY")
+    supabase_client: Optional[Client] = None
+    if SUPABASE_URL and SUPABASE_KEY:
+        supabase_client = create_client(SUPABASE_URL, SUPABASE_KEY)
+except Exception as e:
+    print(f"⚠️ TrialLimits: Failed to initialize Supabase client: {e}")
+    supabase_client = None
+
 
 class TrialLimitsService:
     """
     จัดการข้อจำกัดการใช้งานสำหรับ Free Trial (14 วัน) และ Subscription Plans
-    
+
+    Now uses Supabase for persistent storage instead of JSON file
+
     Limits สำหรับ Free Trial:
     - Menu Items: 20 รายการ
     - Image Generation: 5 ภาพ
     - Image Enhancement: 5 ภาพ
     """
-    
+
     def __init__(self):
-        # In-memory storage (สำหรับ MVP)
-        # ภายหลังควรย้ายไปเก็บใน database
-        self.usage_data: Dict[str, Dict[str, Any]] = defaultdict(lambda: {
-            "user_id": "",
-            "trial_start_date": None,
-            "trial_end_date": None,
-            "is_subscribed": False,
-            "subscription_plan": None,
-            "menu_items_count": 0,
-            "image_generation_count": 0,
-            "image_enhancement_count": 0,
-            "last_reset": None
-        })
-        
+        self.supabase_client = supabase_client
+
         # Trial limits (14 days)
         self.TRIAL_DURATION_DAYS = 14
         self.TRIAL_MENU_ITEMS_LIMIT = 20  # 20 menu items for Free Trial
         self.TRIAL_IMAGE_GENERATION_LIMIT = 5  # 5 AI generations for Free Trial
         self.TRIAL_IMAGE_ENHANCEMENT_LIMIT = 5  # 5 enhancements for Free Trial
-        
+
         # Subscription plan limits (per month)
         # Based on actual plans: Starter ($39), Professional ($89), Enterprise ($199)
         self.SUBSCRIPTION_LIMITS = {
@@ -80,77 +83,169 @@ class TrialLimitsService:
                 "image_enhancement": 200,
             }
         }
-        
-        # Load from file if exists
-        self.data_file = Path(__file__).parent.parent / "trial_usage_data.json"
-        self.load_data()
-    
-    def load_data(self):
-        """โหลดข้อมูล usage จากไฟล์"""
-        try:
-            if self.data_file.exists():
-                with open(self.data_file, 'r', encoding='utf-8') as f:
-                    data = json.load(f)
-                    # Convert date strings back to datetime
-                    for user_id, user_data in data.items():
-                        if user_data.get('trial_start_date'):
-                            user_data['trial_start_date'] = datetime.fromisoformat(user_data['trial_start_date'])
-                        if user_data.get('trial_end_date'):
-                            user_data['trial_end_date'] = datetime.fromisoformat(user_data['trial_end_date'])
-                        if user_data.get('last_reset'):
-                            user_data['last_reset'] = datetime.fromisoformat(user_data['last_reset'])
-                    self.usage_data.update(data)
-        except Exception as e:
-            print(f"⚠️ Failed to load trial usage data: {str(e)}")
-    
-    def save_data(self):
-        """บันทึกข้อมูล usage ลงไฟล์"""
-        try:
-            # Convert datetime to ISO string for JSON serialization
-            data_to_save = {}
-            for user_id, user_data in self.usage_data.items():
-                data_to_save[user_id] = user_data.copy()
-                if isinstance(data_to_save[user_id].get('trial_start_date'), datetime):
-                    data_to_save[user_id]['trial_start_date'] = data_to_save[user_id]['trial_start_date'].isoformat()
-                if isinstance(data_to_save[user_id].get('trial_end_date'), datetime):
-                    data_to_save[user_id]['trial_end_date'] = data_to_save[user_id]['trial_end_date'].isoformat()
-                if isinstance(data_to_save[user_id].get('last_reset'), datetime):
-                    data_to_save[user_id]['last_reset'] = data_to_save[user_id]['last_reset'].isoformat()
-            
-            with open(self.data_file, 'w', encoding='utf-8') as f:
-                json.dump(data_to_save, f, indent=2, ensure_ascii=False)
-        except Exception as e:
-            print(f"⚠️ Failed to save trial usage data: {str(e)}")
-    
-    def initialize_user(self, user_id: str) -> Dict[str, Any]:
-        """
-        เริ่มต้น trial สำหรับ user ใหม่
-        
-        Args:
-            user_id: User ID
-            
-        Returns:
-            Dictionary with trial information
-        """
-        if user_id not in self.usage_data or not self.usage_data[user_id].get('trial_start_date'):
-            now = datetime.now()
-            trial_end = now + timedelta(days=self.TRIAL_DURATION_DAYS)
-            
-            self.usage_data[user_id] = {
-                "user_id": user_id,
-                "trial_start_date": now,
-                "trial_end_date": trial_end,
-                "is_subscribed": False,
-                "subscription_plan": None,
-                "menu_items_count": 0,
+
+    def _is_valid_uuid(self, uuid_string: str) -> bool:
+        """Check if string is a valid UUID format"""
+        import re
+        uuid_pattern = re.compile(
+            r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$',
+            re.IGNORECASE
+        )
+        return bool(uuid_pattern.match(str(uuid_string)))
+
+    def _get_usage_from_supabase(self, user_id: str) -> Dict[str, Any]:
+        """Get usage data from Supabase user_profiles table"""
+        if not self.supabase_client or not self._is_valid_uuid(user_id):
+            return {
                 "image_generation_count": 0,
                 "image_enhancement_count": 0,
-                "last_reset": now
+                "menu_items_count": 0,
+                "usage_reset_date": None
             }
-            self.save_data()
-        
+
+        try:
+            result = self.supabase_client.table('user_profiles').select(
+                'image_generation_count, image_enhancement_count, menu_items_count, '
+                'usage_reset_date, trial_start_date, trial_end_date'
+            ).eq('user_id', user_id).limit(1).execute()
+
+            if result.data and len(result.data) > 0:
+                data = result.data[0]
+
+                # Check if we need to reset monthly counts (first of the month)
+                usage_reset_date = data.get('usage_reset_date')
+                now = datetime.now()
+
+                # Reset counts if it's a new month
+                if usage_reset_date:
+                    if isinstance(usage_reset_date, str):
+                        usage_reset_date = datetime.fromisoformat(usage_reset_date.replace('Z', '+00:00'))
+
+                    # Check if we're in a new month
+                    if usage_reset_date.month != now.month or usage_reset_date.year != now.year:
+                        # Reset monthly counts
+                        self._reset_monthly_counts(user_id)
+                        return {
+                            "image_generation_count": 0,
+                            "image_enhancement_count": 0,
+                            "menu_items_count": data.get('menu_items_count', 0),  # Don't reset menu items
+                            "usage_reset_date": now.isoformat(),
+                            "trial_start_date": data.get('trial_start_date'),
+                            "trial_end_date": data.get('trial_end_date')
+                        }
+
+                return {
+                    "image_generation_count": data.get('image_generation_count', 0) or 0,
+                    "image_enhancement_count": data.get('image_enhancement_count', 0) or 0,
+                    "menu_items_count": data.get('menu_items_count', 0) or 0,
+                    "usage_reset_date": usage_reset_date,
+                    "trial_start_date": data.get('trial_start_date'),
+                    "trial_end_date": data.get('trial_end_date')
+                }
+        except Exception as e:
+            print(f"❌ TrialLimits: Failed to get usage from Supabase: {e}")
+
+        return {
+            "image_generation_count": 0,
+            "image_enhancement_count": 0,
+            "menu_items_count": 0,
+            "usage_reset_date": None
+        }
+
+    def _reset_monthly_counts(self, user_id: str):
+        """Reset monthly usage counts (AI generation/enhancement)"""
+        if not self.supabase_client or not self._is_valid_uuid(user_id):
+            return
+
+        try:
+            self.supabase_client.table('user_profiles').update({
+                'image_generation_count': 0,
+                'image_enhancement_count': 0,
+                'usage_reset_date': datetime.now().isoformat()
+            }).eq('user_id', user_id).execute()
+            print(f"✅ TrialLimits: Reset monthly counts for user {user_id}")
+        except Exception as e:
+            print(f"❌ TrialLimits: Failed to reset monthly counts: {e}")
+
+    def _update_usage_in_supabase(self, user_id: str, field: str, increment: int = 1) -> bool:
+        """Update usage count in Supabase"""
+        if not self.supabase_client or not self._is_valid_uuid(user_id):
+            print(f"⚠️ TrialLimits: Cannot update usage - invalid user_id: {user_id}")
+            return False
+
+        try:
+            # First get current value
+            result = self.supabase_client.table('user_profiles').select(field).eq('user_id', user_id).limit(1).execute()
+
+            if result.data and len(result.data) > 0:
+                current_value = result.data[0].get(field, 0) or 0
+                new_value = current_value + increment
+
+                # Update the value
+                self.supabase_client.table('user_profiles').update({
+                    field: new_value,
+                    'updated_at': datetime.now().isoformat()
+                }).eq('user_id', user_id).execute()
+
+                print(f"✅ TrialLimits: Updated {field} for user {user_id}: {current_value} → {new_value}")
+                return True
+            else:
+                # User profile doesn't exist, create it with initial count
+                print(f"⚠️ TrialLimits: User profile not found for {user_id}, creating...")
+                self.supabase_client.table('user_profiles').insert({
+                    'user_id': user_id,
+                    field: increment,
+                    'role': 'free_trial',
+                    'trial_start_date': datetime.now().isoformat(),
+                    'trial_end_date': (datetime.now() + timedelta(days=self.TRIAL_DURATION_DAYS)).isoformat(),
+                    'usage_reset_date': datetime.now().isoformat()
+                }).execute()
+                return True
+
+        except Exception as e:
+            print(f"❌ TrialLimits: Failed to update usage in Supabase: {e}")
+            import traceback
+            traceback.print_exc()
+            return False
+
+    def initialize_user(self, user_id: str) -> Dict[str, Any]:
+        """
+        Initialize or ensure user exists in database
+
+        Args:
+            user_id: User ID
+
+        Returns:
+            User status dictionary
+        """
+        if not self.supabase_client or not self._is_valid_uuid(user_id):
+            return self.get_user_status(user_id)
+
+        try:
+            # Check if user profile exists
+            result = self.supabase_client.table('user_profiles').select('user_id').eq('user_id', user_id).limit(1).execute()
+
+            if not result.data or len(result.data) == 0:
+                # Create user profile with trial
+                now = datetime.now()
+                trial_end = now + timedelta(days=self.TRIAL_DURATION_DAYS)
+
+                self.supabase_client.table('user_profiles').insert({
+                    'user_id': user_id,
+                    'role': 'free_trial',
+                    'trial_start_date': now.isoformat(),
+                    'trial_end_date': trial_end.isoformat(),
+                    'image_generation_count': 0,
+                    'image_enhancement_count': 0,
+                    'menu_items_count': 0,
+                    'usage_reset_date': now.isoformat()
+                }).execute()
+                print(f"✅ TrialLimits: Initialized new user {user_id}")
+        except Exception as e:
+            print(f"❌ TrialLimits: Failed to initialize user: {e}")
+
         return self.get_user_status(user_id)
-    
+
     def get_user_status(self, user_id: str, user_role: str = None) -> Dict[str, Any]:
         """
         ดึงสถานะ trial ของ user
@@ -165,7 +260,7 @@ class TrialLimitsService:
         # ⚡ OPTIMIZED: Use passed role if available, otherwise fetch
         if user_role is None:
             user_role = user_role_service.get_user_role(user_id)
-        
+
         # Map role to subscription plan
         role_to_plan = {
             'free_trial': None,
@@ -174,56 +269,63 @@ class TrialLimitsService:
             'enterprise': 'enterprise',
             'admin': 'enterprise'  # Admin gets enterprise features
         }
-        
+
         plan_from_role = role_to_plan.get(user_role)
         is_subscribed = plan_from_role is not None
-        
-        # Initialize if not exists
-        if user_id not in self.usage_data:
-            self.initialize_user(user_id)
-        
-        user_data = self.usage_data[user_id]
+
+        # Get usage data from Supabase
+        usage_data = self._get_usage_from_supabase(user_id)
+
         now = datetime.now()
-        
+
         # Check if trial expired
-        trial_end = user_data.get('trial_end_date')
+        trial_end = usage_data.get('trial_end_date')
         if trial_end and isinstance(trial_end, str):
-            trial_end = datetime.fromisoformat(trial_end)
-        
+            try:
+                trial_end = datetime.fromisoformat(trial_end.replace('Z', '+00:00'))
+            except:
+                trial_end = None
+
         is_trial_active = (
             user_role == 'free_trial' and
             trial_end and
             now < trial_end
         )
-        
-        # Override subscription status based on role
-        if is_subscribed:
-            user_data['is_subscribed'] = True
-            user_data['subscription_plan'] = plan_from_role
-        
+
+        # Calculate trial days remaining
+        trial_days_remaining = 0
+        if trial_end and now < trial_end:
+            trial_days_remaining = (trial_end - now).days
+
+        # Build user_data dict for _get_limits_for_user
+        user_data = {
+            'is_subscribed': is_subscribed,
+            'subscription_plan': plan_from_role
+        }
+
         return {
             "user_id": user_id,
-            "role": user_role,  # Include role in response
+            "role": user_role,
             "is_subscribed": is_subscribed,
             "subscription_plan": plan_from_role,
             "is_trial_active": is_trial_active,
-            "trial_start_date": user_data.get('trial_start_date'),
-            "trial_end_date": user_data.get('trial_end_date'),
-            "trial_days_remaining": (trial_end - now).days if trial_end and now < trial_end else 0,
-            "menu_items_count": user_data.get('menu_items_count', 0),
-            "image_generation_count": user_data.get('image_generation_count', 0),
-            "image_enhancement_count": user_data.get('image_enhancement_count', 0),
+            "trial_start_date": usage_data.get('trial_start_date'),
+            "trial_end_date": usage_data.get('trial_end_date'),
+            "trial_days_remaining": trial_days_remaining,
+            "menu_items_count": usage_data.get('menu_items_count', 0),
+            "image_generation_count": usage_data.get('image_generation_count', 0),
+            "image_enhancement_count": usage_data.get('image_enhancement_count', 0),
             "limits": self._get_limits_for_user(user_data)
         }
-    
+
     def check_limit(self, user_id: str, action: str) -> Dict[str, Any]:
         """
         ตรวจสอบว่ายังสามารถใช้งานได้หรือไม่
-        
+
         Args:
             user_id: User ID
             action: 'menu_items', 'image_generation', หรือ 'image_enhancement'
-            
+
         Returns:
             Dictionary with:
             - allowed: bool
@@ -235,13 +337,13 @@ class TrialLimitsService:
         if user_role_service.is_admin(user_id):
             return {
                 "allowed": True,
-                "remaining": 999999,  # Use large number instead of inf for JSON compatibility
+                "remaining": 999999,
                 "limit": 999999,
                 "message": "Unlimited access (Admin)"
             }
-        
+
         status = self.get_user_status(user_id)
-        
+
         # Subscribed users have limits based on their plan
         if status['is_subscribed']:
             plan = status.get('subscription_plan', 'starter')
@@ -253,11 +355,11 @@ class TrialLimitsService:
             }
             plan = plan_mapping.get(plan, plan)
             plan_limits = self.SUBSCRIPTION_LIMITS.get(plan, self.SUBSCRIPTION_LIMITS['starter'])
-            
+
             limit = plan_limits.get(action, 0)
             count_key = f"{action}_count"
             count = status.get(count_key, 0)
-            
+
             # Check if feature is not available in plan (limit = 0)
             if limit == 0:
                 action_name = {
@@ -265,139 +367,160 @@ class TrialLimitsService:
                     'image_generation': 'Image Generation',
                     'image_enhancement': 'Image Enhancement',
                 }.get(action, action)
-                
+
                 return {
                     "allowed": False,
                     "remaining": 0,
                     "limit": 0,
                     "message": f"{action_name} is not available in {plan.title()} plan. Please upgrade to Professional or Enterprise plan."
                 }
-            
-            # Check if limit is unlimited (represented as -1 or very large number)
+
+            # Check if limit is unlimited
             if limit == float('inf') or limit == -1 or limit >= 999999:
                 return {
                     "allowed": True,
-                    "remaining": 999999,  # Use large number instead of inf for JSON compatibility
+                    "remaining": 999999,
                     "limit": 999999,
                     "message": f"Unlimited access (Plan: {plan.title()})"
                 }
-            
+
             remaining = max(0, limit - count)
             allowed = remaining > 0
-            
+
             if not allowed:
                 action_name = {
                     'menu_items': 'Menu Items',
                     'image_generation': 'Image Generation',
                     'image_enhancement': 'Image Enhancement',
                 }.get(action, action)
-                
+
                 return {
                     "allowed": False,
                     "remaining": 0,
                     "limit": limit,
                     "message": f"Plan limit reached for {action_name}. You've used {limit}/{limit} this month. Please upgrade your plan to continue."
                 }
-            
+
             return {
                 "allowed": True,
                 "remaining": remaining,
                 "limit": limit,
-                "message": f"{remaining} {action} remaining this month (Plan: {plan.title()})"
+                "message": f"OK. {remaining}/{limit} remaining this month."
             }
-        
-        # Check if trial is active
-        if not status['is_trial_active']:
-            return {
-                "allowed": False,
-                "remaining": 0,
-                "limit": 0,
-                "message": "Trial expired. Please subscribe to continue."
+
+        # Free trial users
+        if status['is_trial_active']:
+            trial_limits = {
+                'menu_items': self.TRIAL_MENU_ITEMS_LIMIT,
+                'image_generation': self.TRIAL_IMAGE_GENERATION_LIMIT,
+                'image_enhancement': self.TRIAL_IMAGE_ENHANCEMENT_LIMIT
             }
-        
-        # Get current count and limit
-        count_key = f"{action}_count"
-        count = status.get(count_key, 0)
-        limit = status['limits'].get(action, 0)
-        
-        remaining = max(0, limit - count)
-        allowed = remaining > 0
-        
-        if not allowed:
-            action_name = {
-                'menu_items': 'Menu Items',
-                'image_generation': 'Image Generation',
-                'image_enhancement': 'Image Enhancement',
-            }.get(action, action)
-            
+
+            limit = trial_limits.get(action, 0)
+            count_key = f"{action}_count"
+            count = status.get(count_key, 0)
+            remaining = max(0, limit - count)
+            allowed = remaining > 0
+
+            if not allowed:
+                action_name = {
+                    'menu_items': 'Menu Items',
+                    'image_generation': 'Image Generation',
+                    'image_enhancement': 'Image Enhancement',
+                }.get(action, action)
+
+                return {
+                    "allowed": False,
+                    "remaining": 0,
+                    "limit": limit,
+                    "message": f"Trial limit reached for {action_name}. Upgrade to continue using this feature."
+                }
+
             return {
-                "allowed": False,
-                "remaining": 0,
+                "allowed": True,
+                "remaining": remaining,
                 "limit": limit,
-                "message": f"Trial limit reached for {action_name}. You've used {limit}/{limit}. Please subscribe to continue."
+                "message": f"Trial: {remaining}/{limit} remaining"
             }
-        
+
+        # Trial expired
         return {
-            "allowed": True,
-            "remaining": remaining,
-            "limit": limit,
-            "message": f"{remaining} {action} remaining in trial"
+            "allowed": False,
+            "remaining": 0,
+            "limit": 0,
+            "message": "Your trial has expired. Please subscribe to continue."
         }
-    
+
     def increment_usage(self, user_id: str, action: str) -> Dict[str, Any]:
         """
-        เพิ่มจำนวนการใช้งาน
-        
+        เพิ่มจำนวนการใช้งาน - Now saves to Supabase
+
         Args:
             user_id: User ID
             action: 'menu_items', 'image_generation', หรือ 'image_enhancement'
-            
+
         Returns:
             Updated user status
         """
-        # Initialize if not exists
-        if user_id not in self.usage_data:
-            self.initialize_user(user_id)
-        
-        count_key = f"{action}_count"
-        self.usage_data[user_id][count_key] = self.usage_data[user_id].get(count_key, 0) + 1
-        self.save_data()
-        
+        field_mapping = {
+            'menu_items': 'menu_items_count',
+            'image_generation': 'image_generation_count',
+            'image_enhancement': 'image_enhancement_count'
+        }
+
+        field = field_mapping.get(action)
+        if field:
+            self._update_usage_in_supabase(user_id, field, 1)
+
         return self.get_user_status(user_id)
-    
+
     def set_subscription(self, user_id: str, plan: str, is_subscribed: bool = True):
         """
-        ตั้งค่าสถานะ subscription
-        
+        ตั้งค่าสถานะ subscription - Updates in Supabase via user_role_service
+
         Args:
             user_id: User ID
             plan: Subscription plan name
             is_subscribed: Whether user is subscribed
         """
-        if user_id not in self.usage_data:
-            self.initialize_user(user_id)
-        
-        self.usage_data[user_id]['is_subscribed'] = is_subscribed
-        self.usage_data[user_id]['subscription_plan'] = plan if is_subscribed else None
-        self.save_data()
-    
+        # This is now handled by Stripe webhooks and user_role_service
+        # Keeping this method for backward compatibility
+        pass
+
     def reset_trial(self, user_id: str):
         """
         Reset trial สำหรับ user (สำหรับ admin/testing)
-        
+
         Args:
             user_id: User ID
         """
-        self.initialize_user(user_id)
-        self.save_data()
-    
+        if not self.supabase_client or not self._is_valid_uuid(user_id):
+            return
+
+        try:
+            now = datetime.now()
+            trial_end = now + timedelta(days=self.TRIAL_DURATION_DAYS)
+
+            self.supabase_client.table('user_profiles').update({
+                'role': 'free_trial',
+                'trial_start_date': now.isoformat(),
+                'trial_end_date': trial_end.isoformat(),
+                'image_generation_count': 0,
+                'image_enhancement_count': 0,
+                'menu_items_count': 0,
+                'usage_reset_date': now.isoformat()
+            }).eq('user_id', user_id).execute()
+            print(f"✅ TrialLimits: Reset trial for user {user_id}")
+        except Exception as e:
+            print(f"❌ TrialLimits: Failed to reset trial: {e}")
+
     def _get_limits_for_user(self, user_data: Dict[str, Any]) -> Dict[str, Any]:
         """
         ดึง limits ตาม subscription plan
-        
+
         Args:
             user_data: User data dictionary
-            
+
         Returns:
             Dictionary with limits for each action
         """
