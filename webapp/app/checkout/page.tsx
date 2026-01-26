@@ -54,13 +54,13 @@ function CheckoutContent() {
 
   // Calculate prices
   const monthlyPrice = plan.price;
-  const yearlyPrice = Math.round(plan.price * 12 * 0.8); // 20% discount
+  const yearlyPrice = Math.round(plan.price * 12 * 0.9); // 10% discount
   const yearlyMonthlyEquivalent = Math.round(yearlyPrice / 12);
 
   const basePrice = billingInterval === 'yearly' ? yearlyPrice : monthlyPrice;
   const discountAmount = appliedCoupon?.discount_amount || 0;
   const finalPrice = Math.max(0, basePrice - discountAmount);
-  const savings = billingInterval === 'yearly' ? Math.round(plan.price * 12 * 0.2) : 0;
+  const savings = billingInterval === 'yearly' ? Math.round(plan.price * 12 * 0.1) : 0;
 
   useEffect(() => {
     const checkUser = async () => {
@@ -301,7 +301,7 @@ function CheckoutContent() {
                   }`}
                 >
                   <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                    SAVE 20%
+                    SAVE 10%
                   </span>
                   <p className="font-semibold text-gray-900">Yearly</p>
                   <p className="text-2xl font-bold text-gray-900 mt-1">

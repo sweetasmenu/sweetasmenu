@@ -1280,7 +1280,7 @@ class AdminService:
                     interval = user.get('billing_interval', 'monthly')
                     price = plan_prices.get(plan, 0)
                     if interval == 'yearly':
-                        mrr += price * 0.8 / 12  # Assume 20% yearly discount
+                        mrr += price * 0.9 / 12  # Assume 10% yearly discount
                     else:
                         mrr += price
 

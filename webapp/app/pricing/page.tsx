@@ -144,7 +144,7 @@ export default function PricingPage() {
             >
               Yearly
               <span className="text-xs bg-green-500 text-white px-2 py-0.5 rounded-full">
-                Save 20%
+                Save 10%
               </span>
             </button>
           </div>
@@ -154,7 +154,7 @@ export default function PricingPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto mb-20">
           {SUBSCRIPTION_PLANS.map((plan) => {
             const colors = getColorClasses(plan.color);
-            const displayPrice = interval === 'year' ? Math.round(plan.price * 0.8) : plan.price;
+            const displayPrice = interval === 'year' ? Math.round(plan.price * 0.9) : plan.price;
 
             return (
               <div

@@ -25,7 +25,7 @@ Go to **Products** in Stripe Dashboard and create 3 products:
 3. Description: `Perfect for small takeaway shops`
 4. Add 2 prices:
    - **Monthly**: $39 NZD, Recurring, Monthly
-   - **Yearly**: $374.40 NZD, Recurring, Yearly (20% discount)
+   - **Yearly**: $421.20 NZD, Recurring, Yearly (10% discount)
 
 ### Product 2: Professional Plan
 
@@ -34,7 +34,7 @@ Go to **Products** in Stripe Dashboard and create 3 products:
 3. Description: `Most Popular - Casual dining restaurants`
 4. Add 2 prices:
    - **Monthly**: $89 NZD, Recurring, Monthly
-   - **Yearly**: $854.40 NZD, Recurring, Yearly (20% discount)
+   - **Yearly**: $961.20 NZD, Recurring, Yearly (10% discount)
 
 ### Product 3: Enterprise Plan
 
@@ -43,7 +43,7 @@ Go to **Products** in Stripe Dashboard and create 3 products:
 3. Description: `Fine dining & Restaurant chains`
 4. Add 2 prices:
    - **Monthly**: $199 NZD, Recurring, Monthly
-   - **Yearly**: $1,910.40 NZD, Recurring, Yearly (20% discount)
+   - **Yearly**: $2,149.20 NZD, Recurring, Yearly (10% discount)
 
 ### Getting Price IDs
 
