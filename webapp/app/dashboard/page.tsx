@@ -365,6 +365,13 @@ export default function DashboardPage() {
   };
 
   const handleSignOut = async () => {
+    // Clear user-specific localStorage to prevent data leaking to other users
+    if (currentUserId) {
+      localStorage.removeItem(`selected_restaurant_${currentUserId}`);
+    }
+    // Also clean up any legacy keys
+    localStorage.removeItem('selected_restaurant_id');
+
     await signOut();
     router.push('/login');
   };

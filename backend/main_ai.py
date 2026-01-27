@@ -2862,8 +2862,16 @@ async def get_user_profile(
         restaurant = None
         if is_valid_uuid:
             if restaurant_id:
-                restaurant = restaurant_service.get_restaurant_by_id(restaurant_id)
-            else:
+                # SECURITY: Validate that the restaurant belongs to this user
+                candidate_restaurant = restaurant_service.get_restaurant_by_id(restaurant_id)
+                if candidate_restaurant and candidate_restaurant.get('user_id') == user_id:
+                    restaurant = candidate_restaurant
+                else:
+                    # Restaurant doesn't exist or belongs to different user - ignore the restaurant_id
+                    print(f"⚠️ Restaurant {restaurant_id} does not belong to user {user_id}, ignoring")
+                    restaurant = None
+
+            if not restaurant:
                 # Get active restaurant first, or fallback to first restaurant
                 all_restaurants = restaurant_service.get_all_restaurants_by_user_id(user_id)
                 if all_restaurants:
