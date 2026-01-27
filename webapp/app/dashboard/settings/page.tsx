@@ -637,11 +637,12 @@ function SettingsContent() {
         // Redirect to Stripe onboarding
         window.location.href = data.onboarding_url;
       } else {
-        alert('ไม่สามารถเชื่อมต่อ Stripe ได้ กรุณาลองใหม่อีกครั้ง');
+        const errorMsg = data.detail || data.message || 'Failed to connect Stripe. Please try again.';
+        alert(errorMsg);
       }
     } catch (error) {
       console.error('Failed to connect Stripe:', error);
-      alert('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
+      alert('An error occurred. Please try again.');
     } finally {
       setConnectingStripe(false);
     }
@@ -656,11 +657,12 @@ function SettingsContent() {
       if (data.success && data.dashboard_url) {
         window.open(data.dashboard_url, '_blank');
       } else {
-        alert('ไม่สามารถเปิด Stripe Dashboard ได้');
+        const errorMsg = data.detail || data.message || 'Failed to open Stripe Dashboard';
+        alert(errorMsg);
       }
     } catch (error) {
       console.error('Failed to get Stripe dashboard link:', error);
-      alert('เกิดข้อผิดพลาด');
+      alert('An error occurred');
     }
   };
 

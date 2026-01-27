@@ -1903,12 +1903,12 @@ async def get_stripe_connect_status(restaurant_id: str):
 @app.post("/api/stripe/connect/onboarding-link/{restaurant_id}", summary="Get Stripe Connect Onboarding Link")
 async def get_stripe_onboarding_link(restaurant_id: str):
     """
-    สร้าง Onboarding Link สำหรับร้านอาหารที่ต้องการเชื่อมต่อ Stripe
+    Create Onboarding Link for restaurant to connect Stripe
     """
     try:
-        # Get restaurant's stripe_account_id
+        # Get restaurant's stripe_account_id and user_id
         result = supabase_client.table('restaurants').select(
-            'stripe_account_id, name, email'
+            'stripe_account_id, name, email, user_id'
         ).eq('id', restaurant_id).limit(1).execute()
 
         if not result.data:
@@ -1916,13 +1916,26 @@ async def get_stripe_onboarding_link(restaurant_id: str):
 
         restaurant = result.data[0]
 
+        # Get email - try restaurant email first, then user's email
+        email = restaurant.get('email', '').strip()
+        if not email and restaurant.get('user_id'):
+            # Get user's email from user_profiles
+            user_result = supabase_client.table('user_profiles').select(
+                'email'
+            ).eq('user_id', restaurant['user_id']).limit(1).execute()
+            if user_result.data:
+                email = user_result.data[0].get('email', '')
+
+        if not email:
+            raise HTTPException(status_code=400, detail="Please add an email address to your restaurant settings before connecting Stripe")
+
         # If no account exists, create one first
         if not restaurant.get('stripe_account_id'):
             # Create new account
             account_result = stripe_service.create_connected_account(
                 restaurant_id=restaurant_id,
                 restaurant_name=restaurant.get('name', 'Restaurant'),
-                email=restaurant.get('email', ''),
+                email=email,
                 country='NZ'
             )
 
