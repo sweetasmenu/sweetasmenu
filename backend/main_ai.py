@@ -1743,7 +1743,7 @@ async def verify_session(request: VerifySessionRequest):
             }
 
             # Update in Supabase
-            supabase_client.table('user_profiles').update(update_data).eq('user_id', request.user_id).execute()
+            user_role_service.supabase_client.table('user_profiles').update(update_data).eq('user_id', request.user_id).execute()
 
             print(f"Updated user {request.user_id} to {new_role} plan ({plan_id}, {interval})")
 
@@ -1761,7 +1761,7 @@ async def verify_session(request: VerifySessionRequest):
                     'stripe_payment_id': request.session_id,
                     'stripe_subscription_id': result.get('subscription_id'),
                 }
-                supabase_client.table('payment_logs').insert(payment_log).execute()
+                restaurant_service.supabase_client.table('payment_logs').insert(payment_log).execute()
             except Exception as log_error:
                 print(f"Failed to log payment: {log_error}")
 
@@ -1834,7 +1834,7 @@ async def create_stripe_connect_account(request: StripeConnectRequest):
 
         # Save account_id to restaurant in database
         try:
-            supabase_client.table('restaurants').update({
+            restaurant_service.supabase_client.table('restaurants').update({
                 'stripe_account_id': result['account_id'],
                 'stripe_account_status': 'pending'
             }).eq('id', request.restaurant_id).execute()
@@ -1860,7 +1860,7 @@ async def get_stripe_connect_status(restaurant_id: str):
     """
     try:
         # Get restaurant's stripe_account_id from database
-        result = supabase_client.table('restaurants').select(
+        result = restaurant_service.supabase_client.table('restaurants').select(
             'stripe_account_id, stripe_account_status'
         ).eq('id', restaurant_id).limit(1).execute()
 
@@ -1880,7 +1880,7 @@ async def get_stripe_connect_status(restaurant_id: str):
         # Update status in database if changed
         if account_status['status'] != result.data[0].get('stripe_account_status'):
             try:
-                supabase_client.table('restaurants').update({
+                restaurant_service.supabase_client.table('restaurants').update({
                     'stripe_account_status': account_status['status']
                 }).eq('id', restaurant_id).execute()
             except Exception as db_error:
@@ -1907,7 +1907,7 @@ async def get_stripe_onboarding_link(restaurant_id: str):
     """
     try:
         # Get restaurant's stripe_account_id and user_id
-        result = supabase_client.table('restaurants').select(
+        result = restaurant_service.supabase_client.table('restaurants').select(
             'stripe_account_id, name, email, user_id'
         ).eq('id', restaurant_id).limit(1).execute()
 
@@ -1920,7 +1920,7 @@ async def get_stripe_onboarding_link(restaurant_id: str):
         email = restaurant.get('email', '').strip()
         if not email and restaurant.get('user_id'):
             # Get user's email from user_profiles
-            user_result = supabase_client.table('user_profiles').select(
+            user_result = restaurant_service.supabase_client.table('user_profiles').select(
                 'email'
             ).eq('user_id', restaurant['user_id']).limit(1).execute()
             if user_result.data:
@@ -1940,7 +1940,7 @@ async def get_stripe_onboarding_link(restaurant_id: str):
             )
 
             # Save to database
-            supabase_client.table('restaurants').update({
+            restaurant_service.supabase_client.table('restaurants').update({
                 'stripe_account_id': account_result['account_id'],
                 'stripe_account_status': 'pending'
             }).eq('id', restaurant_id).execute()
@@ -1970,7 +1970,7 @@ async def get_stripe_dashboard_link(restaurant_id: str):
     """
     try:
         # Get restaurant's stripe_account_id
-        result = supabase_client.table('restaurants').select(
+        result = restaurant_service.supabase_client.table('restaurants').select(
             'stripe_account_id'
         ).eq('id', restaurant_id).limit(1).execute()
 
