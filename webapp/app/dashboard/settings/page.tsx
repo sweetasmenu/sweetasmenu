@@ -865,7 +865,7 @@ function SettingsContent() {
   };
 
   const handleDeleteStaff = async (staffId: string) => {
-    if (!confirm('คุณแน่ใจหรือไม่ที่จะลบพนักงานคนนี้?')) return;
+    if (!confirm('Are you sure you want to delete this staff member?')) return;
     if (!profile?.restaurant?.restaurant_id) return;
 
     try {
@@ -878,7 +878,7 @@ function SettingsContent() {
 
       const data = await response.json();
       if (data.success) {
-        alert('ลบพนักงานเรียบร้อย!');
+        alert('Staff member deleted successfully!');
         loadStaff(profile.restaurant.restaurant_id);
       }
     } catch (error) {
