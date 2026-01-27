@@ -1,8 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Upload, FileText, Settings, Receipt, LayoutDashboard } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { Upload, FileText, Settings, Receipt, LayoutDashboard, LogOut } from 'lucide-react';
+import { signOut } from '@/lib/supabase/auth';
 
 interface TabItem {
   href: string;
@@ -40,6 +41,21 @@ const tabs: TabItem[] = [
 
 export default function TabBar() {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    // Clear user-specific localStorage to prevent data leaking
+    const keys = Object.keys(localStorage);
+    keys.forEach(key => {
+      if (key.startsWith('selected_restaurant_')) {
+        localStorage.removeItem(key);
+      }
+    });
+    localStorage.removeItem('selected_restaurant_id');
+
+    await signOut();
+    router.push('/login');
+  };
 
   // Don't show tab bar on login or public pages
   const hiddenPaths = [
@@ -104,6 +120,14 @@ export default function TabBar() {
             </Link>
           );
         })}
+        {/* Sign Out Button */}
+        <button
+          onClick={handleSignOut}
+          className="flex flex-col items-center justify-center flex-1 h-full py-2 transition-colors text-red-500 hover:text-red-600"
+        >
+          <LogOut className="w-6 h-6" />
+          <span className="text-sm mt-1 font-bold">Sign Out</span>
+        </button>
       </nav>
     </div>
   );
