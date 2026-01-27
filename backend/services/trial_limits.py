@@ -11,8 +11,21 @@ from datetime import datetime, timedelta
 from collections import defaultdict
 import json
 import os
+import re
 from pathlib import Path
 from .user_role_service import user_role_service
+
+# Import Supabase client for persistent storage
+try:
+    from supabase import create_client, Client
+    SUPABASE_URL = os.getenv("SUPABASE_URL")
+    SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY") or os.getenv("SUPABASE_KEY")
+    _supabase_client: Optional[Client] = None
+    if SUPABASE_URL and SUPABASE_KEY:
+        _supabase_client = create_client(SUPABASE_URL, SUPABASE_KEY)
+except Exception as e:
+    print(f"⚠️ TrialLimits: Supabase not available, using JSON file only: {e}")
+    _supabase_client = None
 
 class TrialLimitsService:
     """
@@ -121,7 +134,46 @@ class TrialLimitsService:
                 json.dump(data_to_save, f, indent=2, ensure_ascii=False)
         except Exception as e:
             print(f"⚠️ Failed to save trial usage data: {str(e)}")
-    
+
+    def _is_valid_uuid(self, uuid_string: str) -> bool:
+        """Check if string is a valid UUID format"""
+        uuid_pattern = re.compile(
+            r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$',
+            re.IGNORECASE
+        )
+        return bool(uuid_pattern.match(str(uuid_string)))
+
+    def _update_supabase_count(self, user_id: str, field: str, new_value: int):
+        """Update usage count in Supabase user_profiles table"""
+        if not _supabase_client or not self._is_valid_uuid(user_id):
+            return
+        try:
+            _supabase_client.table('user_profiles').update({
+                field: new_value
+            }).eq('user_id', user_id).execute()
+            print(f"✅ TrialLimits: Updated {field}={new_value} for user {user_id[:8]}...")
+        except Exception as e:
+            print(f"⚠️ TrialLimits: Failed to update Supabase: {e}")
+
+    def _get_supabase_counts(self, user_id: str) -> Optional[Dict[str, int]]:
+        """Get usage counts from Supabase user_profiles table"""
+        if not _supabase_client or not self._is_valid_uuid(user_id):
+            return None
+        try:
+            result = _supabase_client.table('user_profiles').select(
+                'image_generation_count, image_enhancement_count, menu_items_count'
+            ).eq('user_id', user_id).limit(1).execute()
+            if result.data and len(result.data) > 0:
+                data = result.data[0]
+                return {
+                    'image_generation_count': data.get('image_generation_count') or 0,
+                    'image_enhancement_count': data.get('image_enhancement_count') or 0,
+                    'menu_items_count': data.get('menu_items_count') or 0
+                }
+        except Exception as e:
+            print(f"⚠️ TrialLimits: Failed to get Supabase counts: {e}")
+        return None
+
     def initialize_user(self, user_id: str) -> Dict[str, Any]:
         """
         เริ่มต้น trial สำหรับ user ใหม่
@@ -200,7 +252,19 @@ class TrialLimitsService:
         if is_subscribed:
             user_data['is_subscribed'] = True
             user_data['subscription_plan'] = plan_from_role
-        
+
+        # Try to get counts from Supabase first (persistent storage)
+        supabase_counts = self._get_supabase_counts(user_id)
+        if supabase_counts:
+            menu_items_count = supabase_counts['menu_items_count']
+            image_generation_count = supabase_counts['image_generation_count']
+            image_enhancement_count = supabase_counts['image_enhancement_count']
+        else:
+            # Fallback to local data
+            menu_items_count = user_data.get('menu_items_count', 0)
+            image_generation_count = user_data.get('image_generation_count', 0)
+            image_enhancement_count = user_data.get('image_enhancement_count', 0)
+
         return {
             "user_id": user_id,
             "role": user_role,  # Include role in response
@@ -210,9 +274,9 @@ class TrialLimitsService:
             "trial_start_date": user_data.get('trial_start_date'),
             "trial_end_date": user_data.get('trial_end_date'),
             "trial_days_remaining": (trial_end - now).days if trial_end and now < trial_end else 0,
-            "menu_items_count": user_data.get('menu_items_count', 0),
-            "image_generation_count": user_data.get('image_generation_count', 0),
-            "image_enhancement_count": user_data.get('image_enhancement_count', 0),
+            "menu_items_count": menu_items_count,
+            "image_generation_count": image_generation_count,
+            "image_enhancement_count": image_enhancement_count,
             "limits": self._get_limits_for_user(user_data)
         }
     
@@ -358,13 +422,17 @@ class TrialLimitsService:
         # Initialize if not exists
         if user_id not in self.usage_data:
             self.initialize_user(user_id)
-        
+
         count_key = f"{action}_count"
-        self.usage_data[user_id][count_key] = self.usage_data[user_id].get(count_key, 0) + 1
+        new_count = self.usage_data[user_id].get(count_key, 0) + 1
+        self.usage_data[user_id][count_key] = new_count
         self.save_data()
-        
+
+        # Also update Supabase for persistent storage
+        self._update_supabase_count(user_id, count_key, new_count)
+
         return self.get_user_status(user_id)
-    
+
     def set_subscription(self, user_id: str, plan: str, is_subscribed: bool = True):
         """
         ตั้งค่าสถานะ subscription
