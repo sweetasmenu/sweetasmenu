@@ -2769,19 +2769,19 @@ function SettingsContent() {
                   {loadingStripeConnect ? (
                     <div className="p-3 bg-gray-50 rounded-lg flex items-center gap-2">
                       <Loader2 className="w-4 h-4 animate-spin text-gray-500" />
-                      <span className="text-sm text-gray-600">กำลังโหลดสถานะ Stripe...</span>
+                      <span className="text-sm text-gray-600">Loading Stripe status...</span>
                     </div>
                   ) : stripeConnectStatus.status === 'active' ? (
                     // Connected and active
                     <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
                       <div className="flex items-center gap-2 mb-2">
                         <CheckCircle className="w-5 h-5 text-green-600" />
-                        <span className="font-semibold text-green-800">เชื่อมต่อ Stripe สำเร็จ</span>
+                        <span className="font-semibold text-green-800">Stripe Connected</span>
                       </div>
                       <p className="text-sm text-green-700 mb-3">
-                        ร้านของคุณพร้อมรับชำระเงินผ่านบัตรเครดิต/เดบิต แล้ว
+                        Your restaurant is ready to accept card payments.
                         {stripeConnectStatus.business_name && (
-                          <span className="block mt-1">ชื่อธุรกิจ: {stripeConnectStatus.business_name}</span>
+                          <span className="block mt-1">Business name: {stripeConnectStatus.business_name}</span>
                         )}
                       </p>
                       <button
@@ -2789,7 +2789,7 @@ function SettingsContent() {
                         className="flex items-center gap-2 text-sm text-green-700 hover:text-green-800 font-medium"
                       >
                         <ArrowUpRight className="w-4 h-4" />
-                        เปิด Stripe Dashboard
+                        Open Stripe Dashboard
                       </button>
                     </div>
                   ) : stripeConnectStatus.status === 'pending' || stripeConnectStatus.status === 'incomplete' ? (
@@ -2797,10 +2797,10 @@ function SettingsContent() {
                     <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                       <div className="flex items-center gap-2 mb-2">
                         <AlertCircle className="w-5 h-5 text-yellow-600" />
-                        <span className="font-semibold text-yellow-800">รอการตรวจสอบ</span>
+                        <span className="font-semibold text-yellow-800">Pending Verification</span>
                       </div>
                       <p className="text-sm text-yellow-700 mb-3">
-                        กรุณาดำเนินการให้ข้อมูลเพิ่มเติมกับ Stripe ให้เสร็จสมบูรณ์
+                        Please complete the Stripe onboarding process to start receiving payments.
                       </p>
                       <button
                         onClick={connectStripeAccount}
@@ -2812,7 +2812,7 @@ function SettingsContent() {
                         ) : (
                           <ArrowUpRight className="w-4 h-4" />
                         )}
-                        ดำเนินการต่อ
+                        Continue
                       </button>
                     </div>
                   ) : (
@@ -2820,10 +2820,10 @@ function SettingsContent() {
                     <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
                       <div className="flex items-center gap-2 mb-2">
                         <Building2 className="w-5 h-5 text-blue-600" />
-                        <span className="font-semibold text-blue-800">เชื่อมต่อบัญชี Stripe ของคุณ</span>
+                        <span className="font-semibold text-blue-800">Connect your Stripe account</span>
                       </div>
                       <p className="text-sm text-blue-700 mb-3">
-                        เชื่อมต่อบัญชี Stripe เพื่อรับเงินจากลูกค้าโดยตรง เงินจะเข้าบัญชีธนาคารของคุณอัตโนมัติ
+                        Connect your Stripe account to receive payments directly. Funds will be deposited to your bank automatically.
                       </p>
                       <button
                         onClick={connectStripeAccount}
@@ -2833,12 +2833,12 @@ function SettingsContent() {
                         {connectingStripe ? (
                           <>
                             <Loader2 className="w-4 h-4 animate-spin" />
-                            กำลังเชื่อมต่อ...
+                            Connecting...
                           </>
                         ) : (
                           <>
                             <ArrowUpRight className="w-4 h-4" />
-                            เชื่อมต่อ Stripe
+                            Connect Stripe
                           </>
                         )}
                       </button>
