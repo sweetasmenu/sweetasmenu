@@ -558,6 +558,261 @@ class StripeService:
         except Exception as e:
             raise Exception(f"Failed to construct webhook event: {str(e)}")
 
+    # =============================================
+    # Stripe Connect Methods (for restaurant payouts)
+    # =============================================
+
+    def create_connected_account(
+        self,
+        restaurant_id: str,
+        restaurant_name: str,
+        email: str,
+        country: str = 'NZ'
+    ) -> Dict[str, Any]:
+        """
+        Create a Stripe Connect Express account for a restaurant
+
+        Args:
+            restaurant_id: Restaurant ID for metadata
+            restaurant_name: Restaurant business name
+            email: Restaurant owner email
+            country: Country code (default: NZ for New Zealand)
+
+        Returns:
+            Dictionary with account_id
+        """
+        try:
+            if not self.api_key:
+                raise Exception("Stripe API key not configured")
+
+            account = stripe.Account.create(
+                type='express',
+                country=country,
+                email=email,
+                capabilities={
+                    'card_payments': {'requested': True},
+                    'transfers': {'requested': True},
+                },
+                business_type='company',
+                business_profile={
+                    'name': restaurant_name,
+                    'mcc': '5812',  # MCC code for restaurants
+                    'product_description': 'Restaurant food orders',
+                },
+                metadata={
+                    'restaurant_id': restaurant_id,
+                    'platform': 'sweetasmenu',
+                },
+            )
+
+            print(f"✅ Created Stripe Connect account: {account.id} for restaurant {restaurant_id}")
+
+            return {
+                'account_id': account.id,
+                'email': email,
+            }
+
+        except stripe.error.StripeError as e:
+            raise Exception(f"Stripe error: {str(e)}")
+        except Exception as e:
+            raise Exception(f"Failed to create connected account: {str(e)}")
+
+    def create_account_onboarding_link(
+        self,
+        account_id: str,
+        refresh_url: str = None,
+        return_url: str = None,
+    ) -> Dict[str, Any]:
+        """
+        Create an onboarding link for restaurant to complete Stripe Connect setup
+
+        Args:
+            account_id: Stripe Connect Account ID
+            refresh_url: URL to redirect if link expires
+            return_url: URL to redirect after completion
+
+        Returns:
+            Dictionary with onboarding_url
+        """
+        try:
+            if not self.api_key:
+                raise Exception("Stripe API key not configured")
+
+            frontend_url = os.getenv('FRONTEND_URL', 'http://localhost:3000')
+            if not refresh_url:
+                refresh_url = f"{frontend_url}/dashboard/settings?stripe_refresh=true"
+            if not return_url:
+                return_url = f"{frontend_url}/dashboard/settings?stripe_connected=true"
+
+            account_link = stripe.AccountLink.create(
+                account=account_id,
+                refresh_url=refresh_url,
+                return_url=return_url,
+                type='account_onboarding',
+            )
+
+            return {
+                'onboarding_url': account_link.url,
+                'expires_at': account_link.expires_at,
+            }
+
+        except stripe.error.StripeError as e:
+            raise Exception(f"Stripe error: {str(e)}")
+        except Exception as e:
+            raise Exception(f"Failed to create onboarding link: {str(e)}")
+
+    def get_connected_account_status(self, account_id: str) -> Dict[str, Any]:
+        """
+        Get the status of a Stripe Connect account
+
+        Args:
+            account_id: Stripe Connect Account ID
+
+        Returns:
+            Dictionary with account status details
+        """
+        try:
+            if not self.api_key:
+                raise Exception("Stripe API key not configured")
+
+            account = stripe.Account.retrieve(account_id)
+
+            # Check if account can receive payments
+            charges_enabled = account.charges_enabled
+            payouts_enabled = account.payouts_enabled
+            details_submitted = account.details_submitted
+
+            # Determine overall status
+            if charges_enabled and payouts_enabled:
+                status = 'active'
+            elif details_submitted:
+                status = 'pending'
+            else:
+                status = 'incomplete'
+
+            # Check for any requirements
+            requirements = account.requirements
+            pending_requirements = requirements.currently_due if requirements else []
+
+            return {
+                'account_id': account_id,
+                'status': status,
+                'charges_enabled': charges_enabled,
+                'payouts_enabled': payouts_enabled,
+                'details_submitted': details_submitted,
+                'business_name': account.business_profile.name if account.business_profile else None,
+                'email': account.email,
+                'pending_requirements': pending_requirements,
+            }
+
+        except stripe.error.StripeError as e:
+            raise Exception(f"Stripe error: {str(e)}")
+        except Exception as e:
+            raise Exception(f"Failed to get account status: {str(e)}")
+
+    def create_login_link(self, account_id: str) -> Dict[str, Any]:
+        """
+        Create a login link for the restaurant to access their Stripe Express dashboard
+
+        Args:
+            account_id: Stripe Connect Account ID
+
+        Returns:
+            Dictionary with login_url
+        """
+        try:
+            if not self.api_key:
+                raise Exception("Stripe API key not configured")
+
+            login_link = stripe.Account.create_login_link(account_id)
+
+            return {
+                'login_url': login_link.url,
+            }
+
+        except stripe.error.StripeError as e:
+            raise Exception(f"Stripe error: {str(e)}")
+        except Exception as e:
+            raise Exception(f"Failed to create login link: {str(e)}")
+
+    def create_payment_intent_with_transfer(
+        self,
+        amount: float,
+        connected_account_id: str,
+        currency: str = 'nzd',
+        order_id: str = None,
+        restaurant_id: str = None,
+        customer_email: str = None,
+        description: str = None,
+        application_fee_percent: float = 2.0,  # Platform fee (2%)
+    ) -> Dict[str, Any]:
+        """
+        Create a Payment Intent with automatic transfer to connected account
+        (Destination Charges)
+
+        Args:
+            amount: Amount in dollars
+            connected_account_id: Stripe Connect Account ID to receive funds
+            currency: Currency code
+            order_id: Order ID for metadata
+            restaurant_id: Restaurant ID for metadata
+            customer_email: Customer email
+            description: Payment description
+            application_fee_percent: Platform fee percentage (default 2%)
+
+        Returns:
+            Dictionary with client_secret and payment_intent_id
+        """
+        try:
+            if not self.api_key:
+                raise Exception("Stripe API key not configured")
+
+            amount_cents = int(amount * 100)
+            application_fee = int(amount_cents * (application_fee_percent / 100))
+
+            metadata = {}
+            if order_id:
+                metadata['order_id'] = order_id
+            if restaurant_id:
+                metadata['restaurant_id'] = restaurant_id
+
+            intent_params = {
+                'amount': amount_cents,
+                'currency': currency.lower(),
+                'metadata': metadata,
+                'automatic_payment_methods': {
+                    'enabled': True,
+                },
+                'application_fee_amount': application_fee,
+                'transfer_data': {
+                    'destination': connected_account_id,
+                },
+            }
+
+            if description:
+                intent_params['description'] = description
+            if customer_email:
+                intent_params['receipt_email'] = customer_email
+
+            intent = stripe.PaymentIntent.create(**intent_params)
+
+            print(f"✅ Created payment intent with transfer: {intent.id} -> {connected_account_id}")
+
+            return {
+                'client_secret': intent.client_secret,
+                'payment_intent_id': intent.id,
+                'amount': amount,
+                'currency': currency,
+                'status': intent.status,
+                'application_fee': application_fee / 100,
+                'restaurant_amount': (amount_cents - application_fee) / 100,
+            }
+
+        except stripe.error.StripeError as e:
+            raise Exception(f"Stripe error: {str(e)}")
+        except Exception as e:
+            raise Exception(f"Failed to create payment intent with transfer: {str(e)}")
+
 
 # Create a singleton instance
 stripe_service = StripeService()

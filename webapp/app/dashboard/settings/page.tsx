@@ -264,6 +264,22 @@ function SettingsContent() {
   });
   const [savingSurcharge, setSavingSurcharge] = useState(false);
 
+  // Stripe Connect state (for restaurant to receive payments)
+  const [stripeConnectStatus, setStripeConnectStatus] = useState<{
+    connected: boolean;
+    status: 'not_connected' | 'pending' | 'active' | 'incomplete';
+    account_id?: string;
+    charges_enabled?: boolean;
+    payouts_enabled?: boolean;
+    business_name?: string;
+    pending_requirements?: string[];
+  }>({
+    connected: false,
+    status: 'not_connected'
+  });
+  const [loadingStripeConnect, setLoadingStripeConnect] = useState(false);
+  const [connectingStripe, setConnectingStripe] = useState(false);
+
   // Password Change state
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
@@ -479,8 +495,27 @@ function SettingsContent() {
 
       // Load surcharge settings
       loadSurchargeSettings(profile.restaurant.restaurant_id);
+
+      // Load Stripe Connect status
+      loadStripeConnectStatus(profile.restaurant.restaurant_id);
     }
   }, [profile]);
+
+  // Check for Stripe Connect callback
+  useEffect(() => {
+    const stripeConnected = searchParams.get('stripe_connected');
+    const stripeRefresh = searchParams.get('stripe_refresh');
+
+    if (stripeConnected === 'true' && profile?.restaurant?.restaurant_id) {
+      // User returned from Stripe onboarding - refresh status
+      loadStripeConnectStatus(profile.restaurant.restaurant_id);
+      setActiveTab('payments');
+    }
+    if (stripeRefresh === 'true' && profile?.restaurant?.restaurant_id) {
+      // Onboarding link expired - show payments tab
+      setActiveTab('payments');
+    }
+  }, [searchParams, profile]);
 
   // ============================================================
   // Restaurant Location Functions (for Delivery Distance Calculation)
@@ -561,6 +596,71 @@ function SettingsContent() {
       }
     } catch (error) {
       console.error('Failed to load payment settings:', error);
+    }
+  };
+
+  // Load Stripe Connect status
+  const loadStripeConnectStatus = async (restaurantId: string) => {
+    if (!restaurantId) return;
+    setLoadingStripeConnect(true);
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/stripe/connect/status/${restaurantId}`);
+      const data = await response.json();
+      if (data.success) {
+        setStripeConnectStatus({
+          connected: data.connected,
+          status: data.status,
+          account_id: data.account_id,
+          charges_enabled: data.charges_enabled,
+          payouts_enabled: data.payouts_enabled,
+          business_name: data.business_name,
+          pending_requirements: data.pending_requirements,
+        });
+      }
+    } catch (error) {
+      console.error('Failed to load Stripe Connect status:', error);
+    } finally {
+      setLoadingStripeConnect(false);
+    }
+  };
+
+  // Connect Stripe account (redirect to Stripe onboarding)
+  const connectStripeAccount = async () => {
+    if (!profile?.restaurant?.restaurant_id) return;
+    setConnectingStripe(true);
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/stripe/connect/onboarding-link/${profile.restaurant.restaurant_id}`, {
+        method: 'POST',
+      });
+      const data = await response.json();
+      if (data.success && data.onboarding_url) {
+        // Redirect to Stripe onboarding
+        window.location.href = data.onboarding_url;
+      } else {
+        alert('ไม่สามารถเชื่อมต่อ Stripe ได้ กรุณาลองใหม่อีกครั้ง');
+      }
+    } catch (error) {
+      console.error('Failed to connect Stripe:', error);
+      alert('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
+    } finally {
+      setConnectingStripe(false);
+    }
+  };
+
+  // Open Stripe Dashboard
+  const openStripeDashboard = async () => {
+    if (!profile?.restaurant?.restaurant_id) return;
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/stripe/connect/dashboard-link/${profile.restaurant.restaurant_id}`);
+      const data = await response.json();
+      if (data.success && data.dashboard_url) {
+        window.open(data.dashboard_url, '_blank');
+      } else {
+        alert('ไม่สามารถเปิด Stripe Dashboard ได้');
+      }
+    } catch (error) {
+      console.error('Failed to get Stripe dashboard link:', error);
+      alert('เกิดข้อผิดพลาด');
     }
   };
 
@@ -2662,11 +2762,88 @@ function SettingsContent() {
                   <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                 </label>
               </div>
+
+              {/* Stripe Connect Status */}
               {paymentSettings.accept_card && (
-                <div className="mt-3 ml-13 p-3 bg-blue-50 rounded-lg">
-                  <p className="text-sm text-blue-800">
-                    ✓ Customers can pay via Stripe Checkout
-                  </p>
+                <div className="mt-4 ml-13 space-y-3">
+                  {loadingStripeConnect ? (
+                    <div className="p-3 bg-gray-50 rounded-lg flex items-center gap-2">
+                      <Loader2 className="w-4 h-4 animate-spin text-gray-500" />
+                      <span className="text-sm text-gray-600">กำลังโหลดสถานะ Stripe...</span>
+                    </div>
+                  ) : stripeConnectStatus.status === 'active' ? (
+                    // Connected and active
+                    <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <CheckCircle className="w-5 h-5 text-green-600" />
+                        <span className="font-semibold text-green-800">เชื่อมต่อ Stripe สำเร็จ</span>
+                      </div>
+                      <p className="text-sm text-green-700 mb-3">
+                        ร้านของคุณพร้อมรับชำระเงินผ่านบัตรเครดิต/เดบิต แล้ว
+                        {stripeConnectStatus.business_name && (
+                          <span className="block mt-1">ชื่อธุรกิจ: {stripeConnectStatus.business_name}</span>
+                        )}
+                      </p>
+                      <button
+                        onClick={openStripeDashboard}
+                        className="flex items-center gap-2 text-sm text-green-700 hover:text-green-800 font-medium"
+                      >
+                        <ArrowUpRight className="w-4 h-4" />
+                        เปิด Stripe Dashboard
+                      </button>
+                    </div>
+                  ) : stripeConnectStatus.status === 'pending' || stripeConnectStatus.status === 'incomplete' ? (
+                    // Pending or incomplete
+                    <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <AlertCircle className="w-5 h-5 text-yellow-600" />
+                        <span className="font-semibold text-yellow-800">รอการตรวจสอบ</span>
+                      </div>
+                      <p className="text-sm text-yellow-700 mb-3">
+                        กรุณาดำเนินการให้ข้อมูลเพิ่มเติมกับ Stripe ให้เสร็จสมบูรณ์
+                      </p>
+                      <button
+                        onClick={connectStripeAccount}
+                        disabled={connectingStripe}
+                        className="flex items-center gap-2 px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 disabled:opacity-50"
+                      >
+                        {connectingStripe ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <ArrowUpRight className="w-4 h-4" />
+                        )}
+                        ดำเนินการต่อ
+                      </button>
+                    </div>
+                  ) : (
+                    // Not connected
+                    <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Building2 className="w-5 h-5 text-blue-600" />
+                        <span className="font-semibold text-blue-800">เชื่อมต่อบัญชี Stripe ของคุณ</span>
+                      </div>
+                      <p className="text-sm text-blue-700 mb-3">
+                        เชื่อมต่อบัญชี Stripe เพื่อรับเงินจากลูกค้าโดยตรง เงินจะเข้าบัญชีธนาคารของคุณอัตโนมัติ
+                      </p>
+                      <button
+                        onClick={connectStripeAccount}
+                        disabled={connectingStripe}
+                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                      >
+                        {connectingStripe ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            กำลังเชื่อมต่อ...
+                          </>
+                        ) : (
+                          <>
+                            <ArrowUpRight className="w-4 h-4" />
+                            เชื่อมต่อ Stripe
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

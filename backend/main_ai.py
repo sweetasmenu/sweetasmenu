@@ -1810,6 +1810,176 @@ async def get_subscription(subscription_id: str):
         raise HTTPException(status_code=404, detail=str(e))
 
 # ============================================================
+# Stripe Connect Routes (Restaurant Payouts)
+# ============================================================
+
+class StripeConnectRequest(BaseModel):
+    restaurant_id: str
+    restaurant_name: str
+    email: str
+
+@app.post("/api/stripe/connect/create-account", summary="Create Stripe Connect Account")
+async def create_stripe_connect_account(request: StripeConnectRequest):
+    """
+    สร้าง Stripe Connect Express Account สำหรับร้านอาหาร
+    """
+    try:
+        # Create Stripe Connect account
+        result = stripe_service.create_connected_account(
+            restaurant_id=request.restaurant_id,
+            restaurant_name=request.restaurant_name,
+            email=request.email,
+            country='NZ'
+        )
+
+        # Save account_id to restaurant in database
+        try:
+            supabase_client.table('restaurants').update({
+                'stripe_account_id': result['account_id'],
+                'stripe_account_status': 'pending'
+            }).eq('id', request.restaurant_id).execute()
+        except Exception as db_error:
+            print(f"⚠️ Failed to save stripe_account_id to database: {db_error}")
+
+        # Create onboarding link
+        onboarding = stripe_service.create_account_onboarding_link(result['account_id'])
+
+        return {
+            "success": True,
+            "account_id": result['account_id'],
+            "onboarding_url": onboarding['onboarding_url'],
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/stripe/connect/status/{restaurant_id}", summary="Get Stripe Connect Status")
+async def get_stripe_connect_status(restaurant_id: str):
+    """
+    ตรวจสอบสถานะ Stripe Connect ของร้านอาหาร
+    """
+    try:
+        # Get restaurant's stripe_account_id from database
+        result = supabase_client.table('restaurants').select(
+            'stripe_account_id, stripe_account_status'
+        ).eq('id', restaurant_id).limit(1).execute()
+
+        if not result.data or not result.data[0].get('stripe_account_id'):
+            return {
+                "success": True,
+                "connected": False,
+                "status": "not_connected",
+                "message": "Stripe account not connected"
+            }
+
+        account_id = result.data[0]['stripe_account_id']
+
+        # Get account status from Stripe
+        account_status = stripe_service.get_connected_account_status(account_id)
+
+        # Update status in database if changed
+        if account_status['status'] != result.data[0].get('stripe_account_status'):
+            try:
+                supabase_client.table('restaurants').update({
+                    'stripe_account_status': account_status['status']
+                }).eq('id', restaurant_id).execute()
+            except Exception as db_error:
+                print(f"⚠️ Failed to update stripe_account_status: {db_error}")
+
+        return {
+            "success": True,
+            "connected": account_status['charges_enabled'],
+            "status": account_status['status'],
+            "account_id": account_id,
+            "charges_enabled": account_status['charges_enabled'],
+            "payouts_enabled": account_status['payouts_enabled'],
+            "business_name": account_status.get('business_name'),
+            "pending_requirements": account_status.get('pending_requirements', []),
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/stripe/connect/onboarding-link/{restaurant_id}", summary="Get Stripe Connect Onboarding Link")
+async def get_stripe_onboarding_link(restaurant_id: str):
+    """
+    สร้าง Onboarding Link สำหรับร้านอาหารที่ต้องการเชื่อมต่อ Stripe
+    """
+    try:
+        # Get restaurant's stripe_account_id
+        result = supabase_client.table('restaurants').select(
+            'stripe_account_id, name, email'
+        ).eq('id', restaurant_id).limit(1).execute()
+
+        if not result.data:
+            raise HTTPException(status_code=404, detail="Restaurant not found")
+
+        restaurant = result.data[0]
+
+        # If no account exists, create one first
+        if not restaurant.get('stripe_account_id'):
+            # Create new account
+            account_result = stripe_service.create_connected_account(
+                restaurant_id=restaurant_id,
+                restaurant_name=restaurant.get('name', 'Restaurant'),
+                email=restaurant.get('email', ''),
+                country='NZ'
+            )
+
+            # Save to database
+            supabase_client.table('restaurants').update({
+                'stripe_account_id': account_result['account_id'],
+                'stripe_account_status': 'pending'
+            }).eq('id', restaurant_id).execute()
+
+            account_id = account_result['account_id']
+        else:
+            account_id = restaurant['stripe_account_id']
+
+        # Create onboarding link
+        onboarding = stripe_service.create_account_onboarding_link(account_id)
+
+        return {
+            "success": True,
+            "onboarding_url": onboarding['onboarding_url'],
+            "account_id": account_id,
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/stripe/connect/dashboard-link/{restaurant_id}", summary="Get Stripe Dashboard Link")
+async def get_stripe_dashboard_link(restaurant_id: str):
+    """
+    สร้าง Login Link สำหรับเข้าถึง Stripe Express Dashboard
+    """
+    try:
+        # Get restaurant's stripe_account_id
+        result = supabase_client.table('restaurants').select(
+            'stripe_account_id'
+        ).eq('id', restaurant_id).limit(1).execute()
+
+        if not result.data or not result.data[0].get('stripe_account_id'):
+            raise HTTPException(status_code=400, detail="Stripe account not connected")
+
+        account_id = result.data[0]['stripe_account_id']
+
+        # Create login link
+        login_result = stripe_service.create_login_link(account_id)
+
+        return {
+            "success": True,
+            "dashboard_url": login_result['login_url'],
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ============================================================
 # Payment System Routes (Order Payments)
 # ============================================================
 
@@ -1838,16 +2008,45 @@ async def create_payment_intent(request: CreatePaymentIntentRequest):
         if not stripe_service.api_key:
             raise HTTPException(status_code=500, detail="Payment system not configured. Please contact the restaurant.")
 
+        # Check if restaurant has a connected Stripe account
+        connected_account_id = None
+        try:
+            restaurant_result = supabase_client.table('restaurants').select(
+                'stripe_account_id, stripe_account_status, name'
+            ).eq('id', request.restaurant_id).limit(1).execute()
+
+            if restaurant_result.data and restaurant_result.data[0].get('stripe_account_id'):
+                # Only use connected account if it's active
+                if restaurant_result.data[0].get('stripe_account_status') == 'active':
+                    connected_account_id = restaurant_result.data[0]['stripe_account_id']
+                    print(f"✅ Using connected account {connected_account_id[:12]}... for restaurant {request.restaurant_id}")
+        except Exception as db_error:
+            print(f"⚠️ Failed to check connected account: {db_error}")
+
         # Create payment intent
         try:
-            result = stripe_service.create_payment_intent(
-                amount=request.amount,
-                currency=request.currency,
-                order_id=request.order_id,
-                restaurant_id=request.restaurant_id,
-                customer_email=request.customer_email,
-                description=f"Order payment for {request.restaurant_id}",
-            )
+            if connected_account_id:
+                # Use destination charges - money goes to restaurant's connected account
+                result = stripe_service.create_payment_intent_with_transfer(
+                    amount=request.amount,
+                    connected_account_id=connected_account_id,
+                    currency=request.currency,
+                    order_id=request.order_id,
+                    restaurant_id=request.restaurant_id,
+                    customer_email=request.customer_email,
+                    description=f"Order payment for restaurant",
+                    application_fee_percent=2.0,  # Platform takes 2%
+                )
+            else:
+                # No connected account - use platform's Stripe account
+                result = stripe_service.create_payment_intent(
+                    amount=request.amount,
+                    currency=request.currency,
+                    order_id=request.order_id,
+                    restaurant_id=request.restaurant_id,
+                    customer_email=request.customer_email,
+                    description=f"Order payment for {request.restaurant_id}",
+                )
         except Exception as stripe_error:
             print(f"❌ Stripe error in create_payment_intent: {str(stripe_error)}")
             raise HTTPException(status_code=500, detail=f"Payment service error: {str(stripe_error)}")
