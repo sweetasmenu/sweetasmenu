@@ -106,8 +106,8 @@ export default function AnalyticsPage() {
   const fetchRestaurant = async (uid: string) => {
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-      // Check localStorage for selected restaurant (branch selection)
-      const savedRestaurantId = localStorage.getItem('selected_restaurant_id');
+      // Check localStorage for selected restaurant (branch selection) - use user-scoped key
+      const savedRestaurantId = localStorage.getItem(`selected_restaurant_${uid}`);
       let url = `${API_URL}/api/user/profile?user_id=${uid}`;
       if (savedRestaurantId) {
         url += `&restaurant_id=${savedRestaurantId}`;

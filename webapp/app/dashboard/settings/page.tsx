@@ -424,9 +424,9 @@ function SettingsContent() {
       loadProfile();
     };
 
-    // Listen for storage changes (cross-tab only)
+    // Listen for storage changes (cross-tab only) - check user-scoped keys
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'selected_restaurant_id') {
+      if (e.key?.startsWith('selected_restaurant_')) {
         handleBranchChange();
       }
     };

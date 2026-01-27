@@ -72,7 +72,8 @@ export default function OrdersPage() {
       // Get restaurant ID for current user (check localStorage first for branch selection)
       const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
       const userId = session.user.id;
-      const savedRestaurantId = localStorage.getItem('selected_restaurant_id');
+      // Use user-scoped key to prevent data leaking between users
+      const savedRestaurantId = localStorage.getItem(`selected_restaurant_${userId}`);
 
       try {
         let url = `${API_URL}/api/user/profile?user_id=${userId}`;

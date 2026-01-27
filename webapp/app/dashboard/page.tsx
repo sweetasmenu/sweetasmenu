@@ -81,9 +81,10 @@ export default function DashboardPage() {
         isFetchingProfile.current = true;
         try {
           // Check localStorage for selected restaurant (multi-branch support)
-          // Try both formats for compatibility
-          const savedRestaurantId = localStorage.getItem(`selected_restaurant_${userId}`) ||
-                                    localStorage.getItem('selected_restaurant_id');
+          // IMPORTANT: Only use user-scoped key to prevent data leaking between users
+          const savedRestaurantId = localStorage.getItem(`selected_restaurant_${userId}`);
+          // Clean up legacy key if exists (could belong to different user)
+          localStorage.removeItem('selected_restaurant_id');
 
           // Fetch user role and plan from backend (also returns restaurant_id)
           const userProfile = await fetchUserPlan(userId, savedRestaurantId || undefined);
