@@ -1217,10 +1217,10 @@ export default function RestaurantMenuPage() {
                     {!isEnterprise && (
                       <div className="px-4 py-3 bg-gray-50 border-t border-gray-200">
                         <p className="text-xs text-gray-500">
-                          🌟 ต้องการแปลหลายภาษา?
+                          🌟 Need more languages?
                         </p>
                         <p className="text-xs text-indigo-600 font-medium mt-1">
-                          อัปเกรด Enterprise
+                          Upgrade to Enterprise
                         </p>
                       </div>
                     )}
