@@ -27,7 +27,7 @@ export default function RootLayout({
         <link rel="icon" href="/icon.png" type="image/png" sizes="32x32" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
       </head>
-      <body className="antialiased">
+      <body className="antialiased overflow-x-hidden">
         <TabBar />
         <div>
           {children}

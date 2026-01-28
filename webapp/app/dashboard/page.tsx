@@ -540,42 +540,44 @@ export default function DashboardPage() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Section */}
-        <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl p-8 text-white mb-8 relative overflow-hidden">
+        <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl p-4 sm:p-8 text-white mb-8 relative overflow-hidden">
           <div className="relative z-10">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <h2 className="text-4xl font-bold mb-2">
+                <h2 className="text-2xl sm:text-4xl font-bold mb-2">
                   {t('dashboard', 'welcome')}! 👋
                 </h2>
-                <p className="text-orange-100 text-lg">
+                <p className="text-orange-100 text-sm sm:text-lg truncate max-w-[200px] sm:max-w-none">
                   {user?.user_metadata?.full_name || user?.email}
                 </p>
               </div>
               {/* View Menu & QR Code Buttons */}
               {restaurantId && (
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3">
                   <Link
                     href={`/restaurant/${restaurantSlug || restaurantId}`}
                     target="_blank"
-                    className="flex items-center gap-3 px-6 py-3 bg-white text-orange-600 rounded-xl font-bold text-lg hover:bg-orange-50 transition-colors shadow-lg"
+                    className="flex items-center gap-1 sm:gap-3 px-3 sm:px-6 py-2 sm:py-3 bg-white text-orange-600 rounded-xl font-bold text-sm sm:text-lg hover:bg-orange-50 transition-colors shadow-lg"
                   >
-                    <ExternalLink className="w-6 h-6" />
-                    {primaryLanguage === 'en' ? 'View Menu' : (primaryLanguage === 'th' ? 'ดูเมนู / View Menu' : 'View Menu')}
+                    <ExternalLink className="w-4 h-4 sm:w-6 sm:h-6" />
+                    <span className="hidden sm:inline">{primaryLanguage === 'en' ? 'View Menu' : (primaryLanguage === 'th' ? 'ดูเมนู / View Menu' : 'View Menu')}</span>
+                    <span className="sm:hidden">Menu</span>
                   </Link>
                   <Link
                     href={`/qr/${restaurantSlug || restaurantId}`}
                     target="_blank"
-                    className="flex items-center gap-3 px-6 py-3 bg-white/20 text-white rounded-xl font-bold text-lg hover:bg-white/30 transition-colors border-2 border-white/50"
+                    className="flex items-center gap-1 sm:gap-3 px-3 sm:px-6 py-2 sm:py-3 bg-white/20 text-white rounded-xl font-bold text-sm sm:text-lg hover:bg-white/30 transition-colors border-2 border-white/50"
                   >
-                    <QrCode className="w-6 h-6" />
-                    QR Code
+                    <QrCode className="w-4 h-4 sm:w-6 sm:h-6" />
+                    <span className="hidden sm:inline">QR Code</span>
+                    <span className="sm:hidden">QR</span>
                   </Link>
                 </div>
               )}
             </div>
           </div>
           <div className="absolute top-0 right-0 transform translate-x-12 translate-y-12">
-            <ChefHat className="w-64 h-64 text-white opacity-10" />
+            <ChefHat className="w-32 h-32 sm:w-64 sm:h-64 text-white opacity-10" />
           </div>
         </div>
 
