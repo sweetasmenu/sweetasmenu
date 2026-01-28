@@ -564,7 +564,7 @@ export default function DashboardPage() {
                     <span className="sm:hidden">Menu</span>
                   </Link>
                   <Link
-                    href={`/qr/${restaurantSlug || restaurantId}`}
+                    href="/qr"
                     target="_blank"
                     className="flex items-center gap-1 sm:gap-3 px-3 sm:px-6 py-2 sm:py-3 bg-white/20 text-white rounded-xl font-bold text-sm sm:text-lg hover:bg-white/30 transition-colors border-2 border-white/50"
                   >
