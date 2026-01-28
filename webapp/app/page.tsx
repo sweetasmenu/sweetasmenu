@@ -226,6 +226,17 @@ export default function HomePage() {
         </div>
       </nav>
 
+      {/* Mobile Menu Backdrop with Blur */}
+      <div
+        className={`fixed inset-0 z-40 lg:hidden transition-all duration-500 ${
+          mobileMenuOpen
+            ? 'opacity-100 pointer-events-auto backdrop-blur-md bg-neutral-950/70'
+            : 'opacity-0 pointer-events-none'
+        }`}
+        style={{ top: '80px' }}
+        onClick={() => setMobileMenuOpen(false)}
+      />
+
       {/* Hero Section - Premium & Elegant */}
       <section className="relative min-h-screen flex items-center pt-28 lg:pt-24">
         {/* Premium Background */}
