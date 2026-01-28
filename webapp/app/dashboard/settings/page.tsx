@@ -581,7 +581,7 @@ function SettingsContent() {
           longitude: data.location.longitude,
           address: restaurantLocation.address
         });
-        alert('บันทึกพิกัดร้านสำเร็จ!');
+        alert('Restaurant location saved successfully!');
       } else {
         setLocationError(data.detail || 'ไม่สามารถบันทึกพิกัดได้');
       }
@@ -702,7 +702,7 @@ function SettingsContent() {
 
       const data = await response.json();
       if (data.success) {
-        alert('บันทึกการตั้งค่าการชำระเงินสำเร็จ');
+        alert('Payment settings saved successfully!');
       } else {
         alert(data.detail || 'Failed to save payment settings');
       }
@@ -819,7 +819,7 @@ function SettingsContent() {
 
   const addBankAccount = () => {
     if (!newBankAccount.bank_name || !newBankAccount.account_name || !newBankAccount.account_number) {
-      alert('กรุณากรอกข้อมูลบัญชีธนาคารให้ครบถ้วน');
+      alert('Please fill in all bank account details');
       return;
     }
 
@@ -883,7 +883,7 @@ function SettingsContent() {
 
       const data = await response.json();
       if (data.success) {
-        alert('พนักงานถูกเพิ่มเรียบร้อย!');
+        alert('Staff added successfully!');
         setShowAddStaff(false);
         setNewStaff({ name: '', email: '', phone: '', role: 'waiter', pin_code: '' });
         loadStaff(profile.restaurant.restaurant_id);
@@ -916,7 +916,7 @@ function SettingsContent() {
 
       const data = await response.json();
       if (data.success) {
-        alert('อัปเดตข้อมูลพนักงานเรียบร้อย!');
+        alert('Staff updated successfully!');
         setEditingStaff(null);
         loadStaff(profile.restaurant.restaurant_id);
       }
@@ -976,7 +976,7 @@ function SettingsContent() {
 
       const data = await response.json();
       if (data.success) {
-        alert('บันทึกตัวเลือกบริการเรียบร้อย!');
+        alert('Service options saved successfully!');
       } else {
         alert(data.detail || 'Failed to save service options');
       }
@@ -2145,7 +2145,7 @@ function SettingsContent() {
 
               {/* Delivery Settings Section - Only show when delivery is enabled */}
               {serviceOptions.delivery && (
-                <div className="mt-4 ml-16 p-4 bg-green-50 rounded-xl border border-green-200">
+                <div className="mt-4 sm:ml-16 p-4 bg-green-50 rounded-xl border border-green-200">
                   <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
                     <Truck className="w-5 h-5 text-green-600" />
                     Delivery Fee Settings
@@ -2154,7 +2154,7 @@ function SettingsContent() {
                   {/* Pricing Mode Toggle */}
                   <div className="mb-4">
                     <p className="text-sm text-gray-600 mb-3">Select delivery fee calculation method:</p>
-                    <div className="flex gap-3">
+                    <div className="flex flex-col sm:flex-row gap-3">
                       <button
                         onClick={() => setDeliverySettings({...deliverySettings, pricing_mode: 'per_km'})}
                         className={`flex-1 p-3 rounded-lg border-2 transition-all ${
@@ -2182,8 +2182,8 @@ function SettingsContent() {
 
                   {/* Per-KM Pricing Settings */}
                   {deliverySettings.pricing_mode === 'per_km' && (
-                    <div className="space-y-4 p-4 bg-white rounded-lg border border-green-200">
-                      <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-4 p-3 sm:p-4 bg-white rounded-lg border border-green-200">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
                             Base Fee
