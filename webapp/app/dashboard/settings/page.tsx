@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Shield, Users, Utensils, Truck, Store, Plus, Trash2, Edit2, Save, X, Loader2, Globe, ExternalLink, MapPin, Navigation, CreditCard, Building2, QrCode, Key, Eye, EyeOff, CheckCircle, AlertCircle, ArrowUpRight } from 'lucide-react';
+import { Shield, Users, Utensils, Truck, Store, Plus, Trash2, Edit2, Save, X, Loader2, Globe, ExternalLink, MapPin, Navigation, CreditCard, Building2, QrCode, Key, Eye, EyeOff, CheckCircle, AlertCircle, ArrowUpRight, BadgePercent } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 
 interface ServiceOptions {
@@ -264,6 +264,14 @@ function SettingsContent() {
   });
   const [savingSurcharge, setSavingSurcharge] = useState(false);
 
+  // Holiday/Festival Food Surcharge Settings state
+  const [foodSurchargeSettings, setFoodSurchargeSettings] = useState({
+    food_surcharge_enabled: false,
+    food_surcharge_rate: 10.00,
+    food_surcharge_name: 'Holiday Surcharge'
+  });
+  const [savingFoodSurcharge, setSavingFoodSurcharge] = useState(false);
+
   // Stripe Connect state (for restaurant to receive payments)
   const [stripeConnectStatus, setStripeConnectStatus] = useState<{
     connected: boolean;
@@ -495,6 +503,9 @@ function SettingsContent() {
 
       // Load surcharge settings
       loadSurchargeSettings(profile.restaurant.restaurant_id);
+
+      // Load food/holiday surcharge settings
+      loadFoodSurchargeSettings(profile.restaurant.restaurant_id);
 
       // Load Stripe Connect status
       loadStripeConnectStatus(profile.restaurant.restaurant_id);
@@ -751,6 +762,58 @@ function SettingsContent() {
       alert('Failed to save surcharge settings');
     } finally {
       setSavingSurcharge(false);
+    }
+  };
+
+  // ============================================================
+  // Food/Holiday Surcharge Settings Functions
+  // ============================================================
+
+  const loadFoodSurchargeSettings = async (restaurantId: string) => {
+    if (!restaurantId) return;
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/restaurant/${restaurantId}/food-surcharge-settings`);
+      const data = await response.json();
+      if (data.success) {
+        setFoodSurchargeSettings({
+          food_surcharge_enabled: data.food_surcharge_enabled || false,
+          food_surcharge_rate: data.food_surcharge_rate || 10.00,
+          food_surcharge_name: data.food_surcharge_name || 'Holiday Surcharge'
+        });
+      }
+    } catch (error) {
+      console.error('Failed to load food surcharge settings:', error);
+    }
+  };
+
+  const saveFoodSurchargeSettings = async () => {
+    if (!profile?.restaurant?.restaurant_id) return;
+
+    // Validate rate is between 0 and 50%
+    if (foodSurchargeSettings.food_surcharge_rate < 0 || foodSurchargeSettings.food_surcharge_rate > 50) {
+      alert('Surcharge rate must be between 0% and 50%');
+      return;
+    }
+
+    setSavingFoodSurcharge(true);
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/restaurant/${profile.restaurant.restaurant_id}/food-surcharge-settings`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(foodSurchargeSettings)
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        alert('Food surcharge settings saved successfully!');
+      } else {
+        alert(data.detail || 'Failed to save food surcharge settings');
+      }
+    } catch (error) {
+      console.error('Failed to save food surcharge settings:', error);
+      alert('Failed to save food surcharge settings');
+    } finally {
+      setSavingFoodSurcharge(false);
     }
   };
 
@@ -2921,6 +2984,112 @@ function SettingsContent() {
                     className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                   >
                     {savingSurcharge ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="w-4 h-4" />
+                        Save Surcharge Settings
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Food/Holiday Surcharge */}
+            <div className="border border-gray-200 rounded-lg p-4 mb-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <BadgePercent className="w-5 h-5 text-purple-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900">Food Surcharge</h3>
+                    <p className="text-sm text-gray-600">
+                      Add surcharge for holidays, festivals, or peak seasons
+                    </p>
+                  </div>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={foodSurchargeSettings.food_surcharge_enabled}
+                    onChange={(e) => setFoodSurchargeSettings({
+                      ...foodSurchargeSettings,
+                      food_surcharge_enabled: e.target.checked
+                    })}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-500"></div>
+                </label>
+              </div>
+
+              {foodSurchargeSettings.food_surcharge_enabled && (
+                <div className="mt-4 ml-13 space-y-4">
+                  <div className="p-4 bg-purple-50 rounded-lg space-y-4">
+                    {/* Surcharge Name */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Surcharge Name
+                      </label>
+                      <input
+                        type="text"
+                        value={foodSurchargeSettings.food_surcharge_name}
+                        onChange={(e) => setFoodSurchargeSettings({
+                          ...foodSurchargeSettings,
+                          food_surcharge_name: e.target.value
+                        })}
+                        placeholder="e.g., Holiday Surcharge, Festival Fee"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:ring-purple-500 focus:border-purple-500"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">This name will be shown to customers on the receipt</p>
+                    </div>
+
+                    {/* Surcharge Rate */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Surcharge Rate (%)
+                      </label>
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="number"
+                          min="0"
+                          max="50"
+                          step="0.5"
+                          value={foodSurchargeSettings.food_surcharge_rate}
+                          onChange={(e) => setFoodSurchargeSettings({
+                            ...foodSurchargeSettings,
+                            food_surcharge_rate: parseFloat(e.target.value) || 0
+                          })}
+                          className="w-24 px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:ring-purple-500 focus:border-purple-500"
+                        />
+                        <span className="text-sm text-gray-600">%</span>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">Maximum 50%</p>
+                    </div>
+                  </div>
+
+                  {/* Example calculation */}
+                  <div className="p-3 bg-gray-50 rounded-lg">
+                    <p className="text-sm text-gray-700">
+                      <strong>Example:</strong> For a $100 order with {foodSurchargeSettings.food_surcharge_rate}% {foodSurchargeSettings.food_surcharge_name}:
+                    </p>
+                    <div className="mt-2 text-sm text-gray-600 space-y-1">
+                      <p>Subtotal: $100.00</p>
+                      <p>{foodSurchargeSettings.food_surcharge_name}: ${(100 * foodSurchargeSettings.food_surcharge_rate / 100).toFixed(2)}</p>
+                      <p className="font-semibold text-gray-900">Total: ${(100 + (100 * foodSurchargeSettings.food_surcharge_rate / 100)).toFixed(2)}</p>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={saveFoodSurchargeSettings}
+                    disabled={savingFoodSurcharge}
+                    className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    {savingFoodSurcharge ? (
                       <>
                         <Loader2 className="w-4 h-4 animate-spin" />
                         Saving...

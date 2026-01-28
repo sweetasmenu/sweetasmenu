@@ -119,6 +119,13 @@ export default function RestaurantMenuPage() {
     credit_card_surcharge_rate: 2.50
   });
 
+  // Food/Holiday surcharge settings
+  const [foodSurchargeSettings, setFoodSurchargeSettings] = useState({
+    food_surcharge_enabled: false,
+    food_surcharge_rate: 10.00,
+    food_surcharge_name: 'Holiday Surcharge'
+  });
+
   // Language selection for customers
   const [selectedLanguage, setSelectedLanguage] = useState<string>('original'); // 'original', 'en', 'th', 'zh', 'ja', 'ko'
   const [translatingMenu, setTranslatingMenu] = useState(false);
@@ -268,6 +275,23 @@ export default function RestaurantMenuPage() {
             }
           } catch (err) {
             console.log('Could not fetch surcharge settings:', err);
+          }
+
+          // Fetch food/holiday surcharge settings
+          try {
+            const foodSurchargeResponse = await fetch(`${API_URL}/api/restaurant/${data.restaurant.id}/food-surcharge-settings`);
+            if (foodSurchargeResponse.ok) {
+              const foodSurchargeData = await foodSurchargeResponse.json();
+              if (foodSurchargeData.success) {
+                setFoodSurchargeSettings({
+                  food_surcharge_enabled: foodSurchargeData.food_surcharge_enabled || false,
+                  food_surcharge_rate: foodSurchargeData.food_surcharge_rate || 10.00,
+                  food_surcharge_name: foodSurchargeData.food_surcharge_name || 'Holiday Surcharge'
+                });
+              }
+            }
+          } catch (err) {
+            console.log('Could not fetch food surcharge settings:', err);
           }
         }
 
@@ -790,6 +814,13 @@ export default function RestaurantMenuPage() {
     return serviceType === 'delivery' ? selectedDeliveryFee : 0;
   };
 
+  // Food/Holiday surcharge (applies to all orders when enabled)
+  const getFoodSurchargeAmount = () => {
+    if (!foodSurchargeSettings.food_surcharge_enabled) return 0;
+    const subtotal = getSubtotal();
+    return Math.round(subtotal * foodSurchargeSettings.food_surcharge_rate / 100 * 100) / 100;
+  };
+
   // Credit card surcharge is now calculated in payment page when customer selects card payment
   // This keeps the restaurant menu page simpler and only shows base price
   const getSurchargeAmount = () => {
@@ -798,12 +829,17 @@ export default function RestaurantMenuPage() {
   };
 
   const getTotalPrice = () => {
-    return getSubtotal() + getDeliveryFee();
+    return getSubtotal() + getDeliveryFee() + getFoodSurchargeAmount();
   };
 
   // Check if surcharge will apply (for informational display only)
   const hasPotentialSurcharge = () => {
     return surchargeSettings.credit_card_surcharge_enabled && surchargeSettings.credit_card_surcharge_rate > 0;
+  };
+
+  // Check if food surcharge applies
+  const hasFoodSurcharge = () => {
+    return foodSurchargeSettings.food_surcharge_enabled && foodSurchargeSettings.food_surcharge_rate > 0;
   };
 
   // Calculate GST from inclusive price (NZ standard: 15% GST, formula: total * 3 / 23)
@@ -924,6 +960,8 @@ export default function RestaurantMenuPage() {
           delivery_fee: serviceType === 'delivery' ? getDeliveryFee() : 0,
           subtotal: getSubtotal(),
           surcharge_amount: getSurchargeAmount(),
+          food_surcharge_amount: getFoodSurchargeAmount(),
+          food_surcharge_name: hasFoodSurcharge() ? foodSurchargeSettings.food_surcharge_name : null,
           payment_method: 'card', // Default to card, will be updated in payment flow
         }),
       });
@@ -1899,6 +1937,18 @@ export default function RestaurantMenuPage() {
                             {deliveryCalculation.distance_text} • ~{deliveryCalculation.duration_text}
                           </div>
                         )}
+                      </div>
+                    )}
+
+                    {/* Food/Holiday Surcharge (if enabled) */}
+                    {hasFoodSurcharge() && (
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-gray-600">
+                          {foodSurchargeSettings.food_surcharge_name} ({foodSurchargeSettings.food_surcharge_rate}%):
+                        </span>
+                        <span className="text-gray-900 font-medium">
+                          ${getFoodSurchargeAmount().toFixed(2)}
+                        </span>
                       </div>
                     )}
 

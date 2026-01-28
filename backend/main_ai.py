@@ -2488,6 +2488,88 @@ async def update_surcharge_settings(restaurant_id: str, request: UpdateSurcharge
 
 
 # ============================================================
+# Food/Holiday Surcharge Settings Routes
+# ============================================================
+
+class UpdateFoodSurchargeSettingsRequest(BaseModel):
+    food_surcharge_enabled: bool = False
+    food_surcharge_rate: float = 10.0
+    food_surcharge_name: str = "Holiday Surcharge"
+
+@app.get("/api/restaurant/{restaurant_id}/food-surcharge-settings", summary="Get Food Surcharge Settings")
+async def get_food_surcharge_settings(restaurant_id: str):
+    """
+    Get food/holiday surcharge settings for a restaurant
+    """
+    try:
+        restaurant = restaurant_service.get_restaurant_by_id(restaurant_id)
+        if not restaurant:
+            raise HTTPException(status_code=404, detail="Restaurant not found")
+
+        return {
+            "success": True,
+            "restaurant_id": restaurant_id,
+            "food_surcharge_enabled": restaurant.get("food_surcharge_enabled", False),
+            "food_surcharge_rate": float(restaurant.get("food_surcharge_rate", 10.0) or 10.0),
+            "food_surcharge_name": restaurant.get("food_surcharge_name", "Holiday Surcharge") or "Holiday Surcharge"
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.put("/api/restaurant/{restaurant_id}/food-surcharge-settings", summary="Update Food Surcharge Settings")
+async def update_food_surcharge_settings(restaurant_id: str, request: UpdateFoodSurchargeSettingsRequest):
+    """
+    Update food/holiday surcharge settings for a restaurant
+
+    Args:
+        food_surcharge_enabled: Whether to add surcharge to food prices
+        food_surcharge_rate: Surcharge rate as percentage (e.g., 10.0 for 10%)
+        food_surcharge_name: Name to display on receipt (e.g., "Holiday Surcharge", "Festival Fee")
+    """
+    try:
+        restaurant = restaurant_service.get_restaurant_by_id(restaurant_id)
+        if not restaurant:
+            raise HTTPException(status_code=404, detail="Restaurant not found")
+
+        # Validate surcharge rate (0-50%)
+        if request.food_surcharge_rate < 0 or request.food_surcharge_rate > 50:
+            raise HTTPException(status_code=400, detail="Surcharge rate must be between 0% and 50%")
+
+        # Prepare update data
+        update_data = {
+            "food_surcharge_enabled": request.food_surcharge_enabled,
+            "food_surcharge_rate": request.food_surcharge_rate,
+            "food_surcharge_name": request.food_surcharge_name or "Holiday Surcharge"
+        }
+
+        # Save to database
+        if not restaurant_service.supabase_client:
+            raise HTTPException(status_code=500, detail="Database connection not available")
+
+        result = restaurant_service.supabase_client.table("restaurants").update(
+            update_data
+        ).eq("id", restaurant_id).execute()
+
+        return {
+            "success": True,
+            "restaurant_id": restaurant_id,
+            "food_surcharge_enabled": request.food_surcharge_enabled,
+            "food_surcharge_rate": request.food_surcharge_rate,
+            "food_surcharge_name": request.food_surcharge_name,
+            "message": "Food surcharge settings updated successfully"
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ============================================================
 # Customization Routes (Theme Color & Cover Image)
 # ============================================================
 
