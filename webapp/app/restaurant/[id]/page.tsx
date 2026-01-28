@@ -1319,64 +1319,52 @@ export default function RestaurantMenuPage() {
           </div>
         ) : (
           <>
-            {/* Mobile Menu - Show slider with 2 items per category */}
-            <MobileMenuSection
-              categories={Object.keys(groupedMenus)}
-              groupedMenus={groupedMenus}
-              themeColor={themeColor}
-              onItemClick={openItemModal}
-              selectedLanguage={selectedLanguage}
-              itemsPerCategory={2}
-            />
-
-            {/* Desktop Menu - Show full templates */}
-            <div className="hidden md:block">
-              {menuTemplate === 'list' && (
-                <ClassicList
-                  menus={menus}
-                  groupedMenus={groupedMenus}
-                  themeColor={themeColor}
-                  onItemClick={openItemModal}
-                  selectedLanguage={selectedLanguage}
-                />
-              )}
-              {menuTemplate === 'grid' && (
-                <GridView
-                  menus={menus}
-                  groupedMenus={groupedMenus}
-                  themeColor={themeColor}
-                  onItemClick={openItemModal}
-                  selectedLanguage={selectedLanguage}
-                />
-              )}
-              {menuTemplate === 'magazine' && (
-                <MagazineStyle
-                  menus={menus}
-                  groupedMenus={groupedMenus}
-                  themeColor={themeColor}
-                  onItemClick={openItemModal}
-                  selectedLanguage={selectedLanguage}
-                />
-              )}
-              {menuTemplate === 'elegant' && (
-                <Elegant
-                  menus={menus}
-                  groupedMenus={groupedMenus}
-                  themeColor={themeColor}
-                  onItemClick={openItemModal}
-                  selectedLanguage={selectedLanguage}
-                />
-              )}
-              {menuTemplate === 'casual' && (
-                <Casual
-                  menus={menus}
-                  groupedMenus={groupedMenus}
-                  themeColor={themeColor}
-                  onItemClick={openItemModal}
-                  selectedLanguage={selectedLanguage}
-                />
-              )}
-            </div>
+            {/* Menu Templates - Responsive for both Mobile and Desktop */}
+            {menuTemplate === 'list' && (
+              <ClassicList
+                menus={menus}
+                groupedMenus={groupedMenus}
+                themeColor={themeColor}
+                onItemClick={openItemModal}
+                selectedLanguage={selectedLanguage}
+              />
+            )}
+            {menuTemplate === 'grid' && (
+              <GridView
+                menus={menus}
+                groupedMenus={groupedMenus}
+                themeColor={themeColor}
+                onItemClick={openItemModal}
+                selectedLanguage={selectedLanguage}
+              />
+            )}
+            {menuTemplate === 'magazine' && (
+              <MagazineStyle
+                menus={menus}
+                groupedMenus={groupedMenus}
+                themeColor={themeColor}
+                onItemClick={openItemModal}
+                selectedLanguage={selectedLanguage}
+              />
+            )}
+            {menuTemplate === 'elegant' && (
+              <Elegant
+                menus={menus}
+                groupedMenus={groupedMenus}
+                themeColor={themeColor}
+                onItemClick={openItemModal}
+                selectedLanguage={selectedLanguage}
+              />
+            )}
+            {menuTemplate === 'casual' && (
+              <Casual
+                menus={menus}
+                groupedMenus={groupedMenus}
+                themeColor={themeColor}
+                onItemClick={openItemModal}
+                selectedLanguage={selectedLanguage}
+              />
+            )}
           </>
         )}
       </div>
