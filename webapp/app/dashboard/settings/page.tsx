@@ -1380,6 +1380,7 @@ function SettingsContent() {
   const roleForPermissions = userRole || profile?.subscription?.role || profile?.subscription?.plan || 'free_trial';
   const canCustomizeTheme = !['free_trial', 'starter'].includes(roleForPermissions);
   const canUploadBanner = ['enterprise', 'admin'].includes(roleForPermissions);
+  const canUseFoodSurcharge = ['professional', 'enterprise', 'admin'].includes(roleForPermissions);
   const isAdmin = userRole === 'admin' || roleForPermissions === 'admin';
 
   if (loading) {
@@ -3000,34 +3001,51 @@ function SettingsContent() {
             </div>
 
             {/* Food/Holiday Surcharge */}
-            <div className="border border-gray-200 rounded-lg p-4 mb-4">
+            <div className={`border rounded-lg p-4 mb-4 ${canUseFoodSurcharge ? 'border-gray-200' : 'border-gray-200 bg-gray-50 opacity-75'}`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                    <BadgePercent className="w-5 h-5 text-purple-600" />
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${canUseFoodSurcharge ? 'bg-purple-100' : 'bg-gray-200'}`}>
+                    <BadgePercent className={`w-5 h-5 ${canUseFoodSurcharge ? 'text-purple-600' : 'text-gray-400'}`} />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">Food Surcharge</h3>
+                    <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+                      Food Surcharge
+                      {!canUseFoodSurcharge && (
+                        <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">Professional+</span>
+                      )}
+                    </h3>
                     <p className="text-sm text-gray-600">
                       Add surcharge for holidays, festivals, or peak seasons
                     </p>
                   </div>
                 </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={foodSurchargeSettings.food_surcharge_enabled}
-                    onChange={(e) => setFoodSurchargeSettings({
-                      ...foodSurchargeSettings,
-                      food_surcharge_enabled: e.target.checked
-                    })}
-                    className="sr-only peer"
-                  />
-                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-500"></div>
-                </label>
+                {canUseFoodSurcharge ? (
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={foodSurchargeSettings.food_surcharge_enabled}
+                      onChange={(e) => setFoodSurchargeSettings({
+                        ...foodSurchargeSettings,
+                        food_surcharge_enabled: e.target.checked
+                      })}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-500"></div>
+                  </label>
+                ) : (
+                  <span className="text-xs text-gray-500">Upgrade required</span>
+                )}
               </div>
 
-              {foodSurchargeSettings.food_surcharge_enabled && (
+              {!canUseFoodSurcharge && (
+                <div className="mt-3 p-3 bg-purple-50 border border-purple-200 rounded-lg">
+                  <p className="text-sm text-purple-700">
+                    Upgrade to <strong>Professional</strong> or <strong>Enterprise</strong> to add surcharges for holidays, festivals, or peak seasons.
+                  </p>
+                </div>
+              )}
+
+              {canUseFoodSurcharge && foodSurchargeSettings.food_surcharge_enabled && (
                 <div className="mt-4 ml-13 space-y-4">
                   <div className="p-4 bg-purple-50 rounded-lg space-y-4">
                     {/* Surcharge Name */}
@@ -3461,9 +3479,27 @@ function SettingsContent() {
                     className="w-full px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 font-medium flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg"
                   >
                     <ArrowUpRight className="w-5 h-5" />
-                    Upgrade to Pro
+                    Upgrade Plan
                   </a>
                 )
+              )}
+
+              {/* Unsubscribe Button - only show for active paid subscriptions */}
+              {profile.subscription.status === 'active' &&
+               profile.subscription.plan?.toLowerCase() !== 'free' &&
+               profile.subscription.is_subscribed &&
+               !profile.subscription.cancel_at_period_end && (
+                <button
+                  onClick={() => {
+                    if (confirm('Are you sure you want to cancel your subscription? You will continue to have access until the end of your current billing period.')) {
+                      handleManageBilling();
+                    }
+                  }}
+                  className="w-full px-6 py-3 bg-white text-red-600 border-2 border-red-200 rounded-lg hover:bg-red-50 font-medium flex items-center justify-center gap-2 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                  Unsubscribe Plan
+                </button>
               )}
 
               {/* Additional info for Stripe Customer Portal */}
