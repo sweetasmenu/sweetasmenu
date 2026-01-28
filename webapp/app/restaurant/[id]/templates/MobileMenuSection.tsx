@@ -105,7 +105,7 @@ export default function MobileMenuSection({
           const isBestSeller = category === 'Bestseller' || category === 'ขายดี';
 
           return (
-            <div key={category} className="px-4">
+            <div key={category} id={`category-${category.replace(/\s+/g, '-')}`} className="px-4 scroll-mt-20">
               {/* Category Header */}
               <div className="flex items-center justify-between mb-3">
                 <h3 className={`text-lg font-bold ${isBestSeller ? 'text-orange-600' : 'text-gray-800'}`}>
