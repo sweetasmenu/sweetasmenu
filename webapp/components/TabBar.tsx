@@ -98,14 +98,14 @@ export default function TabBar() {
 
   return (
     <div className="sticky top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 shadow-lg">
-      <nav className="flex justify-around items-center h-18 max-w-2xl mx-auto">
+      <nav className="flex justify-around items-center h-14 sm:h-16 max-w-3xl mx-auto px-1">
         {tabs.map((tab) => {
           const isActive = isDashboardActive(tab.href);
           return (
             <Link
               key={tab.href}
               href={tab.href}
-              className={`flex flex-col items-center justify-center flex-1 h-full py-2 transition-colors ${
+              className={`flex flex-col items-center justify-center flex-1 h-full py-1 sm:py-2 transition-colors min-w-0 ${
                 isActive
                   ? 'text-orange-500'
                   : 'text-gray-600 hover:text-gray-800'
@@ -114,7 +114,7 @@ export default function TabBar() {
               <span className={isActive ? 'text-orange-500' : 'text-gray-500'}>
                 {tab.icon}
               </span>
-              <span className={`text-sm mt-1 font-bold ${isActive ? 'text-orange-500' : 'text-gray-600'}`}>
+              <span className={`text-[10px] sm:text-xs mt-0.5 font-semibold whitespace-nowrap ${isActive ? 'text-orange-500' : 'text-gray-600'}`}>
                 {tab.label}
               </span>
             </Link>
@@ -123,10 +123,10 @@ export default function TabBar() {
         {/* Sign Out Button */}
         <button
           onClick={handleSignOut}
-          className="flex flex-col items-center justify-center flex-1 h-full py-2 transition-colors text-red-500 hover:text-red-600"
+          className="flex flex-col items-center justify-center flex-1 h-full py-1 sm:py-2 transition-colors text-red-500 hover:text-red-600 min-w-0"
         >
           <LogOut className="w-6 h-6" />
-          <span className="text-sm mt-1 font-bold">Sign Out</span>
+          <span className="text-[10px] sm:text-xs mt-0.5 font-semibold whitespace-nowrap">Sign Out</span>
         </button>
       </nav>
     </div>

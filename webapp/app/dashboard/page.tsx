@@ -439,38 +439,38 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50">
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
+          <div className="flex items-center justify-between h-14 sm:h-16">
+            <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
+              <div className="flex items-center min-w-0">
                 {restaurantLogo ? (
                   <img
                     src={restaurantLogo}
                     alt={restaurantName || 'Restaurant Logo'}
-                    className="w-10 h-10 object-contain rounded-lg"
+                    className="w-8 h-8 sm:w-10 sm:h-10 object-contain rounded-lg flex-shrink-0"
                   />
                 ) : (
-                  <div className="bg-orange-500 p-2 rounded-lg">
-                    <ChefHat className="w-6 h-6 text-white" />
+                  <div className="bg-orange-500 p-1.5 sm:p-2 rounded-lg flex-shrink-0">
+                    <ChefHat className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                   </div>
                 )}
-                <h1 className="ml-3 text-xl font-bold text-gray-900">
+                <h1 className="ml-2 sm:ml-3 text-sm sm:text-xl font-bold text-gray-900 truncate max-w-[80px] sm:max-w-none">
                   {restaurantName || 'SmartMenu'}
                 </h1>
               </div>
 
               {/* Branch Dropdown */}
               {restaurants.length > 1 && (
-                <div className="relative">
+                <div className="relative flex-shrink-0">
                   <button
                     onClick={() => setShowBranchDropdown(!showBranchDropdown)}
-                    className="flex items-center gap-2 px-3 py-2 bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors border border-orange-200"
+                    className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors border border-orange-200"
                   >
                     <Building2 className="w-4 h-4 text-orange-600" />
-                    <span className="text-sm font-medium text-gray-700 max-w-[150px] truncate">
+                    <span className="text-xs sm:text-sm font-medium text-gray-700 max-w-[60px] sm:max-w-[150px] truncate hidden sm:inline">
                       {restaurantName || 'Select Branch'}
                     </span>
-                    <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${showBranchDropdown ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`w-3 h-3 sm:w-4 sm:h-4 text-gray-500 transition-transform ${showBranchDropdown ? 'rotate-180' : ''}`} />
                   </button>
 
                   {showBranchDropdown && (
@@ -506,30 +506,30 @@ export default function DashboardPage() {
                 </div>
               )}
 
-              {/* Single restaurant name display */}
+              {/* Single restaurant name display - hidden on mobile */}
               {restaurants.length === 1 && restaurantName && (
-                <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg">
+                <div className="hidden sm:flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg">
                   <Building2 className="w-4 h-4 text-gray-500" />
                   <span className="text-sm font-medium text-gray-700">{restaurantName}</span>
                 </div>
               )}
             </div>
 
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
               {/* Admin Button - Only visible for admin role */}
               {userRole === 'admin' && (
                 <Link
                   href="/dashboard/admin"
-                  className="flex items-center space-x-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors"
+                  className="flex items-center space-x-1 sm:space-x-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors"
                 >
                   <Shield className="w-4 h-4" />
-                  <span className="text-sm font-medium">Admin</span>
+                  <span className="text-xs sm:text-sm font-medium hidden sm:inline">Admin</span>
                 </Link>
               )}
-              <div className="flex items-center space-x-2">
-                <User className="w-5 h-5 text-gray-500" />
-                <span className="text-sm text-gray-700">
-                  {user?.user_metadata?.full_name || user?.email}
+              <div className="flex items-center space-x-1 sm:space-x-2">
+                <User className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" />
+                <span className="text-xs sm:text-sm text-gray-700 max-w-[60px] sm:max-w-[150px] truncate">
+                  {user?.user_metadata?.full_name || user?.email?.split('@')[0]}
                 </span>
               </div>
             </div>
