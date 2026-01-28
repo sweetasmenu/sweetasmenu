@@ -26,7 +26,8 @@ import {
   Receipt,
   ChevronDown,
   Building2,
-  Shield
+  Shield,
+  QrCode
 } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -550,16 +551,26 @@ export default function DashboardPage() {
                   {user?.user_metadata?.full_name || user?.email}
                 </p>
               </div>
-              {/* View Menu Button - Prominent placement */}
+              {/* View Menu & QR Code Buttons */}
               {restaurantId && (
-                <Link
-                  href={`/restaurant/${restaurantSlug || restaurantId}`}
-                  target="_blank"
-                  className="flex items-center gap-3 px-6 py-3 bg-white text-orange-600 rounded-xl font-bold text-lg hover:bg-orange-50 transition-colors shadow-lg"
-                >
-                  <ExternalLink className="w-6 h-6" />
-                  {primaryLanguage === 'en' ? 'View Menu' : (primaryLanguage === 'th' ? 'ดูเมนู / View Menu' : 'View Menu')}
-                </Link>
+                <div className="flex items-center gap-3">
+                  <Link
+                    href={`/restaurant/${restaurantSlug || restaurantId}`}
+                    target="_blank"
+                    className="flex items-center gap-3 px-6 py-3 bg-white text-orange-600 rounded-xl font-bold text-lg hover:bg-orange-50 transition-colors shadow-lg"
+                  >
+                    <ExternalLink className="w-6 h-6" />
+                    {primaryLanguage === 'en' ? 'View Menu' : (primaryLanguage === 'th' ? 'ดูเมนู / View Menu' : 'View Menu')}
+                  </Link>
+                  <Link
+                    href={`/qr/${restaurantSlug || restaurantId}`}
+                    target="_blank"
+                    className="flex items-center gap-3 px-6 py-3 bg-white/20 text-white rounded-xl font-bold text-lg hover:bg-white/30 transition-colors border-2 border-white/50"
+                  >
+                    <QrCode className="w-6 h-6" />
+                    QR Code
+                  </Link>
+                </div>
               )}
             </div>
           </div>
