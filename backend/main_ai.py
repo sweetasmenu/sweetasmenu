@@ -2945,12 +2945,18 @@ async def get_user_profile(
         if is_valid_uuid:
             if restaurant_id:
                 # SECURITY: Validate that the restaurant belongs to this user
+                # Handle NULL user_id (from early migrations) - allow access if user_id is NULL or matches
                 candidate_restaurant = restaurant_service.get_restaurant_by_id(restaurant_id)
-                if candidate_restaurant and candidate_restaurant.get('user_id') == user_id:
-                    restaurant = candidate_restaurant
+                if candidate_restaurant:
+                    restaurant_user_id = candidate_restaurant.get('user_id')
+                    # Allow access if: user_id is NULL OR user_id matches
+                    if restaurant_user_id is None or restaurant_user_id == user_id:
+                        restaurant = candidate_restaurant
+                    else:
+                        # Restaurant belongs to different user - ignore the restaurant_id
+                        print(f"⚠️ Restaurant {restaurant_id} does not belong to user {user_id}, ignoring")
+                        restaurant = None
                 else:
-                    # Restaurant doesn't exist or belongs to different user - ignore the restaurant_id
-                    print(f"⚠️ Restaurant {restaurant_id} does not belong to user {user_id}, ignoring")
                     restaurant = None
 
             if not restaurant:
@@ -4814,14 +4820,15 @@ async def get_restaurant_images(restaurant_id: str, user_id: str, limit: int = 5
         
         if not restaurant:
             raise HTTPException(status_code=404, detail="Restaurant not found")
-        
-        # Check ownership
-        if restaurant.get('user_id') != user_id:
+
+        # Check ownership - allow if user_id is NULL or matches
+        restaurant_user_id = restaurant.get('user_id')
+        if restaurant_user_id is not None and restaurant_user_id != user_id:
             raise HTTPException(
                 status_code=403,
                 detail="You don't have permission to access this restaurant's images"
             )
-        
+
         images = image_library_service.get_images_by_restaurant(restaurant_id, limit)
         
         return {
@@ -5094,10 +5101,12 @@ async def delete_restaurant(restaurant_id: str, user_id: str):
         restaurant = restaurant_service.get_restaurant_by_id(restaurant_id)
         if not restaurant:
             raise HTTPException(status_code=404, detail="Restaurant not found")
-        
-        if restaurant.get('user_id') != user_id:
+
+        # Check ownership - allow if user_id is NULL or matches
+        restaurant_user_id = restaurant.get('user_id')
+        if restaurant_user_id is not None and restaurant_user_id != user_id:
             raise HTTPException(status_code=403, detail="You don't have permission to delete this restaurant")
-        
+
         # Delete (CASCADE will handle menus, orders, etc.)
         success = restaurant_service.delete_restaurant(restaurant_id, user_id)
         
@@ -5239,12 +5248,16 @@ async def copy_menu_to_restaurant(request: Dict[str, Any]):
         if not source_menu:
             raise HTTPException(status_code=404, detail="Source menu not found")
         
-        # Verify target restaurant belongs to user
+        # Verify target restaurant belongs to user - allow if user_id is NULL or matches
         target_restaurant = restaurant_service.get_restaurant_by_id(target_restaurant_id)
-        if not target_restaurant or target_restaurant.get('user_id') != user_id:
+        if not target_restaurant:
+            raise HTTPException(status_code=404, detail="Target restaurant not found")
+
+        target_user_id = target_restaurant.get('user_id')
+        if target_user_id is not None and target_user_id != user_id:
             raise HTTPException(
                 status_code=403,
-                detail="Target restaurant not found or you don't have permission"
+                detail="You don't have permission to access target restaurant"
             )
         
         # Copy menu item (with all translations including meats/addOns)

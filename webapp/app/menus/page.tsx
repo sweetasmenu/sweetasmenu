@@ -167,6 +167,23 @@ export default function MenusPage() {
     fetchUserRoleAndRestaurants();
   }, []);
 
+  // Listen for branch changes from other pages (Dashboard, Settings, etc.)
+  useEffect(() => {
+    const handleBranchChange = () => {
+      console.log('🔄 My Menu: Branch changed, reloading menus...');
+      fetchRestaurantIdAndMenus();
+      fetchUserRoleAndRestaurants();
+    };
+
+    window.addEventListener('branchChanged', handleBranchChange);
+    window.addEventListener('userRoleChanged', handleBranchChange);
+
+    return () => {
+      window.removeEventListener('branchChanged', handleBranchChange);
+      window.removeEventListener('userRoleChanged', handleBranchChange);
+    };
+  }, []);
+
   const fetchRestaurantIdAndMenus = async () => {
     try {
       // Get restaurant ID first
