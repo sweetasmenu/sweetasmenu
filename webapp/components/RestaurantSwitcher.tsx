@@ -60,20 +60,39 @@ export default function RestaurantSwitcher({
     }
   }, [userId]);
 
-  const handleSwitch = (restaurantId: string) => {
+  const handleSwitch = async (restaurantId: string) => {
     setSelectedId(restaurantId);
     setShowDropdown(false);
-    
-    // Save to localStorage
+
+    // Save to localStorage (user-scoped)
     localStorage.setItem(`selected_restaurant_${userId}`, restaurantId);
-    
+
+    // Update backend
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      await fetch(`${API_URL}/api/user/set-restaurant`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: userId,
+          restaurant_id: restaurantId,
+        }),
+      });
+    } catch (error) {
+      console.error('Failed to update restaurant:', error);
+    }
+
+    // Dispatch events for other components to sync
+    window.dispatchEvent(new CustomEvent('branchChanged', { detail: { restaurantId } }));
+    window.dispatchEvent(new CustomEvent('userRoleChanged'));
+
     // Callback
     if (onSwitch) {
       onSwitch(restaurantId);
     }
-    
-    // Reload page to refresh data
-    window.location.reload();
+
+    // Reload page to refresh data (keep this for now to ensure data consistency)
+    setTimeout(() => window.location.reload(), 100);
   };
 
   const currentRestaurant = restaurants.find(r => r.id === selectedId);
