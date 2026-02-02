@@ -1662,7 +1662,15 @@ export default function RestaurantMenuPage() {
                         )}
                         {serviceOptions.pickup && (
                           <button
-                            onClick={() => setServiceType('pickup')}
+                            onClick={() => {
+                              setServiceType('pickup');
+                              // Auto-fill pickup time to 30 minutes from now
+                              const pickupTime = new Date(Date.now() + 30 * 60 * 1000);
+                              const defaultTime = pickupTime.toISOString().slice(0, 16);
+                              setCustomerDetails(prev => ({ ...prev, pickup_time: defaultTime }));
+                              // Show wait time message
+                              alert(dt('customer', 'pickupWaitTime', getCustomerLang()));
+                            }}
                             className={`p-3 rounded-lg border-2 transition-all ${
                               serviceType === 'pickup'
                                 ? 'border-orange-500 bg-orange-50'
