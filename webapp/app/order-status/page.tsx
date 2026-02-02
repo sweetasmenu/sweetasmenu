@@ -30,7 +30,7 @@ interface OrderItem {
 interface Order {
   id: string;
   restaurant_id: string;
-  status: 'pending' | 'pending_payment' | 'confirmed' | 'preparing' | 'ready' | 'completed' | 'cancelled';
+  status: 'pending' | 'pending_payment' | 'verifying_payment' | 'confirmed' | 'preparing' | 'ready' | 'completed' | 'cancelled';
   service_type?: 'dine_in' | 'pickup' | 'delivery';
   items: OrderItem[];
   total_price: number;

@@ -126,7 +126,7 @@ interface Order {
   tax: number;
   delivery_fee: number;
   total_price: number;
-  status: 'pending' | 'pending_payment' | 'payment_rejected' | 'confirmed' | 'preparing' | 'ready' | 'completed' | 'cancelled';
+  status: 'pending' | 'pending_payment' | 'verifying_payment' | 'payment_rejected' | 'confirmed' | 'preparing' | 'ready' | 'completed' | 'cancelled';
   service_type?: 'dine_in' | 'pickup' | 'delivery';
   customer_name?: string;
   customer_phone?: string;
