@@ -360,7 +360,7 @@ export default function CashierDashboardPage() {
           <h2>Revenue by Payment Method</h2>
           <div class="row"><span>Credit/Debit Card:</span><span>$${summary.revenue_by_method.card.toFixed(2)}</span></div>
           <div class="row"><span>Bank Transfer:</span><span>$${summary.revenue_by_method.bank_transfer.toFixed(2)}</span></div>
-          <div class="row"><span>Cash at Counter:</span><span>$${summary.revenue_by_method.cash_at_counter.toFixed(2)}</span></div>
+          <div class="row"><span>Pay at Cashier:</span><span>$${summary.revenue_by_method.cash_at_counter.toFixed(2)}</span></div>
           <div class="row"><span>Unpaid:</span><span>$${summary.revenue_by_method.unpaid.toFixed(2)}</span></div>
         </div>
 

@@ -39,7 +39,7 @@ interface Order {
   id: string;
   table_no: string | null;
   items: OrderItem[];
-  status: 'pending_payment' | 'pending' | 'confirmed' | 'preparing' | 'ready' | 'completed' | 'cancelled';
+  status: 'pending_payment' | 'awaiting_cashier_payment' | 'pending' | 'confirmed' | 'preparing' | 'ready' | 'completed' | 'cancelled';
   service_type: 'dine_in' | 'pickup' | 'delivery';
   special_instructions?: string;
   created_at: string;
@@ -47,7 +47,7 @@ interface Order {
   customer_phone?: string;
   customer_details?: CustomerDetails;
   total_price: number;
-  payment_method?: 'card' | 'bank_transfer' | 'cash_at_counter';
+  payment_method?: 'card' | 'bank_transfer' | 'cash_at_counter' | 'cash_at_cashier';
   payment_status?: 'pending' | 'paid' | 'failed';
   payment_intent_id?: string;
   payment_slip_url?: string;
@@ -508,6 +508,27 @@ export default function StaffOrdersPage() {
       }
     } catch (error) {
       console.error('Failed to update order:', error);
+    }
+  };
+
+  // Confirm cashier payment - staff confirms customer has paid at cashier
+  const confirmCashierPayment = async (orderId: string) => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/orders/${orderId}/confirm-cashier-payment`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          // Order will now be 'confirmed' and sent to kitchen
+          // The real-time subscription will update the order list
+          console.log('✅ Cashier payment confirmed, order sent to kitchen');
+        }
+      }
+    } catch (error) {
+      console.error('Failed to confirm cashier payment:', error);
     }
   };
 
@@ -1241,6 +1262,7 @@ export default function StaffOrdersPage() {
   const getStatusColor = (status: Order['status']) => {
     switch (status) {
       case 'pending_payment': return 'bg-purple-500';
+      case 'awaiting_cashier_payment': return 'bg-orange-500';
       case 'pending': return 'bg-yellow-500';
       case 'confirmed': return 'bg-blue-500';
       case 'preparing': return 'bg-orange-500';
@@ -1372,6 +1394,7 @@ export default function StaffOrdersPage() {
                       <div>
                         <span className={`px-2 py-1 rounded text-xs font-semibold ${getStatusColor(order.status)}`}>
                           {order.status === 'pending_payment' ? (lang === 'th' ? 'รอยืนยันชำระเงิน' : 'Awaiting Payment') :
+                           order.status === 'awaiting_cashier_payment' ? (lang === 'th' ? 'รอรับเงินที่แคชเชียร์' : 'Pay at Cashier') :
                            order.status === 'pending' ? t('orders', 'pending', lang) :
                            order.status === 'confirmed' ? t('orders', 'confirmed', lang) :
                            order.status === 'preparing' ? t('orders', 'preparing', lang) :
@@ -1461,6 +1484,16 @@ export default function StaffOrdersPage() {
                       >
                         <Eye className="w-5 h-5" />
                         {lang === 'th' ? 'ตรวจสอบการชำระเงิน' : 'Verify Payment'}
+                      </button>
+                    )}
+                    {/* Confirm Cashier Payment Button - for awaiting_cashier_payment orders */}
+                    {order.status === 'awaiting_cashier_payment' && (
+                      <button
+                        onClick={() => confirmCashierPayment(order.id)}
+                        className={`flex-1 py-2 bg-green-500 hover:bg-green-600 rounded-lg font-semibold flex items-center justify-center gap-2`}
+                      >
+                        <CheckCircle className="w-5 h-5" />
+                        {lang === 'th' ? 'ยืนยันรับเงินแล้ว' : 'Confirm Payment'}
                       </button>
                     )}
                     {/* Confirm Order Button - for pending orders (already paid/verified) */}

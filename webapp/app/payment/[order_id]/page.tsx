@@ -41,7 +41,7 @@ interface BankAccount {
 interface PaymentSettings {
   accept_card: boolean;
   accept_bank_transfer: boolean;
-  accept_cash_at_counter?: boolean;  // Pay at counter for dine-in
+  accept_cash_at_counter?: boolean;  // Pay at cashier for dine-in
   bank_accounts: BankAccount[];
 }
 
@@ -389,7 +389,7 @@ export default function PaymentPage() {
   const [order, setOrder] = useState<Order | null>(null);
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [paymentSettings, setPaymentSettings] = useState<PaymentSettings | null>(null);
-  const [selectedMethod, setSelectedMethod] = useState<'card' | 'bank_transfer' | 'cash_at_counter' | null>(null);
+  const [selectedMethod, setSelectedMethod] = useState<'card' | 'bank_transfer' | 'cash_at_cashier' | null>(null);
   const [processingCashPayment, setProcessingCashPayment] = useState(false);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -398,8 +398,8 @@ export default function PaymentPage() {
   // Surcharge confirmation popup
   const [showSurchargeConfirm, setShowSurchargeConfirm] = useState(false);
 
-  // Pay at Counter confirmation popup
-  const [showPayAtCounterConfirm, setShowPayAtCounterConfirm] = useState(false);
+  // Pay at Cashier confirmation popup
+  const [showPayAtCashierConfirm, setShowPayAtCashierConfirm] = useState(false);
 
   // Surcharge settings for card payments
   const [surchargeSettings, setSurchargeSettings] = useState({
@@ -575,20 +575,20 @@ export default function PaymentPage() {
     setPaymentSuccess(true);
   };
 
-  // Handle Pay at Counter selection
-  const handlePayAtCounter = async () => {
+  // Handle Pay at Cashier selection
+  const handlePayAtCashier = async () => {
     if (!order) return;
 
     setProcessingCashPayment(true);
     setError(null);
 
     try {
-      // Update order to confirm and set payment method to cash_at_counter
-      const response = await fetch(`${API_URL}/api/orders/${order.id}/pay-at-counter`, {
+      // Update order to set payment method to cash_at_cashier (status stays pending_payment until staff confirms)
+      const response = await fetch(`${API_URL}/api/orders/${order.id}/pay-at-cashier`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          payment_method: 'cash_at_counter',
+          payment_method: 'cash_at_cashier',
         }),
       });
 
@@ -599,13 +599,13 @@ export default function PaymentPage() {
         const statusParams = new URLSearchParams();
         statusParams.set('lang', selectedLanguage);
         statusParams.set('restaurant', restaurantSlug || order.restaurant_id);
-        statusParams.set('payment', 'counter');
+        statusParams.set('payment', 'cashier');
         router.push(`/order-status/${order.id}?${statusParams.toString()}`);
       } else {
         setError(data.detail || 'Failed to confirm order');
       }
     } catch (err) {
-      console.error('Error confirming pay at counter:', err);
+      console.error('Error confirming pay at cashier:', err);
       setError('Failed to confirm order. Please try again.');
     } finally {
       setProcessingCashPayment(false);
@@ -850,12 +850,12 @@ export default function PaymentPage() {
               </button>
             )}
 
-            {/* Pay at Counter - Only for Dine-in orders */}
+            {/* Pay at Cashier - Only for Dine-in orders */}
             {order.service_type === 'dine_in' && (
               <button
-                onClick={() => setSelectedMethod('cash_at_counter')}
+                onClick={() => setSelectedMethod('cash_at_cashier')}
                 className={`w-full p-4 rounded-lg border-2 text-left transition-all flex items-center gap-4 ${
-                  selectedMethod === 'cash_at_counter'
+                  selectedMethod === 'cash_at_cashier'
                     ? 'border-orange-500 bg-orange-50'
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
@@ -864,7 +864,7 @@ export default function PaymentPage() {
                   <Banknote className="w-6 h-6 text-orange-600" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900">Pay at Counter</h3>
+                  <h3 className="font-semibold text-gray-900">Pay at Cashier</h3>
                   <p className="text-sm text-gray-600">Pay with cash or card at the cashier</p>
                 </div>
               </button>
@@ -906,16 +906,16 @@ export default function PaymentPage() {
           </div>
         )}
 
-        {/* Pay at Counter Confirmation */}
-        {selectedMethod === 'cash_at_counter' && (
+        {/* Pay at Cashier Confirmation */}
+        {selectedMethod === 'cash_at_cashier' && (
           <div className="bg-white rounded-xl shadow-lg p-6">
             <div className="text-center mb-6">
               <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Banknote className="w-8 h-8 text-orange-600" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Pay at Counter</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Pay at Cashier</h3>
               <p className="text-gray-600">
-                Your order will be sent to the kitchen. Please pay at the cashier when ready.
+                Please pay at the cashier first. Your order will start being prepared after payment is received.
               </p>
             </div>
 
@@ -933,12 +933,12 @@ export default function PaymentPage() {
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
               <p className="text-sm text-yellow-800">
                 <strong>Note:</strong> Please show your table number to the cashier when paying.
-                You can pay with cash or card at the counter.
+                You can pay with cash or card at the cashier.
               </p>
             </div>
 
             <button
-              onClick={() => setShowPayAtCounterConfirm(true)}
+              onClick={() => setShowPayAtCashierConfirm(true)}
               disabled={processingCashPayment}
               className="w-full py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg font-bold text-lg hover:from-orange-600 hover:to-orange-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
@@ -950,7 +950,7 @@ export default function PaymentPage() {
               ) : (
                 <>
                   <CheckCircle className="w-5 h-5" />
-                  Confirm Order & Pay at Counter
+                  Confirm Order & Pay at Cashier
                 </>
               )}
             </button>
@@ -1024,8 +1024,8 @@ export default function PaymentPage() {
         </div>
       )}
 
-      {/* Pay at Counter Confirmation Modal */}
-      {showPayAtCounterConfirm && order && (
+      {/* Pay at Cashier Confirmation Modal */}
+      {showPayAtCashierConfirm && order && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl">
             <div className="text-center mb-6">
@@ -1037,7 +1037,7 @@ export default function PaymentPage() {
 
             <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 mb-6">
               <p className="text-orange-800 font-medium text-center leading-relaxed">
-                Please pay at the counter first.<br />
+                Please pay at the cashier first.<br />
                 Your order will start being prepared after payment is received.
               </p>
             </div>
@@ -1056,7 +1056,7 @@ export default function PaymentPage() {
             <div className="flex gap-3">
               <button
                 onClick={() => {
-                  setShowPayAtCounterConfirm(false);
+                  setShowPayAtCashierConfirm(false);
                   setSelectedMethod(null);
                 }}
                 className="flex-1 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
@@ -1065,8 +1065,8 @@ export default function PaymentPage() {
               </button>
               <button
                 onClick={() => {
-                  setShowPayAtCounterConfirm(false);
-                  handlePayAtCounter();
+                  setShowPayAtCashierConfirm(false);
+                  handlePayAtCashier();
                 }}
                 disabled={processingCashPayment}
                 className="flex-1 py-3 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"

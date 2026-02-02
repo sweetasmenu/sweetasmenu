@@ -457,10 +457,16 @@ export const posTranslations = {
       de: 'Banküberweisung', id: 'Transfer Bank', ms: 'Pindahan Bank'
     },
     cashAtCounter: {
-      th: 'เงินสด', en: 'Cash at Counter', zh: '现金',
+      th: 'เงินสด', en: 'Pay at Cashier', zh: '现金',
       ja: '現金', ko: '현금', vi: 'Tiền mặt',
       hi: 'नकद', es: 'Efectivo', fr: 'Espèces',
       de: 'Bargeld', id: 'Tunai', ms: 'Tunai'
+    },
+    cashAtCashier: {
+      th: 'จ่ายเงินที่แคชเชียร์', en: 'Pay at Cashier', zh: '收银台付款',
+      ja: 'レジで支払い', ko: '계산대에서 결제', vi: 'Thanh toán tại quầy',
+      hi: 'कैशियर पर भुगतान', es: 'Pagar en caja', fr: 'Payer à la caisse',
+      de: 'An der Kasse bezahlen', id: 'Bayar di Kasir', ms: 'Bayar di Kaunter'
     },
     unpaid: {
       th: 'ยังไม่ชำระ', en: 'Unpaid', zh: '未付款',

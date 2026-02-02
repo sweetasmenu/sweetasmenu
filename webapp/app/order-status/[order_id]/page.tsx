@@ -126,7 +126,7 @@ interface Order {
   tax: number;
   delivery_fee: number;
   total_price: number;
-  status: 'pending' | 'pending_payment' | 'verifying_payment' | 'payment_rejected' | 'confirmed' | 'preparing' | 'ready' | 'completed' | 'cancelled';
+  status: 'pending' | 'pending_payment' | 'awaiting_cashier_payment' | 'verifying_payment' | 'payment_rejected' | 'confirmed' | 'preparing' | 'ready' | 'completed' | 'cancelled';
   service_type?: 'dine_in' | 'pickup' | 'delivery';
   customer_name?: string;
   customer_phone?: string;
@@ -138,7 +138,7 @@ interface Order {
   estimated_minutes?: number;
   cooking_started_at?: string;
   // Payment fields
-  payment_method?: 'card' | 'bank_transfer' | 'cash';
+  payment_method?: 'card' | 'bank_transfer' | 'cash' | 'cash_at_cashier';
   payment_slip_url?: string;
   payment_intent_id?: string;
   cancel_reason?: string;
@@ -307,6 +307,15 @@ export default function OrderStatusPage() {
           icon: <Clock className="w-6 h-6" />,
           text: t('status', 'awaitingPayment', lang),
           description: t('status', 'awaitingPaymentDesc', lang),
+          color: 'text-orange-600',
+          bgColor: 'bg-orange-100',
+          borderColor: 'border-orange-300'
+        };
+      case 'awaiting_cashier_payment':
+        return {
+          icon: <Clock className="w-6 h-6" />,
+          text: lang === 'th' ? 'รอชำระเงินที่แคชเชียร์' : 'Please Pay at Cashier',
+          description: lang === 'th' ? 'กรุณาชำระเงินที่แคชเชียร์ก่อน รายการอาหารจะเริ่มทำหลังได้รับการชำระเงิน' : 'Please pay at the cashier first. Your order will start being prepared after payment is confirmed.',
           color: 'text-orange-600',
           bgColor: 'bg-orange-100',
           borderColor: 'border-orange-300'

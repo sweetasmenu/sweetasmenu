@@ -30,14 +30,14 @@ interface OrderItem {
 interface Order {
   id: string;
   restaurant_id: string;
-  status: 'pending' | 'pending_payment' | 'verifying_payment' | 'confirmed' | 'preparing' | 'ready' | 'completed' | 'cancelled';
+  status: 'pending' | 'pending_payment' | 'awaiting_cashier_payment' | 'verifying_payment' | 'confirmed' | 'preparing' | 'ready' | 'completed' | 'cancelled';
   service_type?: 'dine_in' | 'pickup' | 'delivery';
   items: OrderItem[];
   total_price: number;
   created_at: string;
   table_no?: string;
   restaurant_name?: string;
-  payment_method?: 'card' | 'bank_transfer' | 'cash';
+  payment_method?: 'card' | 'bank_transfer' | 'cash' | 'cash_at_cashier';
 }
 
 interface StoredOrder {
@@ -174,6 +174,13 @@ export default function MyOrdersPage() {
         return {
           icon: <CreditCard className="w-5 h-5" />,
           text: 'Awaiting Payment',
+          color: 'text-orange-600',
+          bgColor: 'bg-orange-100'
+        };
+      case 'awaiting_cashier_payment':
+        return {
+          icon: <Clock className="w-5 h-5" />,
+          text: 'Pay at Cashier',
           color: 'text-orange-600',
           bgColor: 'bg-orange-100'
         };

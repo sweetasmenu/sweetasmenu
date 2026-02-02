@@ -3889,23 +3889,23 @@ async def update_order_estimated_time(order_id: str, request: UpdateEstimatedTim
 
 
 # ============================================================
-# Pay at Counter API (for Dine-in orders)
+# Pay at Cashier API (for Dine-in orders)
 # ============================================================
 
-class PayAtCounterRequest(BaseModel):
-    payment_method: str = "cash_at_counter"
+class PayAtCashierRequest(BaseModel):
+    payment_method: str = "cash_at_cashier"
 
-@app.post("/api/orders/{order_id}/pay-at-counter", summary="Confirm Pay at Counter")
-async def pay_at_counter(order_id: str, request: PayAtCounterRequest):
+@app.post("/api/orders/{order_id}/pay-at-cashier", summary="Request Pay at Cashier")
+async def pay_at_cashier(order_id: str, request: PayAtCashierRequest):
     """
-    ยืนยันการจ่ายเงินที่เค้าท์เตอร์สำหรับ Dine-in orders
+    ขอจ่ายเงินที่แคชเชียร์สำหรับ Dine-in orders
 
-    Order จะถูกส่งไปครัวและสถานะการจ่ายจะเป็น pending
-    ลูกค้าจ่ายเงินที่แคชเชียร์หลังจากทานอาหารเสร็จ
+    Order จะอยู่ในสถานะ awaiting_cashier_payment รอให้พนักงานยืนยันการชำระเงิน
+    หลังจากพนักงานยืนยันแล้ว order จะถูกส่งไปครัว
 
     Args:
         order_id: Order ID
-        payment_method: Payment method (default: cash_at_counter)
+        payment_method: Payment method (default: cash_at_cashier)
 
     Returns:
         Dictionary with updated order
@@ -3918,13 +3918,14 @@ async def pay_at_counter(order_id: str, request: PayAtCounterRequest):
 
         # Verify it's a dine-in order
         if order.get("service_type") != "dine_in":
-            raise HTTPException(status_code=400, detail="Pay at counter is only available for dine-in orders")
+            raise HTTPException(status_code=400, detail="Pay at cashier is only available for dine-in orders")
 
-        # Update order with payment method and confirm for kitchen
+        # Update order with payment method - status stays awaiting cashier payment
+        # Order will NOT go to kitchen until staff confirms payment
         update_data = {
             "payment_method": request.payment_method,
-            "payment_status": "pending",  # Will be marked as paid when customer pays at counter
-            "status": "confirmed"  # Send to kitchen immediately
+            "payment_status": "pending",
+            "status": "awaiting_cashier_payment"  # New status - waiting for staff to confirm payment
         }
 
         updated_order = orders_service.update_order(order_id, update_data)
@@ -3934,13 +3935,69 @@ async def pay_at_counter(order_id: str, request: PayAtCounterRequest):
 
         return {
             "success": True,
-            "message": "Order confirmed. Please pay at the counter.",
+            "message": "Please pay at the cashier. Your order will be prepared after payment is confirmed.",
             "order": updated_order
         }
     except HTTPException:
         raise
     except Exception as e:
-        print(f"❌ Pay at counter error: {str(e)}")
+        print(f"❌ Pay at cashier error: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Keep the old endpoint for backwards compatibility (redirects to new one)
+@app.post("/api/orders/{order_id}/pay-at-counter", summary="Confirm Pay at Counter (Deprecated)")
+async def pay_at_counter(order_id: str, request: PayAtCashierRequest):
+    """Deprecated: Use /pay-at-cashier instead"""
+    return await pay_at_cashier(order_id, request)
+
+# ============================================================
+# Staff Confirm Cashier Payment API
+# ============================================================
+
+@app.post("/api/orders/{order_id}/confirm-cashier-payment", summary="Staff Confirm Cashier Payment")
+async def confirm_cashier_payment(order_id: str):
+    """
+    พนักงานยืนยันว่าลูกค้าจ่ายเงินที่แคชเชียร์แล้ว
+    Order จะถูกส่งไปครัวและสถานะการจ่ายจะเป็น paid
+
+    Args:
+        order_id: Order ID
+
+    Returns:
+        Dictionary with updated order
+    """
+    try:
+        # Get order
+        order = orders_service.get_order(order_id)
+        if not order:
+            raise HTTPException(status_code=404, detail="Order not found")
+
+        # Verify order is awaiting cashier payment
+        if order.get("status") != "awaiting_cashier_payment":
+            raise HTTPException(status_code=400, detail="Order is not awaiting cashier payment")
+
+        # Update order - now send to kitchen
+        update_data = {
+            "payment_status": "paid",
+            "status": "confirmed"  # Now send to kitchen
+        }
+
+        updated_order = orders_service.update_order(order_id, update_data)
+
+        if not updated_order:
+            raise HTTPException(status_code=500, detail="Failed to update order")
+
+        return {
+            "success": True,
+            "message": "Payment confirmed. Order sent to kitchen.",
+            "order": updated_order
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Confirm cashier payment error: {str(e)}")
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
