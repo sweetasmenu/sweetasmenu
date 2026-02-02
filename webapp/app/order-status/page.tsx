@@ -37,7 +37,7 @@ interface Order {
   created_at: string;
   table_no?: string;
   restaurant_name?: string;
-  payment_method?: 'card' | 'bank_transfer' | 'cash' | 'cash_at_cashier';
+  payment_method?: 'card' | 'bank_transfer' | 'cash' | 'cash_at_cashier' | 'cashier_cash' | 'cashier_eftpos';
 }
 
 interface StoredOrder {

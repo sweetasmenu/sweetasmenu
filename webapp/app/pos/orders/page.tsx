@@ -47,7 +47,7 @@ interface Order {
   customer_phone?: string;
   customer_details?: CustomerDetails;
   total_price: number;
-  payment_method?: 'card' | 'bank_transfer' | 'cash_at_counter' | 'cash_at_cashier';
+  payment_method?: 'card' | 'bank_transfer' | 'cash_at_counter' | 'cash_at_cashier' | 'cashier_cash' | 'cashier_eftpos';
   payment_status?: 'pending' | 'paid' | 'failed';
   payment_intent_id?: string;
   payment_slip_url?: string;
@@ -116,6 +116,11 @@ export default function StaffOrdersPage() {
   const [paymentModalOrder, setPaymentModalOrder] = useState<Order | null>(null);
   const [paymentVerifyLoading, setPaymentVerifyLoading] = useState(false);
   const [stripePaymentStatus, setStripePaymentStatus] = useState<'loading' | 'succeeded' | 'failed' | 'pending' | 'unknown'>('loading');
+
+  // Cashier payment confirmation modal states
+  const [showCashierPaymentModal, setShowCashierPaymentModal] = useState(false);
+  const [cashierPaymentOrder, setCashierPaymentOrder] = useState<Order | null>(null);
+  const [cashierPaymentLoading, setCashierPaymentLoading] = useState(false);
 
   // Restaurant details for receipts
   const [restaurantDetails, setRestaurantDetails] = useState<{
@@ -511,12 +516,21 @@ export default function StaffOrdersPage() {
     }
   };
 
+  // Open cashier payment modal - staff selects Cash or EFTPOS
+  const openCashierPaymentModal = (order: Order) => {
+    setCashierPaymentOrder(order);
+    setShowCashierPaymentModal(true);
+  };
+
   // Confirm cashier payment - staff confirms customer has paid at cashier
-  const confirmCashierPayment = async (orderId: string) => {
+  // paymentType: 'cashier_cash' or 'cashier_eftpos'
+  const confirmCashierPayment = async (orderId: string, paymentType: 'cashier_cash' | 'cashier_eftpos') => {
+    setCashierPaymentLoading(true);
     try {
       const response = await fetch(`${BACKEND_URL}/api/orders/${orderId}/confirm-cashier-payment`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ payment_type: paymentType })
       });
 
       if (response.ok) {
@@ -525,10 +539,14 @@ export default function StaffOrdersPage() {
           // Order will now be 'confirmed' and sent to kitchen
           // The real-time subscription will update the order list
           console.log('✅ Cashier payment confirmed, order sent to kitchen');
+          setShowCashierPaymentModal(false);
+          setCashierPaymentOrder(null);
         }
       }
     } catch (error) {
       console.error('Failed to confirm cashier payment:', error);
+    } finally {
+      setCashierPaymentLoading(false);
     }
   };
 
@@ -1489,7 +1507,7 @@ export default function StaffOrdersPage() {
                     {/* Confirm Cashier Payment Button - for awaiting_cashier_payment orders */}
                     {order.status === 'awaiting_cashier_payment' && (
                       <button
-                        onClick={() => confirmCashierPayment(order.id)}
+                        onClick={() => openCashierPaymentModal(order)}
                         className={`flex-1 py-2 bg-green-500 hover:bg-green-600 rounded-lg font-semibold flex items-center justify-center gap-2`}
                       >
                         <CheckCircle className="w-5 h-5" />
@@ -2002,6 +2020,105 @@ export default function StaffOrdersPage() {
                     : '⚠️ Payment failed. Cannot confirm this order.'}
                 </p>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Cashier Payment Confirmation Modal - Select Cash or EFTPOS */}
+      {showCashierPaymentModal && cashierPaymentOrder && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-800 rounded-xl max-w-md w-full">
+            <div className="p-4 border-b border-slate-700 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-green-400">
+                {lang === 'th' ? 'ยืนยันการชำระเงิน' : 'Confirm Payment'}
+              </h3>
+              <button
+                onClick={() => {
+                  setShowCashierPaymentModal(false);
+                  setCashierPaymentOrder(null);
+                }}
+                className="p-1 hover:bg-slate-700 rounded"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-4">
+              {/* Order Info */}
+              <div className="mb-4 p-3 bg-slate-700 rounded-lg">
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <p className="text-slate-400 text-sm">{lang === 'th' ? 'ออเดอร์' : 'Order'}</p>
+                    <p className="text-lg font-bold">#{cashierPaymentOrder.id.slice(0, 8).toUpperCase()}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-slate-400 text-sm">{lang === 'th' ? 'ยอดรวม' : 'Total'}</p>
+                    <p className="text-lg font-bold text-green-400">${cashierPaymentOrder.total_price?.toFixed(2) || '0.00'}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 text-sm text-slate-400">
+                  <span>
+                    {cashierPaymentOrder.table_no
+                      ? `${lang === 'th' ? 'โต๊ะ' : 'Table'} ${cashierPaymentOrder.table_no}`
+                      : (cashierPaymentOrder.customer_name || cashierPaymentOrder.customer_details?.name || '-')}
+                  </span>
+                </div>
+              </div>
+
+              {/* Payment Type Selection */}
+              <div className="mb-4">
+                <p className="text-sm text-slate-400 mb-3">{lang === 'th' ? 'ลูกค้าจ่ายด้วย:' : 'Customer paid with:'}</p>
+                <div className="grid grid-cols-2 gap-3">
+                  {/* Cash Button */}
+                  <button
+                    onClick={() => confirmCashierPayment(cashierPaymentOrder.id, 'cashier_cash')}
+                    disabled={cashierPaymentLoading}
+                    className="p-4 bg-green-500/20 border-2 border-green-500 rounded-xl hover:bg-green-500/30 transition-colors disabled:opacity-50"
+                  >
+                    <div className="text-center">
+                      <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-2">
+                        <span className="text-2xl">💵</span>
+                      </div>
+                      <p className="font-bold text-green-400">{lang === 'th' ? 'เงินสด' : 'Cash'}</p>
+                    </div>
+                  </button>
+
+                  {/* EFTPOS Button */}
+                  <button
+                    onClick={() => confirmCashierPayment(cashierPaymentOrder.id, 'cashier_eftpos')}
+                    disabled={cashierPaymentLoading}
+                    className="p-4 bg-blue-500/20 border-2 border-blue-500 rounded-xl hover:bg-blue-500/30 transition-colors disabled:opacity-50"
+                  >
+                    <div className="text-center">
+                      <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-2">
+                        <span className="text-2xl">💳</span>
+                      </div>
+                      <p className="font-bold text-blue-400">EFTPOS</p>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              {/* Loading indicator */}
+              {cashierPaymentLoading && (
+                <div className="flex items-center justify-center py-2">
+                  <Loader2 className="w-6 h-6 animate-spin text-green-500" />
+                  <span className="ml-2 text-slate-400">{lang === 'th' ? 'กำลังดำเนินการ...' : 'Processing...'}</span>
+                </div>
+              )}
+
+              {/* Cancel Button */}
+              <button
+                onClick={() => {
+                  setShowCashierPaymentModal(false);
+                  setCashierPaymentOrder(null);
+                }}
+                disabled={cashierPaymentLoading}
+                className="w-full mt-3 py-2 bg-slate-600 hover:bg-slate-500 rounded-lg font-semibold disabled:opacity-50"
+              >
+                {lang === 'th' ? 'ยกเลิก' : 'Cancel'}
+              </button>
             </div>
           </div>
         </div>

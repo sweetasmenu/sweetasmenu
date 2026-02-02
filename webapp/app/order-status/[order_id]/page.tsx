@@ -138,7 +138,7 @@ interface Order {
   estimated_minutes?: number;
   cooking_started_at?: string;
   // Payment fields
-  payment_method?: 'card' | 'bank_transfer' | 'cash' | 'cash_at_cashier';
+  payment_method?: 'card' | 'bank_transfer' | 'cash' | 'cash_at_cashier' | 'cashier_cash' | 'cashier_eftpos';
   payment_slip_url?: string;
   payment_intent_id?: string;
   cancel_reason?: string;

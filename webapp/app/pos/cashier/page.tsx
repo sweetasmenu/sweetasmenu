@@ -41,6 +41,9 @@ interface DailySummary {
     card: number;
     bank_transfer: number;
     cash_at_counter: number;
+    cash_at_cashier?: number; // Legacy
+    cashier_cash?: number;
+    cashier_eftpos?: number;
     unpaid: number;
   };
   void_reasons: Array<{
@@ -763,8 +766,12 @@ export default function CashierDashboardPage() {
                             <BilingualTextInline category="cashier" textKey="creditDebit" lang={lang} />
                           ) : order.payment_method === 'bank_transfer' ? (
                             <BilingualTextInline category="cashier" textKey="bankTransfer" lang={lang} />
-                          ) : order.payment_method === 'cash_at_counter' ? (
-                            <BilingualTextInline category="cashier" textKey="cashAtCounter" lang={lang} />
+                          ) : order.payment_method === 'cashier_cash' ? (
+                            lang === 'th' ? 'แคชเชียร์/เงินสด' : 'Cashier/Cash'
+                          ) : order.payment_method === 'cashier_eftpos' ? (
+                            lang === 'th' ? 'แคชเชียร์/EFTPOS' : 'Cashier/EFTPOS'
+                          ) : (order.payment_method === 'cash_at_counter' || order.payment_method === 'cash_at_cashier') ? (
+                            lang === 'th' ? 'แคชเชียร์/เงินสด' : 'Cashier/Cash'
                           ) : order.payment_method}
                         </p>
                       )}

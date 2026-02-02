@@ -94,6 +94,9 @@ interface Summary {
     card: { count: number; revenue: number };
     bank_transfer: { count: number; revenue: number };
     cash?: { count: number; revenue: number };
+    cash_at_cashier?: { count: number; revenue: number }; // Legacy
+    cashier_cash?: { count: number; revenue: number };
+    cashier_eftpos?: { count: number; revenue: number };
   };
   // Voided orders
   voided_orders?: number;
@@ -519,6 +522,10 @@ export default function OrderSummaryPage() {
       case 'card': return 'Card';
       case 'bank_transfer': return 'Bank Transfer';
       case 'cash': return 'Cash';
+      case 'cashier_cash': return 'Cashier/Cash';
+      case 'cashier_eftpos': return 'Cashier/EFTPOS';
+      case 'cash_at_cashier': return 'Cashier/Cash'; // Legacy support
+      case 'cash_at_counter': return 'Cashier/Cash'; // Legacy support
       default: return '-';
     }
   };
@@ -650,6 +657,9 @@ export default function OrderSummaryPage() {
           <div class="row"><span>Card:</span><span>${summary?.payment_method?.card?.count || 0} orders ($${(summary?.payment_method?.card?.revenue || 0).toFixed(2)})</span></div>
           <div class="row"><span>Bank Transfer:</span><span>${summary?.payment_method?.bank_transfer?.count || 0} orders ($${(summary?.payment_method?.bank_transfer?.revenue || 0).toFixed(2)})</span></div>
           ${summary?.payment_method?.cash?.count ? `<div class="row"><span>Cash:</span><span>${summary.payment_method.cash.count} orders ($${(summary.payment_method.cash.revenue || 0).toFixed(2)})</span></div>` : ''}
+          ${summary?.payment_method?.cashier_cash?.count ? `<div class="row"><span>Cashier/Cash:</span><span>${summary.payment_method.cashier_cash.count} orders ($${(summary.payment_method.cashier_cash.revenue || 0).toFixed(2)})</span></div>` : ''}
+          ${summary?.payment_method?.cashier_eftpos?.count ? `<div class="row"><span>Cashier/EFTPOS:</span><span>${summary.payment_method.cashier_eftpos.count} orders ($${(summary.payment_method.cashier_eftpos.revenue || 0).toFixed(2)})</span></div>` : ''}
+          ${summary?.payment_method?.cash_at_cashier?.count ? `<div class="row"><span>Cashier/Cash:</span><span>${summary.payment_method.cash_at_cashier.count} orders ($${(summary.payment_method.cash_at_cashier.revenue || 0).toFixed(2)})</span></div>` : ''}
         </div>
 
         <div class="section">
@@ -1085,6 +1095,25 @@ export default function OrderSummaryPage() {
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Cash:</span>
                     <span className="font-bold text-purple-700">{summary.payment_method.cash.count} orders</span>
+                  </div>
+                )}
+                {summary.payment_method.cashier_cash && summary.payment_method.cashier_cash.count > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Cashier/Cash:</span>
+                    <span className="font-bold text-purple-700">{summary.payment_method.cashier_cash.count} orders</span>
+                  </div>
+                )}
+                {summary.payment_method.cashier_eftpos && summary.payment_method.cashier_eftpos.count > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Cashier/EFTPOS:</span>
+                    <span className="font-bold text-purple-700">{summary.payment_method.cashier_eftpos.count} orders</span>
+                  </div>
+                )}
+                {/* Legacy support for old cash_at_cashier */}
+                {summary.payment_method.cash_at_cashier && summary.payment_method.cash_at_cashier.count > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Cashier/Cash:</span>
+                    <span className="font-bold text-purple-700">{summary.payment_method.cash_at_cashier.count} orders</span>
                   </div>
                 )}
               </div>

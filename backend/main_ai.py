@@ -3956,14 +3956,18 @@ async def pay_at_counter(order_id: str, request: PayAtCashierRequest):
 # Staff Confirm Cashier Payment API
 # ============================================================
 
+class ConfirmCashierPaymentRequest(BaseModel):
+    payment_type: str = "cashier_cash"  # 'cashier_cash' or 'cashier_eftpos'
+
 @app.post("/api/orders/{order_id}/confirm-cashier-payment", summary="Staff Confirm Cashier Payment")
-async def confirm_cashier_payment(order_id: str):
+async def confirm_cashier_payment(order_id: str, request: ConfirmCashierPaymentRequest = None):
     """
     พนักงานยืนยันว่าลูกค้าจ่ายเงินที่แคชเชียร์แล้ว
     Order จะถูกส่งไปครัวและสถานะการจ่ายจะเป็น paid
 
     Args:
         order_id: Order ID
+        request: Request body with payment_type ('cashier_cash' or 'cashier_eftpos')
 
     Returns:
         Dictionary with updated order
@@ -3978,8 +3982,14 @@ async def confirm_cashier_payment(order_id: str):
         if order.get("status") != "awaiting_cashier_payment":
             raise HTTPException(status_code=400, detail="Order is not awaiting cashier payment")
 
-        # Update order - now send to kitchen
+        # Get payment type from request or default to cashier_cash
+        payment_type = "cashier_cash"
+        if request and request.payment_type in ["cashier_cash", "cashier_eftpos"]:
+            payment_type = request.payment_type
+
+        # Update order - now send to kitchen with specific payment type
         update_data = {
+            "payment_method": payment_type,  # Set to cashier_cash or cashier_eftpos
             "payment_status": "paid",
             "status": "confirmed"  # Now send to kitchen
         }
