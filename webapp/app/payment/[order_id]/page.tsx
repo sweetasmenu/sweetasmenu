@@ -624,18 +624,27 @@ export default function PaymentPage() {
   }
 
   if (error) {
+    const menuUrl = `/restaurant/${restaurantSlug || restaurant?.slug || order?.restaurant_id || ''}`;
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
           <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Payment Error</h1>
           <p className="text-gray-600 mb-6">{error}</p>
-          <Link
-            href="/"
-            className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700"
-          >
-            Go Home
-          </Link>
+          <div className="flex flex-col gap-3">
+            <button
+              onClick={() => setError(null)}
+              className="w-full px-6 py-3 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600"
+            >
+              Try Again
+            </button>
+            <Link
+              href={menuUrl}
+              className="w-full px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300"
+            >
+              Back to Menu
+            </Link>
+          </div>
         </div>
       </div>
     );
