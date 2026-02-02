@@ -394,6 +394,24 @@ class RestaurantService:
                 print("⚠️ Restaurant Service: No data to update")
                 return None
 
+            # Auto-update slug when name changes
+            if 'name' in update_data and update_data['name']:
+                new_name = update_data['name']
+                base_slug = self._slugify(new_name)
+
+                # Check if slug already exists (excluding current restaurant)
+                slug = base_slug
+                counter = 1
+                while True:
+                    existing = self.supabase_client.table('restaurants').select('id').eq('slug', slug).neq('id', restaurant_id).limit(1).execute()
+                    if not existing.data or len(existing.data) == 0:
+                        break
+                    counter += 1
+                    slug = f"{base_slug}-{counter}"
+
+                update_data['slug'] = slug
+                print(f"📝 Restaurant Service: Auto-updated slug to: {slug}")
+
             # Check if optional columns exist
             # If they don't exist, remove them from update_data before updating
             optional_columns = ['theme_color', 'cover_image_url', 'delivery_settings', 'pos_theme_color']
