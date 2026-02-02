@@ -374,20 +374,22 @@ body {
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
 
-/* Mobile modal height - uses dvh for better mobile browser support */
+/* Mobile modal height - FULL SCREEN for all packages */
 @media (max-width: 767px) {
   .mobile-modal-height {
-    height: calc(100dvh - 40px);
-    height: calc(100vh - 40px); /* Fallback for browsers without dvh support */
-    max-height: calc(100dvh - 40px);
-    max-height: calc(100vh - 40px);
+    height: 100dvh;
+    height: 100vh; /* Fallback for browsers without dvh support */
+    max-height: 100dvh;
+    max-height: 100vh;
+    border-radius: 0 !important; /* Remove rounded corners for fullscreen */
   }
 
   /* Support for iOS safe areas */
   @supports (height: 100dvh) {
     .mobile-modal-height {
-      height: calc(100dvh - env(safe-area-inset-bottom, 0px) - 20px);
-      max-height: calc(100dvh - env(safe-area-inset-bottom, 0px) - 20px);
+      height: calc(100dvh - env(safe-area-inset-bottom, 0px));
+      max-height: calc(100dvh - env(safe-area-inset-bottom, 0px));
+      padding-bottom: env(safe-area-inset-bottom, 0px);
     }
   }
 }

@@ -228,14 +228,14 @@ export default function MobileMenuSection({
         })}
       </div>
 
-      {/* Category Detail Modal */}
+      {/* Category Detail Modal - Full screen on mobile */}
       {selectedCategory && (
         <div
           className="fixed inset-0 bg-black/50 z-50 md:hidden"
           onClick={() => setSelectedCategory(null)}
         >
           <div
-            className="absolute inset-x-0 bottom-0 bg-white rounded-t-3xl max-h-[85vh] overflow-hidden"
+            className="absolute inset-0 bg-white overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
