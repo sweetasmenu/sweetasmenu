@@ -595,12 +595,9 @@ export default function PaymentPage() {
       const data = await response.json();
 
       if (data.success) {
-        // Redirect to order status page with language and restaurant params
-        const statusParams = new URLSearchParams();
-        statusParams.set('lang', selectedLanguage);
-        statusParams.set('restaurant', restaurantSlug || order.restaurant_id);
-        statusParams.set('payment', 'cashier');
-        router.push(`/order-status/${order.id}?${statusParams.toString()}`);
+        // Redirect to restaurant menu so customer can check My Orders
+        const menuUrl = `/restaurant/${restaurantSlug || order.restaurant_id}`;
+        router.push(menuUrl);
       } else {
         setError(data.detail || 'Failed to confirm order');
       }
