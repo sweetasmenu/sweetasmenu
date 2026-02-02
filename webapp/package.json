@@ -13,6 +13,7 @@
     "@stripe/stripe-js": "^8.6.0",
     "@supabase/supabase-js": "^2.39.3",
     "canvas-confetti": "^1.9.3",
+    "html2canvas": "^1.4.1",
     "lucide-react": "^0.312.0",
     "next": "^14.2.33",
     "qrcode.react": "^4.2.0",
@@ -22,6 +23,7 @@
   },
   "devDependencies": {
     "@types/canvas-confetti": "^1.9.0",
+    "@types/html2canvas": "^0.5.35",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
