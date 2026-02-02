@@ -5134,14 +5134,16 @@ async def set_active_restaurant(request: Dict[str, Any]):
         
         if not user_id or not restaurant_id:
             raise HTTPException(status_code=400, detail="user_id and restaurant_id are required")
-        
-        # Verify ownership using check_user_has_access (handles NULL user_id)
-        if not restaurant_service.check_user_has_access(restaurant_id, user_id):
-            raise HTTPException(status_code=403, detail="You don't have permission to access this restaurant")
 
+        # Get restaurant first
         restaurant = restaurant_service.get_restaurant_by_id(restaurant_id)
         if not restaurant:
             raise HTTPException(status_code=404, detail="Restaurant not found")
+
+        # Verify ownership - allow if restaurant.user_id is NULL OR matches user_id
+        restaurant_user_id = restaurant.get('user_id')
+        if restaurant_user_id is not None and restaurant_user_id != user_id:
+            raise HTTPException(status_code=403, detail="You don't have permission to access this restaurant")
         
         # Update active restaurant in database
         # Set all restaurants to inactive first

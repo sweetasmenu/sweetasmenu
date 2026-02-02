@@ -323,34 +323,77 @@ class RestaurantService:
             traceback.print_exc()
             return None
     
+    def check_user_has_access(self, restaurant_id: str, user_id: str) -> bool:
+        """
+        ตรวจสอบว่า user มีสิทธิ์เข้าถึง restaurant หรือไม่
+        รองรับ restaurants ที่มี user_id เป็น NULL (จาก early migrations)
+
+        Args:
+            restaurant_id: Restaurant ID
+            user_id: User ID
+
+        Returns:
+            True if user has access, False otherwise
+        """
+        if not self.supabase_client:
+            return False
+
+        try:
+            # Get restaurant to check user_id
+            result = self.supabase_client.table('restaurants').select('user_id').eq('id', restaurant_id).limit(1).execute()
+
+            if not result.data or len(result.data) == 0:
+                print(f"⚠️ Restaurant Service: Restaurant {restaurant_id} not found")
+                return False
+
+            restaurant_user_id = result.data[0].get('user_id')
+
+            # Allow access if:
+            # 1. restaurant.user_id is NULL (early migration restaurants)
+            # 2. restaurant.user_id matches the requesting user_id
+            if restaurant_user_id is None or restaurant_user_id == user_id:
+                return True
+
+            print(f"⚠️ Restaurant Service: User {user_id} does not have access to restaurant {restaurant_id}")
+            return False
+
+        except Exception as e:
+            print(f"❌ Restaurant Service: Error checking access: {str(e)}")
+            return False
+
     def update_restaurant(self, restaurant_id: str, user_id: str, update_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """
         อัปเดตข้อมูลร้านอาหาร
-        
+
         Args:
             restaurant_id: Restaurant ID
             user_id: User ID (for verification)
             update_data: Dictionary with fields to update (name, phone, email, address, theme_color, etc.)
-            
+
         Returns:
             Dictionary with updated restaurant data or None if failed
         """
         if not self.supabase_client:
             print("⚠️ Restaurant Service: Supabase client not available")
             return None
-        
+
         if not self._is_valid_uuid(restaurant_id) or not self._is_valid_uuid(user_id):
             print(f"⚠️ Restaurant Service: Invalid ID format, cannot update restaurant.")
             return None
-        
+
         try:
+            # Check user has access first (handles NULL user_id)
+            if not self.check_user_has_access(restaurant_id, user_id):
+                print(f"⚠️ Restaurant Service: User {user_id} does not have access to restaurant {restaurant_id}")
+                return None
+
             # Remove None values from update_data
             update_data = {k: v for k, v in update_data.items() if v is not None}
-            
+
             if not update_data:
                 print("⚠️ Restaurant Service: No data to update")
                 return None
-            
+
             # Check if optional columns exist
             # If they don't exist, remove them from update_data before updating
             optional_columns = ['theme_color', 'cover_image_url', 'delivery_settings', 'pos_theme_color']
@@ -367,15 +410,15 @@ class RestaurantService:
                         if col in error_msg or 'PGRST204' in error_msg:
                             print(f"⚠️ Restaurant Service: {col} column not found, removing from update data")
                             update_data.pop(col, None)
-            
+
             if not update_data:
                 print("⚠️ Restaurant Service: No data to update after removing non-existent columns")
                 return None
-            
-            # Update restaurant (with user_id check for security)
+
+            # Update restaurant by ID only (permission already checked above)
             try:
-                result = self.supabase_client.table('restaurants').update(update_data).eq('id', restaurant_id).eq('user_id', user_id).execute()
-                
+                result = self.supabase_client.table('restaurants').update(update_data).eq('id', restaurant_id).execute()
+
                 if result.data and len(result.data) > 0:
                     restaurant = result.data[0]
                     print(f"✅ Restaurant Service: Updated restaurant {restaurant_id}")
@@ -398,8 +441,8 @@ class RestaurantService:
                         print("⚠️ Restaurant Service: No data to update after removing non-existent columns")
                         return None
 
-                    # Retry update without missing columns
-                    result = self.supabase_client.table('restaurants').update(update_data).eq('id', restaurant_id).eq('user_id', user_id).execute()
+                    # Retry update without missing columns (by ID only)
+                    result = self.supabase_client.table('restaurants').update(update_data).eq('id', restaurant_id).execute()
 
                     if result.data and len(result.data) > 0:
                         restaurant = result.data[0]
@@ -412,7 +455,7 @@ class RestaurantService:
                 else:
                     # Re-raise if it's a different error
                     raise update_error
-                
+
         except Exception as e:
             print(f"❌ Restaurant Service: Failed to update restaurant: {str(e)}")
             import traceback
