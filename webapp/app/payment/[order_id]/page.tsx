@@ -306,10 +306,11 @@ function BankTransferPayment({
       <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
         <h4 className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
           <Upload className="w-5 h-5" />
-          Upload Payment Slip (Optional)
+          Upload Payment Slip
+          <span className="text-red-500">*</span>
         </h4>
         <p className="text-sm text-blue-700 mb-3">
-          Upload your transfer receipt for faster verification
+          Please upload your transfer receipt for verification
         </p>
 
         <input
@@ -327,6 +328,13 @@ function BankTransferPayment({
               alt="Payment slip"
               className="max-w-full max-h-48 mx-auto rounded-lg shadow"
             />
+            {/* Change Image Button */}
+            <label
+              htmlFor="slip-upload"
+              className="block w-full py-2 border border-blue-300 bg-white text-blue-600 rounded-lg text-center cursor-pointer hover:bg-blue-50 transition-colors text-sm font-medium"
+            >
+              Change Image
+            </label>
             <button
               onClick={handleUpload}
               disabled={uploading}
@@ -389,6 +397,9 @@ export default function PaymentPage() {
 
   // Surcharge confirmation popup
   const [showSurchargeConfirm, setShowSurchargeConfirm] = useState(false);
+
+  // Pay at Counter confirmation popup
+  const [showPayAtCounterConfirm, setShowPayAtCounterConfirm] = useState(false);
 
   // Surcharge settings for card payments
   const [surchargeSettings, setSurchargeSettings] = useState({
@@ -927,7 +938,7 @@ export default function PaymentPage() {
             </div>
 
             <button
-              onClick={handlePayAtCounter}
+              onClick={() => setShowPayAtCounterConfirm(true)}
               disabled={processingCashPayment}
               className="w-full py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg font-bold text-lg hover:from-orange-600 hover:to-orange-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
@@ -1007,6 +1018,64 @@ export default function PaymentPage() {
                 className="flex-1 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
               >
                 Accept & Continue
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Pay at Counter Confirmation Modal */}
+      {showPayAtCounterConfirm && order && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Banknote className="w-8 h-8 text-orange-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Important Notice</h3>
+            </div>
+
+            <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 mb-6">
+              <p className="text-orange-800 font-medium text-center leading-relaxed">
+                Please pay at the counter first.<br />
+                Your order will start being prepared after payment is received.
+              </p>
+            </div>
+
+            <div className="bg-gray-50 rounded-xl p-4 mb-6">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-gray-600">Table Number</span>
+                <span className="font-bold text-gray-900">{order.table_no || '-'}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">Amount to Pay</span>
+                <span className="text-xl font-bold text-orange-600">${order.total_price.toFixed(2)} NZD</span>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowPayAtCounterConfirm(false);
+                  setSelectedMethod(null);
+                }}
+                className="flex-1 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
+              >
+                Change Payment
+              </button>
+              <button
+                onClick={() => {
+                  setShowPayAtCounterConfirm(false);
+                  handlePayAtCounter();
+                }}
+                disabled={processingCashPayment}
+                className="flex-1 py-3 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {processingCashPayment ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  'OK, I Understand'
+                )}
               </button>
             </div>
           </div>
