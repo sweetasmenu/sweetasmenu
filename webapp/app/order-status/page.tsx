@@ -177,6 +177,13 @@ export default function MyOrdersPage() {
           color: 'text-orange-600',
           bgColor: 'bg-orange-100'
         };
+      case 'verifying_payment':
+        return {
+          icon: <Clock className="w-5 h-5" />,
+          text: 'Verifying Payment',
+          color: 'text-blue-600',
+          bgColor: 'bg-blue-100'
+        };
       case 'pending':
         return {
           icon: <Clock className="w-5 h-5" />,

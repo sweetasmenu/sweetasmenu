@@ -80,6 +80,7 @@ const translations: Record<string, Record<string, Record<string, string>>> = {
   },
   buttons: {
     backToMenu: { en: 'Back to Menu', th: 'กลับไปเมนู', ko: '메뉴로 돌아가기', zh: '返回菜单', ja: 'メニューに戻る' },
+    backToMyOrders: { en: 'Back to My Orders', th: 'กลับไปออเดอร์ของฉัน', ko: '내 주문으로 돌아가기', zh: '返回我的订单', ja: '注文履歴に戻る' },
     goHome: { en: 'Go Home', th: 'กลับหน้าแรก', ko: '홈으로', zh: '回到首页', ja: 'ホームへ' },
     completePayment: { en: 'Complete Payment', th: 'ชำระเงิน', ko: '결제 완료', zh: '完成付款', ja: '支払いを完了' },
   },
@@ -742,13 +743,23 @@ export default function OrderStatusPage() {
 
         {/* Back Button */}
         <div className="mt-6 text-center">
-          <Link
-            href={menuUrl}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            {restaurantSlug ? t('buttons', 'backToMenu', lang) : t('buttons', 'goHome', lang)}
-          </Link>
+          {order.status === 'verifying_payment' ? (
+            <Link
+              href="/order-status"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              {t('buttons', 'backToMyOrders', lang)}
+            </Link>
+          ) : (
+            <Link
+              href={menuUrl}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              {restaurantSlug ? t('buttons', 'backToMenu', lang) : t('buttons', 'goHome', lang)}
+            </Link>
+          )}
         </div>
       </div>
     </div>
