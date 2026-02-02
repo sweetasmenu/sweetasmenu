@@ -332,16 +332,9 @@ export default function MyOrdersPage() {
           <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
             <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h2 className="text-xl font-semibold text-gray-700 mb-2">No orders yet</h2>
-            <p className="text-gray-500 mb-6">
+            <p className="text-gray-500">
               Your orders will appear here after you place an order
             </p>
-            <button
-              onClick={handleBackToMenu}
-              className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-semibold inline-flex items-center gap-2"
-            >
-              <ArrowLeft className="w-5 h-5" />
-              Back to Menu
-            </button>
           </div>
         ) : (
           <>
