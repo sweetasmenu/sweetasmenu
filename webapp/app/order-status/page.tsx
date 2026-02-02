@@ -14,7 +14,9 @@ import {
   RefreshCw,
   Trash2,
   MapPin,
-  Store
+  Store,
+  CreditCard,
+  ArrowLeft
 } from 'lucide-react';
 
 interface OrderItem {
@@ -35,6 +37,7 @@ interface Order {
   created_at: string;
   table_no?: string;
   restaurant_name?: string;
+  payment_method?: 'card' | 'bank_transfer' | 'cash';
 }
 
 interface StoredOrder {
@@ -49,6 +52,7 @@ export default function MyOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [lastRestaurantSlug, setLastRestaurantSlug] = useState<string>('');
 
   const getStoredOrderIds = (): StoredOrder[] => {
     if (typeof window === 'undefined') return [];
@@ -60,6 +64,21 @@ export default function MyOrdersPage() {
     }
   };
 
+  const getLastVisitedRestaurant = (): string => {
+    if (typeof window === 'undefined') return '';
+    try {
+      // Get from stored orders - use the most recent order's restaurant
+      const storedOrders = getStoredOrderIds();
+      if (storedOrders.length > 0) {
+        return storedOrders[0].restaurantId || '';
+      }
+      // Fallback: check if there's a stored last visited restaurant
+      return localStorage.getItem('last_visited_restaurant') || '';
+    } catch {
+      return '';
+    }
+  };
+
   const removeStoredOrder = (orderId: string) => {
     const stored = getStoredOrderIds().filter(o => o.orderId !== orderId);
     localStorage.setItem('my_orders', JSON.stringify(stored));
@@ -68,6 +87,10 @@ export default function MyOrdersPage() {
 
   const fetchOrders = useCallback(async (showRefresh = false) => {
     const storedOrders = getStoredOrderIds();
+
+    // Set last restaurant slug for back navigation
+    const lastSlug = getLastVisitedRestaurant();
+    setLastRestaurantSlug(lastSlug);
 
     if (storedOrders.length === 0) {
       setOrders([]);
@@ -149,7 +172,7 @@ export default function MyOrdersPage() {
     switch (status) {
       case 'pending_payment':
         return {
-          icon: <Clock className="w-5 h-5" />,
+          icon: <CreditCard className="w-5 h-5" />,
           text: 'Awaiting Payment',
           color: 'text-orange-600',
           bgColor: 'bg-orange-100'
@@ -240,6 +263,27 @@ export default function MyOrdersPage() {
     });
   };
 
+  // Handle back to menu navigation
+  const handleBackToMenu = () => {
+    if (lastRestaurantSlug) {
+      router.push(`/restaurant/${lastRestaurantSlug}`);
+    } else {
+      // If no restaurant slug, try to use the first order's restaurant
+      const storedOrders = getStoredOrderIds();
+      if (storedOrders.length > 0 && storedOrders[0].restaurantId) {
+        router.push(`/restaurant/${storedOrders[0].restaurantId}`);
+      } else {
+        // Last resort: go back in history
+        router.back();
+      }
+    }
+  };
+
+  // Handle pay now for pending_payment orders
+  const handlePayNow = (orderId: string, restaurantSlug: string) => {
+    router.push(`/payment/${orderId}?restaurant=${restaurantSlug}`);
+  };
+
   // Filter: Show active orders first, then recent completed/cancelled
   const activeOrders = orders.filter(o =>
     !['completed', 'cancelled'].includes(o.status)
@@ -285,10 +329,11 @@ export default function MyOrdersPage() {
               Your orders will appear here after you place an order
             </p>
             <button
-              onClick={() => router.push('/')}
-              className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold"
+              onClick={handleBackToMenu}
+              className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-semibold inline-flex items-center gap-2"
             >
-              Browse Restaurants
+              <ArrowLeft className="w-5 h-5" />
+              Back to Menu
             </button>
           </div>
         ) : (
@@ -303,54 +348,77 @@ export default function MyOrdersPage() {
                 <div className="space-y-3">
                   {activeOrders.map(order => {
                     const statusInfo = getStatusInfo(order.status);
+                    const storedOrder = getStoredOrderIds().find(o => o.orderId === order.id);
+                    const restaurantSlug = storedOrder?.restaurantId || '';
+
                     return (
                       <div
                         key={order.id}
-                        onClick={() => router.push(`/order-status/${order.id}`)}
-                        className="bg-white rounded-xl shadow-md p-4 cursor-pointer hover:shadow-lg transition-shadow border-l-4 border-orange-500"
+                        className="bg-white rounded-xl shadow-md p-4 border-l-4 border-orange-500"
                       >
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              {order.restaurant_name && (
-                                <span className="font-semibold text-gray-900">{order.restaurant_name}</span>
-                              )}
-                              {getServiceTypeIcon(order.service_type)}
+                        <div
+                          className="cursor-pointer"
+                          onClick={() => router.push(`/order-status/${order.id}?restaurant=${restaurantSlug}`)}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                {order.restaurant_name && (
+                                  <span className="font-semibold text-gray-900">{order.restaurant_name}</span>
+                                )}
+                                {getServiceTypeIcon(order.service_type)}
+                              </div>
+                              <p className="text-sm text-gray-500">
+                                Order #{order.id.slice(0, 8)} • {formatTime(order.created_at)}
+                              </p>
+                              <p className="text-sm text-gray-600 mt-1">
+                                {order.items.length} item{order.items.length > 1 ? 's' : ''} • ${order.total_price?.toFixed(2) || '0.00'}
+                              </p>
                             </div>
-                            <p className="text-sm text-gray-500">
-                              Order #{order.id.slice(0, 8)} • {formatTime(order.created_at)}
-                            </p>
-                            <p className="text-sm text-gray-600 mt-1">
-                              {order.items.length} item{order.items.length > 1 ? 's' : ''} • ${order.total_price?.toFixed(2) || '0.00'}
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <div className={`flex items-center gap-1 px-2 py-1 rounded-full ${statusInfo.bgColor} ${statusInfo.color}`}>
-                              {statusInfo.icon}
-                              <span className="text-sm font-medium">{statusInfo.text}</span>
+                            <div className="flex items-center gap-2">
+                              <div className={`flex items-center gap-1 px-2 py-1 rounded-full ${statusInfo.bgColor} ${statusInfo.color}`}>
+                                {statusInfo.icon}
+                                <span className="text-sm font-medium">{statusInfo.text}</span>
+                              </div>
+                              <ChevronRight className="w-5 h-5 text-gray-400" />
                             </div>
-                            <ChevronRight className="w-5 h-5 text-gray-400" />
                           </div>
+
+                          {/* Progress indicator for active orders */}
+                          {order.status !== 'pending_payment' && (
+                            <div className="mt-3 flex gap-1">
+                              <div className={`h-1 flex-1 rounded ${
+                                ['pending', 'confirmed', 'preparing', 'ready'].includes(order.status)
+                                  ? 'bg-green-500' : 'bg-gray-200'
+                              }`}></div>
+                              <div className={`h-1 flex-1 rounded ${
+                                ['confirmed', 'preparing', 'ready'].includes(order.status)
+                                  ? 'bg-green-500' : 'bg-gray-200'
+                              }`}></div>
+                              <div className={`h-1 flex-1 rounded ${
+                                ['preparing', 'ready'].includes(order.status)
+                                  ? 'bg-green-500' : 'bg-gray-200'
+                              }`}></div>
+                              <div className={`h-1 flex-1 rounded ${
+                                order.status === 'ready' ? 'bg-green-500' : 'bg-gray-200'
+                              }`}></div>
+                            </div>
+                          )}
                         </div>
 
-                        {/* Progress indicator for active orders */}
-                        {order.status !== 'pending_payment' && (
-                          <div className="mt-3 flex gap-1">
-                            <div className={`h-1 flex-1 rounded ${
-                              ['pending', 'confirmed', 'preparing', 'ready'].includes(order.status)
-                                ? 'bg-green-500' : 'bg-gray-200'
-                            }`}></div>
-                            <div className={`h-1 flex-1 rounded ${
-                              ['confirmed', 'preparing', 'ready'].includes(order.status)
-                                ? 'bg-green-500' : 'bg-gray-200'
-                            }`}></div>
-                            <div className={`h-1 flex-1 rounded ${
-                              ['preparing', 'ready'].includes(order.status)
-                                ? 'bg-green-500' : 'bg-gray-200'
-                            }`}></div>
-                            <div className={`h-1 flex-1 rounded ${
-                              order.status === 'ready' ? 'bg-green-500' : 'bg-gray-200'
-                            }`}></div>
+                        {/* Pay Now Button for pending_payment orders */}
+                        {order.status === 'pending_payment' && (
+                          <div className="mt-3 pt-3 border-t border-gray-100">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handlePayNow(order.id, restaurantSlug);
+                              }}
+                              className="w-full py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold flex items-center justify-center gap-2"
+                            >
+                              <CreditCard className="w-5 h-5" />
+                              Complete Payment
+                            </button>
                           </div>
                         )}
                       </div>
@@ -367,6 +435,9 @@ export default function MyOrdersPage() {
                 <div className="space-y-3">
                   {pastOrders.map(order => {
                     const statusInfo = getStatusInfo(order.status);
+                    const storedOrder = getStoredOrderIds().find(o => o.orderId === order.id);
+                    const restaurantSlug = storedOrder?.restaurantId || '';
+
                     return (
                       <div
                         key={order.id}
@@ -375,7 +446,7 @@ export default function MyOrdersPage() {
                         <div className="flex items-start justify-between">
                           <div
                             className="flex-1 cursor-pointer"
-                            onClick={() => router.push(`/order-status/${order.id}`)}
+                            onClick={() => router.push(`/order-status/${order.id}?restaurant=${restaurantSlug}`)}
                           >
                             <div className="flex items-center gap-2 mb-1">
                               {order.restaurant_name && (
@@ -424,13 +495,14 @@ export default function MyOrdersPage() {
           </div>
         )}
 
-        {/* Back Button */}
+        {/* Back to Menu Button - Always visible */}
         <div className="mt-6 text-center">
           <button
-            onClick={() => router.push('/')}
-            className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-900 rounded-lg font-semibold"
+            onClick={handleBackToMenu}
+            className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-semibold inline-flex items-center gap-2"
           >
-            Back to Home
+            <ArrowLeft className="w-5 h-5" />
+            Back to Menu
           </button>
         </div>
       </div>

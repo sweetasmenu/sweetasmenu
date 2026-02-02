@@ -81,6 +81,7 @@ const translations: Record<string, Record<string, Record<string, string>>> = {
   buttons: {
     backToMenu: { en: 'Back to Menu', th: 'กลับไปเมนู', ko: '메뉴로 돌아가기', zh: '返回菜单', ja: 'メニューに戻る' },
     goHome: { en: 'Go Home', th: 'กลับหน้าแรก', ko: '홈으로', zh: '回到首页', ja: 'ホームへ' },
+    completePayment: { en: 'Complete Payment', th: 'ชำระเงิน', ko: '결제 완료', zh: '完成付款', ja: '支払いを完了' },
   },
   errors: {
     orderNotFound: { en: 'Order Not Found', th: 'ไม่พบออเดอร์', ko: '주문을 찾을 수 없음', zh: '未找到订单', ja: '注文が見つかりません' },
@@ -469,6 +470,18 @@ export default function OrderStatusPage() {
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
             <span>{t('labels', 'updatesAutomatically', lang)}</span>
           </div>
+
+          {/* Complete Payment Button for pending_payment orders */}
+          {order.status === 'pending_payment' && (
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <Link
+                href={`/payment/${order.id}?restaurant=${restaurantSlug}&lang=${lang}`}
+                className="block w-full py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-semibold text-center"
+              >
+                {t('buttons', 'completePayment', lang)}
+              </Link>
+            </div>
+          )}
         </div>
 
         {/* Customer Info Card - based on service type */}
