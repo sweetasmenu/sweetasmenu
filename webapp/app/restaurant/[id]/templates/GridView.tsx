@@ -204,7 +204,7 @@ export default function GridView({ menus, groupedMenus, themeColor, onItemClick,
                   {items.map((menu) => (
                     <div
                       key={menu.menu_id}
-                      className="flex-shrink-0 w-[300px] bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all cursor-pointer transform hover:-translate-y-1"
+                      className="flex-shrink-0 w-[280px] sm:w-[300px] md:w-[320px] bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all cursor-pointer transform hover:-translate-y-1"
                       onClick={() => onItemClick(menu)}
                     >
                       {/* Photo - Fixed aspect ratio */}
@@ -276,7 +276,7 @@ export default function GridView({ menus, groupedMenus, themeColor, onItemClick,
               </div>
             ) : (
               /* Grid View - When expanded or <= 3 items */
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {items.map((menu) => (
                   <div
                     key={menu.menu_id}

@@ -1565,7 +1565,7 @@ function SettingsContent() {
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Phone
@@ -1719,7 +1719,7 @@ function SettingsContent() {
                 <label className="block text-sm font-medium text-gray-700 mb-3">
                   Menu Template
                 </label>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
                   {[
                     { id: 'list', name: 'Classic List', emoji: '📋', desc: 'Simple list view with descriptions' },
                     { id: 'grid', name: 'Grid View', emoji: '🔲', desc: 'Card-based grid layout' },
@@ -2089,7 +2089,7 @@ function SettingsContent() {
                       <span className="flex-1 border-t border-gray-300"></span>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Latitude</label>
                         <input
@@ -2454,7 +2454,7 @@ function SettingsContent() {
               {getPrimaryLanguageDescription(primaryLanguage)}
             </p>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
               {AVAILABLE_LANGUAGES.map((lang) => (
                 <button
                   key={lang.code}
@@ -2494,7 +2494,7 @@ function SettingsContent() {
               Select theme color for your POS pages. The color will appear in Kitchen, Staff, and Cashier pages.
             </p>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
               {POS_THEME_OPTIONS.map((theme) => (
                 <button
                   key={theme.code}

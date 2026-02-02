@@ -820,7 +820,7 @@ export default function OrderSummaryPage() {
         </Link>
 
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-4">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Order Summary</h1>
@@ -876,7 +876,7 @@ export default function OrderSummaryPage() {
           </div>
 
           {/* Export & Print Buttons */}
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 flex-wrap">
             {/* Daily Sales Summary Button - Available to all users */}
             <button
               onClick={printDailySummary}
@@ -930,7 +930,7 @@ export default function OrderSummaryPage() {
             <h2 className="font-semibold text-gray-900">Filters</h2>
           </div>
 
-          <div className="grid md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Date Range */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
@@ -1017,7 +1017,7 @@ export default function OrderSummaryPage() {
 
         {/* Summary Cards */}
         {summary && (
-          <div className="grid md:grid-cols-5 gap-4 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
             {/* Total Orders */}
             <div
               className="bg-white rounded-xl shadow-lg p-6 cursor-pointer hover:shadow-xl hover:scale-[1.02] transition-all"
@@ -1161,8 +1161,8 @@ export default function OrderSummaryPage() {
               <p className="text-gray-500">No orders found for the selected filters</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
+            <div className="overflow-x-auto -mx-4 sm:mx-0">
+              <table className="w-full min-w-[640px]">
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date/Time</th>

@@ -153,8 +153,8 @@ export default function MobileMenuSection({
                       style={{
                         width: 'calc(50% - 6px)',
                         scrollSnapAlign: 'start',
-                        minWidth: '160px',
-                        maxWidth: '200px'
+                        minWidth: '140px',
+                        maxWidth: '180px'
                       }}
                     >
                       {/* Image */}
@@ -283,7 +283,7 @@ export default function MobileMenuSection({
             <div className="overflow-y-auto p-4" style={{ maxHeight: 'calc(85vh - 100px)' }}>
               {viewMode === 'grid' ? (
                 /* Grid View */
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {(groupedMenus[selectedCategory] || []).map((item) => (
                     <div
                       key={item.menu_id}

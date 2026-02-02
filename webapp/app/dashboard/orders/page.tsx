@@ -284,7 +284,7 @@ export default function OrdersPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Orders</h1>
               <p className="text-gray-600 mt-1">Manage customer orders in real-time</p>
@@ -301,7 +301,7 @@ export default function OrdersPage() {
 
         {/* Filter Tabs */}
         <div className="mb-6 border-b border-gray-200">
-          <nav className="-mb-px flex space-x-8">
+          <nav className="-mb-px flex space-x-4 sm:space-x-8 overflow-x-auto scrollbar-hide">
             {['all', 'pending', 'preparing', 'ready', 'completed'].map((status) => (
               <button
                 key={status}
@@ -345,8 +345,8 @@ export default function OrdersPage() {
                 }}
               >
                 {/* Order Header */}
-                <div className="flex items-start justify-between mb-4">
-                  <div>
+                <div className="flex flex-col lg:flex-row items-start justify-between gap-4 mb-4">
+                  <div className="flex-1 w-full lg:w-auto">
                     <div className="flex items-center gap-3 mb-2">
                       <h2 className="text-xl font-bold text-gray-900">
                         Order #{order.id.slice(0, 8)}
@@ -465,7 +465,7 @@ export default function OrdersPage() {
                 )}
 
                 {/* Action Buttons */}
-                <div className="flex items-center gap-3 pt-4 border-t border-gray-200">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-4 border-t border-gray-200">
                   {order.status === 'pending' && (
                     <>
                       <button

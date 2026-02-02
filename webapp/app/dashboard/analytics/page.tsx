@@ -190,8 +190,8 @@ export default function AnalyticsPage() {
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Dashboard
           </Link>
-          
-          <div className="flex items-center justify-between">
+
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
             <div>
               <h1 className="text-4xl font-bold text-gray-900 mb-2">Analytics Dashboard</h1>
               <p className="text-gray-600">Insights and performance metrics for your restaurant</p>
@@ -199,7 +199,7 @@ export default function AnalyticsPage() {
             
             {/* Period Selector */}
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 bg-white rounded-lg p-1 shadow-md">
+              <div className="flex items-center gap-2 bg-white rounded-lg p-1 shadow-md w-full sm:w-auto">
                 <button
                   onClick={() => setSelectedPeriod(7)}
                   className={`px-4 py-2 rounded-md font-semibold text-sm transition-all ${
@@ -233,7 +233,7 @@ export default function AnalyticsPage() {
               </div>
               
               {/* Export Buttons */}
-              <div className="flex items-center gap-2">
+              <div className="grid grid-cols-3 sm:flex sm:items-center gap-2">
                 <button
                   onClick={() => {
                     const reportData = formatReportData(
@@ -287,7 +287,7 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Revenue Summary Cards */}
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-8">
           {/* Total Revenue */}
           <div className="bg-white rounded-2xl shadow-xl p-6 border-l-4 border-green-500">
             <div className="flex items-center justify-between mb-4">
@@ -370,7 +370,7 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Service Type Breakdown & Popular Items */}
-        <div className="grid lg:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           {/* Service Type Breakdown */}
           <div className="bg-white rounded-2xl shadow-xl p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center">

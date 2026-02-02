@@ -94,11 +94,11 @@ export default function Elegant({ menus, groupedMenus, themeColor, onItemClick, 
                 }`}
                 onClick={() => onItemClick(menu)}
               >
-                <div className="flex flex-col md:flex-row">
+                <div className="flex flex-col lg:flex-row">
                   {/* Photo - Larger for Best Sellers */}
                   {menu.photo_url && (
                     <div className={`relative bg-gray-200 ${
-                      menu.is_best_seller ? 'md:w-1/2' : 'md:w-1/3'
+                      menu.is_best_seller ? 'w-full lg:w-1/2' : 'w-full lg:w-1/3'
                     }`}>
                       <div className={menu.is_best_seller ? 'h-80' : 'h-64'}>
                         <img
@@ -126,12 +126,12 @@ export default function Elegant({ menus, groupedMenus, themeColor, onItemClick, 
                   )}
 
                   {/* Content */}
-                  <div className={`p-8 flex-1 flex flex-col justify-center ${
+                  <div className={`p-4 sm:p-6 lg:p-8 flex-1 flex flex-col justify-center ${
                     menu.is_best_seller ? 'bg-gradient-to-br from-orange-50 to-transparent' : ''
                   }`}>
                     {/* Name */}
                     <h3 className={`font-serif font-bold text-gray-900 mb-2 ${
-                      menu.is_best_seller ? 'text-3xl' : 'text-2xl'
+                      menu.is_best_seller ? 'text-xl sm:text-2xl lg:text-3xl' : 'text-lg sm:text-xl lg:text-2xl'
                     }`}>
                       {selectedLanguage === 'en' && menu.nameEn ? menu.nameEn : menu.name}
                     </h3>

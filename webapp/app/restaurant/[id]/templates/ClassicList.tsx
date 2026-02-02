@@ -85,10 +85,10 @@ export default function ClassicList({ menus, groupedMenus, themeColor, onItemCli
                 className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all overflow-hidden cursor-pointer"
                 onClick={() => onItemClick(menu)}
               >
-                <div className="flex">
+                <div className="flex flex-col sm:flex-row">
                   {/* Photo */}
                   {menu.photo_url && (
-                    <div className="w-32 h-32 flex-shrink-0 bg-gray-200">
+                    <div className="w-full sm:w-32 h-48 sm:h-32 flex-shrink-0 bg-gray-200">
                       <img
                         src={menu.photo_url}
                         alt={menu.name}
@@ -98,7 +98,7 @@ export default function ClassicList({ menus, groupedMenus, themeColor, onItemCli
                   )}
 
                   {/* Content */}
-                  <div className="flex-1 p-4 flex items-center justify-between">
+                  <div className="flex-1 p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-0">
                     <div className="flex-1">
                       {/* Name with Best Seller Badge */}
                       <div className="flex items-center gap-2 mb-1">
@@ -131,7 +131,7 @@ export default function ClassicList({ menus, groupedMenus, themeColor, onItemCli
                     </div>
                     
                     {/* Price & Add Button */}
-                    <div className="flex flex-col items-end gap-2 ml-4">
+                    <div className="flex flex-row sm:flex-col items-start sm:items-end gap-2 ml-0 sm:ml-4 w-full sm:w-auto">
                       <span className="text-2xl font-bold" style={{ color: themeColor }}>
                         ${menu.price}
                       </span>

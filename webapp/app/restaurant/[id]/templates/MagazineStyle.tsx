@@ -90,7 +90,7 @@ export default function MagazineStyle({ menus, groupedMenus, themeColor, onItemC
                   </div>
                 )}
 
-                <div className="grid lg:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   {bestSellers.map((menu) => (
                     <div
                       key={menu.menu_id}
@@ -154,7 +154,7 @@ export default function MagazineStyle({ menus, groupedMenus, themeColor, onItemC
             
             {/* Regular Items - Smaller Grid */}
             {regularItems.length > 0 && (
-              <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
                 {regularItems.map((menu) => (
                   <div
                     key={menu.menu_id}
