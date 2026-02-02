@@ -227,21 +227,48 @@ export default function RestaurantQRCodePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 py-8">
-      <div className="container mx-auto px-4 max-w-4xl">
-        {/* Back Button */}
-        <Link
-          href="/menus"
-          className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-8 transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to My Menu
-        </Link>
+    <>
+      {/* Print styles - only show sticker when printing */}
+      <style jsx global>{`
+        @media print {
+          body * {
+            visibility: hidden;
+          }
+          #qr-sticker-print,
+          #qr-sticker-print * {
+            visibility: visible;
+          }
+          #qr-sticker-print {
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: none !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          @page {
+            size: auto;
+            margin: 10mm;
+          }
+        }
+      `}</style>
 
-        {/* Main Content */}
-        <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12">
-          {/* Header */}
-          <div className="text-center mb-8">
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 py-8 print:bg-white print:py-0">
+        <div className="container mx-auto px-4 max-w-4xl print:max-w-none print:px-0">
+          {/* Back Button */}
+          <Link
+            href="/menus"
+            className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-8 transition-colors print:hidden"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to My Menu
+          </Link>
+
+          {/* Main Content */}
+          <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 print:shadow-none print:p-0 print:rounded-none">
+            {/* Header */}
+            <div className="text-center mb-8 print:hidden">
             <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <QrCode className="w-8 h-8 text-orange-500" />
             </div>
@@ -254,10 +281,11 @@ export default function RestaurantQRCodePage() {
           </div>
 
           {/* QR Code Sticker Preview */}
-          <div className="flex justify-center mb-8">
+          <div className="flex justify-center mb-8 print:mb-0">
             <div
               ref={stickerRef}
-              className="bg-white rounded-3xl overflow-hidden"
+              id="qr-sticker-print"
+              className="bg-white rounded-3xl overflow-hidden print:rounded-2xl"
               style={{
                 width: '320px',
                 border: `8px solid ${themeColor}`,
@@ -327,7 +355,7 @@ export default function RestaurantQRCodePage() {
           </div>
 
           {/* Menu URL */}
-          <div className="bg-gray-50 rounded-xl p-4 sm:p-6 mb-8">
+          <div className="bg-gray-50 rounded-xl p-4 sm:p-6 mb-8 print:hidden">
             <p className="text-sm font-semibold text-gray-700 mb-2">Menu URL:</p>
             <div className="flex flex-col sm:flex-row gap-2">
               <input
@@ -356,7 +384,7 @@ export default function RestaurantQRCodePage() {
           </div>
 
           {/* Actions */}
-          <div className="grid md:grid-cols-3 gap-4">
+          <div className="grid md:grid-cols-3 gap-4 print:hidden">
             <button
               onClick={handleDownload}
               disabled={downloading}
@@ -393,7 +421,7 @@ export default function RestaurantQRCodePage() {
           </div>
 
           {/* Preview Link */}
-          <div className="mt-8 pt-8 border-t border-gray-200 text-center">
+          <div className="mt-8 pt-8 border-t border-gray-200 text-center print:hidden">
             <Link
               href={`/restaurant/${restaurantId}`}
               target="_blank"
@@ -405,7 +433,7 @@ export default function RestaurantQRCodePage() {
         </div>
 
         {/* Instructions */}
-        <div className="mt-8 bg-blue-50 border border-blue-200 rounded-xl p-6">
+        <div className="mt-8 bg-blue-50 border border-blue-200 rounded-xl p-6 print:hidden">
           <h3 className="font-semibold text-blue-900 mb-3">📱 How to use this QR sticker:</h3>
           <ol className="list-decimal list-inside space-y-2 text-sm text-blue-800">
             <li>Click &quot;Download Sticker&quot; to save the high-quality image</li>
@@ -417,7 +445,7 @@ export default function RestaurantQRCodePage() {
         </div>
 
         {/* Customization Note */}
-        <div className="mt-4 bg-amber-50 border border-amber-200 rounded-xl p-6">
+        <div className="mt-4 bg-amber-50 border border-amber-200 rounded-xl p-6 print:hidden">
           <h3 className="font-semibold text-amber-900 mb-2">🎨 Customize your sticker:</h3>
           <p className="text-sm text-amber-800">
             The sticker color matches your restaurant&apos;s theme color. You can change it in{' '}
@@ -428,5 +456,6 @@ export default function RestaurantQRCodePage() {
         </div>
       </div>
     </div>
+    </>
   );
 }
