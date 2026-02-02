@@ -2118,9 +2118,9 @@ function ItemModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end md:items-center justify-center md:p-4" onClick={onClose}>
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 md:flex md:items-center md:justify-center md:p-4" onClick={onClose}>
       <div
-        className="bg-white md:rounded-2xl w-full md:max-w-2xl overflow-y-auto mobile-modal-height md:h-auto md:max-h-[90vh]"
+        className="bg-white md:rounded-2xl w-full md:max-w-2xl overflow-y-auto mobile-modal-height md:relative md:h-auto md:max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-4 md:p-6 pt-6">
@@ -2401,9 +2401,9 @@ function EditCartItemModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-[55] flex items-end md:items-center justify-center md:p-4" onClick={onClose}>
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-[55] md:flex md:items-center md:justify-center md:p-4" onClick={onClose}>
       <div
-        className="bg-white md:rounded-2xl w-full md:max-w-lg overflow-y-auto mobile-modal-height md:h-auto md:max-h-[90vh]"
+        className="bg-white md:rounded-2xl w-full md:max-w-lg overflow-y-auto mobile-modal-height md:relative md:h-auto md:max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-4 md:p-6 pt-6">

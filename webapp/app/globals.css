@@ -377,18 +377,23 @@ body {
 /* Mobile modal height - FULL SCREEN for all packages */
 @media (max-width: 767px) {
   .mobile-modal-height {
-    height: 100dvh;
-    height: 100vh; /* Fallback for browsers without dvh support */
-    max-height: 100dvh;
-    max-height: 100vh;
+    height: 100dvh !important;
+    height: 100vh !important; /* Fallback for browsers without dvh support */
+    max-height: 100dvh !important;
+    max-height: 100vh !important;
+    min-height: 100dvh !important;
+    min-height: 100vh !important;
     border-radius: 0 !important; /* Remove rounded corners for fullscreen */
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
   }
 
-  /* Support for iOS safe areas */
-  @supports (height: 100dvh) {
+  /* Support for iOS safe areas - only add padding, don't reduce height */
+  @supports (padding: env(safe-area-inset-bottom)) {
     .mobile-modal-height {
-      height: calc(100dvh - env(safe-area-inset-bottom, 0px));
-      max-height: calc(100dvh - env(safe-area-inset-bottom, 0px));
       padding-bottom: env(safe-area-inset-bottom, 0px);
     }
   }
