@@ -3007,7 +3007,11 @@ async def get_user_profile(
                 "service_options": service_options,
                 "primary_language": restaurant.get("primary_language", "th"),
                 "pos_theme_color": restaurant.get("pos_theme_color", "orange"),
-                "delivery_rates": restaurant.get("delivery_rates") or []
+                "delivery_rates": restaurant.get("delivery_rates") or [],
+                # Tax/Business info for NZ
+                "gst_registered": restaurant.get("gst_registered", True),
+                "gst_number": restaurant.get("gst_number", ""),
+                "ird_number": restaurant.get("ird_number", ""),
             }
         else:
             # Fallback if creation failed
@@ -3024,7 +3028,11 @@ async def get_user_profile(
                 "cover_image_url": None,
                 "menu_template": "grid",
                 "service_options": {"dine_in": True, "pickup": True, "delivery": True},
-                "delivery_rates": []
+                "delivery_rates": [],
+                # Tax/Business info for NZ
+                "gst_registered": True,
+                "gst_number": "",
+                "ird_number": "",
             }
         
         # ⚡ OPTIMIZED: Get user profile first (includes role) - single DB call instead of multiple
