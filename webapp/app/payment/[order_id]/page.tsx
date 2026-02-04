@@ -993,24 +993,30 @@ export default function PaymentPage() {
               </p>
             </div>
 
-            <div className="bg-gray-50 rounded-xl p-4 mb-6 space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-800">Order Total</span>
-                <span className="font-medium">${order.total_price.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-sm text-orange-600">
-                <span>Service Fee ({surchargeSettings.credit_card_surcharge_rate}%)</span>
-                <span className="font-medium">
-                  +${getSurchargeAmount().toFixed(2)}
-                </span>
-              </div>
-              <div className="flex justify-between text-lg font-bold pt-2 border-t border-gray-200">
-                <span>Total</span>
-                <span className="text-blue-600">
-                  ${getFinalTotal().toFixed(2)} NZD
-                </span>
-              </div>
-            </div>
+            {(() => {
+              const modalSurcharge = Math.round((order.subtotal + (order.delivery_fee || 0)) * surchargeSettings.credit_card_surcharge_rate) / 100;
+              const modalTotal = order.total_price + modalSurcharge;
+              return (
+                <div className="bg-gray-50 rounded-xl p-4 mb-6 space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-800">Order Total</span>
+                    <span className="font-medium text-gray-900">${order.total_price.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm text-orange-600">
+                    <span>Service Fee ({surchargeSettings.credit_card_surcharge_rate}%)</span>
+                    <span className="font-medium">
+                      +${modalSurcharge.toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-lg font-bold pt-2 border-t border-gray-200 text-gray-900">
+                    <span>Total</span>
+                    <span className="text-blue-600">
+                      ${modalTotal.toFixed(2)} NZD
+                    </span>
+                  </div>
+                </div>
+              );
+            })()}
 
             <div className="flex gap-3">
               <button
