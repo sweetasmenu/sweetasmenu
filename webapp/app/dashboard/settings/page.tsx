@@ -1354,7 +1354,7 @@ function SettingsContent() {
         
         {/* Tabs */}
         <div className="border-b border-gray-200 mb-8">
-          <nav className="-mb-px flex space-x-8 overflow-x-auto">
+          <nav className="-mb-px flex space-x-4 sm:space-x-8 overflow-x-auto">
             <button
               onClick={() => setActiveTab('profile')}
               className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
@@ -1424,8 +1424,8 @@ function SettingsContent() {
 
         {/* Tab Content */}
         {activeTab === 'profile' && (
-          <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Restaurant Information</h2>
+          <div className="bg-white shadow rounded-lg p-4 sm:p-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-6">Restaurant Information</h2>
 
             {/* Basic Info Form */}
             <div className="space-y-6">
@@ -1765,9 +1765,9 @@ function SettingsContent() {
 
         {/* Services Tab */}
         {activeTab === 'services' && (
-          <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
-              <Utensils className="w-6 h-6 text-orange-500" />
+          <div className="bg-white shadow rounded-lg p-4 sm:p-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
+              <Utensils className="w-5 h-5 sm:w-6 sm:h-6 text-orange-500" />
               Service Options
             </h2>
             <p className="text-gray-600 mb-6">
@@ -2601,8 +2601,8 @@ function SettingsContent() {
 
         {/* Payment Settings Tab */}
         {activeTab === 'payments' && (
-          <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
+          <div className="bg-white shadow rounded-lg p-4 sm:p-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
               <CreditCard className="w-6 h-6" />
               Payment Settings
             </h2>
@@ -2640,7 +2640,7 @@ function SettingsContent() {
 
               {/* Stripe Connect Status */}
               {paymentSettings.accept_card && (
-                <div className="mt-4 ml-13 space-y-3">
+                <div className="mt-4 sm:ml-13 space-y-3">
                   {loadingStripeConnect ? (
                     <div className="p-3 bg-gray-50 rounded-lg flex items-center gap-2">
                       <Loader2 className="w-4 h-4 animate-spin text-gray-500" />
@@ -2753,7 +2753,7 @@ function SettingsContent() {
 
               {/* Bank Accounts List */}
               {paymentSettings.accept_bank_transfer && (
-                <div className="mt-4 ml-13">
+                <div className="mt-4 sm:ml-13">
                   <div className="flex items-center justify-between mb-3">
                     <h4 className="font-medium text-gray-900">Bank Accounts</h4>
                     <button
@@ -2873,7 +2873,7 @@ function SettingsContent() {
                         <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
                       </label>
                     </div>
-                    <p className="text-xs text-gray-500 mt-2 ml-11">
+                    <p className="text-xs text-gray-500 mt-2 sm:ml-11">
                       Note: QR Code feature may not be available in all regions. Disable if not supported in your area.
                     </p>
                   </div>
@@ -2917,8 +2917,8 @@ function SettingsContent() {
         )}
 
         {activeTab === 'billing' && (
-          <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Subscription & Billing</h2>
+          <div className="bg-white shadow rounded-lg p-4 sm:p-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-6">Subscription & Billing</h2>
 
             {/* Current Plan Card */}
             <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-6 text-white mb-6">
@@ -3116,8 +3116,8 @@ function SettingsContent() {
 
         {/* Security Tab */}
         {activeTab === 'security' && (
-          <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Security Settings</h2>
+          <div className="bg-white shadow rounded-lg p-4 sm:p-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-6">Security Settings</h2>
 
             {/* Change Password Section */}
             <div className="max-w-md">
