@@ -1843,27 +1843,27 @@ function SettingsContent() {
 
               {/* Restaurant Location Section - Only show when delivery is enabled */}
               {serviceOptions.delivery && (
-                <div className="mt-4 ml-16 p-4 bg-blue-50 rounded-xl border border-blue-200 mb-4">
-                  <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                    <MapPin className="w-5 h-5 text-blue-600" />
-                    Restaurant Location (for distance calculation)
+                <div className="mt-4 sm:ml-16 p-3 sm:p-4 bg-blue-50 rounded-xl border border-blue-200 mb-4">
+                  <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2 text-sm sm:text-base">
+                    <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 flex-shrink-0" />
+                    Restaurant Location
                   </h4>
-                  <p className="text-sm text-gray-600 mb-4">
+                  <p className="text-xs sm:text-sm text-gray-600 mb-4">
                     Enter address for automatic distance and delivery fee calculation
                   </p>
 
                   {/* Current Location Status */}
                   {restaurantLocation.latitude && restaurantLocation.longitude ? (
-                    <div className="flex items-center gap-2 p-3 bg-green-100 rounded-lg mb-4">
-                      <Navigation className="w-5 h-5 text-green-600" />
-                      <span className="text-sm text-green-800">
-                        Current location: {restaurantLocation.latitude.toFixed(6)}, {restaurantLocation.longitude.toFixed(6)}
+                    <div className="flex items-start gap-2 p-2 sm:p-3 bg-green-100 rounded-lg mb-4">
+                      <Navigation className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                      <span className="text-xs sm:text-sm text-green-800 break-all">
+                        {restaurantLocation.latitude.toFixed(6)}, {restaurantLocation.longitude.toFixed(6)}
                       </span>
                     </div>
                   ) : (
-                    <div className="flex items-center gap-2 p-3 bg-yellow-100 rounded-lg mb-4">
-                      <MapPin className="w-5 h-5 text-yellow-600" />
-                      <span className="text-sm text-yellow-800">
+                    <div className="flex items-start gap-2 p-2 sm:p-3 bg-yellow-100 rounded-lg mb-4">
+                      <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                      <span className="text-xs sm:text-sm text-yellow-800">
                         Location not set - auto delivery fee calculation unavailable
                       </span>
                     </div>
@@ -1872,46 +1872,47 @@ function SettingsContent() {
                   {/* Address Input */}
                   <div className="space-y-3">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Restaurant Address (Google will auto-convert to coordinates)
+                      <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+                        Restaurant Address
                       </label>
                       <input
                         type="text"
                         value={restaurantLocation.address}
                         onChange={(e) => setRestaurantLocation({...restaurantLocation, address: e.target.value})}
-                        placeholder="e.g. 123 Queen Street, Auckland CBD, New Zealand"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="e.g. 123 Queen Street, Auckland"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                       />
+                      <p className="text-xs text-gray-500 mt-1">Google will auto-convert to coordinates</p>
                     </div>
 
                     {/* Or Manual Coordinates */}
-                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-500">
                       <span className="flex-1 border-t border-gray-300"></span>
-                      <span>Or enter coordinates manually</span>
+                      <span className="whitespace-nowrap">Or enter manually</span>
                       <span className="flex-1 border-t border-gray-300"></span>
                     </div>
 
-                    <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
+                    <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Latitude</label>
+                        <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Latitude</label>
                         <input
                           type="number"
                           step="any"
                           value={restaurantLocation.latitude || ''}
                           onChange={(e) => setRestaurantLocation({...restaurantLocation, latitude: parseFloat(e.target.value) || null})}
                           placeholder="-36.8485"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Longitude</label>
+                        <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Longitude</label>
                         <input
                           type="number"
                           step="any"
                           value={restaurantLocation.longitude || ''}
                           onChange={(e) => setRestaurantLocation({...restaurantLocation, longitude: parseFloat(e.target.value) || null})}
                           placeholder="174.7633"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
                         />
                       </div>
                     </div>
@@ -1927,7 +1928,7 @@ function SettingsContent() {
                     <button
                       onClick={updateRestaurantLocation}
                       disabled={locationLoading}
-                      className="w-full px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                      className="w-full px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition-colors disabled:opacity-50 flex items-center justify-center gap-2 text-sm sm:text-base"
                     >
                       {locationLoading ? (
                         <>
