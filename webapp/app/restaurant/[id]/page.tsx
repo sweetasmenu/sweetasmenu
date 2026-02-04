@@ -51,6 +51,22 @@ interface DeliverySettings {
   free_delivery_above: number;
 }
 
+// Format a Date to NZ timezone string for datetime-local input (YYYY-MM-DDTHH:MM)
+function toNZDatetimeLocal(date: Date): string {
+  const nzFormatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Pacific/Auckland',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
+  const parts = nzFormatter.formatToParts(date);
+  const get = (type: string) => parts.find(p => p.type === type)?.value || '';
+  return `${get('year')}-${get('month')}-${get('day')}T${get('hour')}:${get('minute')}`;
+}
+
 export default function RestaurantMenuPage() {
   const params = useParams();
   const router = useRouter();
@@ -1664,9 +1680,9 @@ export default function RestaurantMenuPage() {
                           <button
                             onClick={() => {
                               setServiceType('pickup');
-                              // Auto-fill pickup time to 30 minutes from now
+                              // Auto-fill pickup time to 30 minutes from now (NZ time)
                               const pickupTime = new Date(Date.now() + 30 * 60 * 1000);
-                              const defaultTime = pickupTime.toISOString().slice(0, 16);
+                              const defaultTime = toNZDatetimeLocal(pickupTime);
                               setCustomerDetails(prev => ({ ...prev, pickup_time: defaultTime }));
                               // Show wait time message
                               alert(dt('customer', 'pickupWaitTime', getCustomerLang()));
@@ -1752,13 +1768,13 @@ export default function RestaurantMenuPage() {
                             value={customerDetails.pickup_time}
                             min={(() => {
                               const minTime = new Date(Date.now() + 30 * 60 * 1000);
-                              return minTime.toISOString().slice(0, 16);
+                              return toNZDatetimeLocal(minTime);
                             })()}
                             onFocus={(e) => {
-                              // Auto-set to 30 minutes from now when user clicks on empty field
+                              // Auto-set to 30 minutes from now (NZ time) when user clicks on empty field
                               if (!customerDetails.pickup_time) {
                                 const minTime = new Date(Date.now() + 30 * 60 * 1000);
-                                const defaultTime = minTime.toISOString().slice(0, 16);
+                                const defaultTime = toNZDatetimeLocal(minTime);
                                 setCustomerDetails({ ...customerDetails, pickup_time: defaultTime });
                               }
                             }}
@@ -1766,9 +1782,9 @@ export default function RestaurantMenuPage() {
                               const selectedTime = new Date(e.target.value).getTime();
                               const minAllowedTime = Date.now() + 30 * 60 * 1000;
                               if (selectedTime < minAllowedTime) {
-                                // Auto-correct to minimum allowed time instead of just showing alert
+                                // Auto-correct to minimum allowed time (NZ time)
                                 const minTime = new Date(minAllowedTime);
-                                const correctedTime = minTime.toISOString().slice(0, 16);
+                                const correctedTime = toNZDatetimeLocal(minTime);
                                 setCustomerDetails({ ...customerDetails, pickup_time: correctedTime });
                                 alert('Pickup time must be at least 30 minutes from now. Auto-adjusted.');
                                 return;
