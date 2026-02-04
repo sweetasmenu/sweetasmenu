@@ -236,8 +236,12 @@ class OrdersService:
                     surcharge_rate = surcharge_settings.get("credit_card_surcharge_rate", 2.50)
                     surcharge_amount = self.calculate_surcharge(subtotal + delivery_fee, surcharge_rate)
 
-            # In NZ, prices are GST-inclusive, so total = subtotal + delivery_fee + surcharge
-            total_price = subtotal + delivery_fee + surcharge_amount
+            # Food/holiday surcharge (applies to all orders when enabled)
+            food_surcharge_amount = float(order_data.get("food_surcharge_amount", 0) or 0)
+            food_surcharge_name = order_data.get("food_surcharge_name")
+
+            # In NZ, prices are GST-inclusive, so total = subtotal + delivery_fee + surcharge + food_surcharge
+            total_price = subtotal + delivery_fee + surcharge_amount + food_surcharge_amount
 
             # Get GST settings and calculate GST (extracted from inclusive price)
             gst_settings = self._get_restaurant_gst_settings(restaurant_id)
@@ -251,7 +255,9 @@ class OrdersService:
                 "tax": tax,  # GST amount extracted from inclusive price
                 "delivery_fee": delivery_fee,
                 "surcharge_amount": surcharge_amount,  # Credit card surcharge
-                "total_price": total_price,  # GST-inclusive total + surcharge
+                "food_surcharge_amount": food_surcharge_amount,  # Food/holiday surcharge
+                "food_surcharge_name": food_surcharge_name,  # Display name
+                "total_price": total_price,  # GST-inclusive total + all surcharges
                 "status": "pending_payment",  # Start with pending_payment, move to pending after payment
                 "payment_status": "pending",  # Payment not yet made
                 "payment_method": payment_method,  # Track payment method
