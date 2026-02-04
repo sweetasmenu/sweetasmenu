@@ -259,13 +259,13 @@ function SettingsContent() {
 
   // Credit Card Surcharge state
   const [cardSurchargeEnabled, setCardSurchargeEnabled] = useState(false);
-  const [cardSurchargeRate, setCardSurchargeRate] = useState(2.50);
+  const [cardSurchargeRate, setCardSurchargeRate] = useState(0);
   const [savingSurcharge, setSavingSurcharge] = useState(false);
 
   // Food/Festival Surcharge state
   const [foodSurchargeEnabled, setFoodSurchargeEnabled] = useState(false);
-  const [foodSurchargeRate, setFoodSurchargeRate] = useState(10.0);
-  const [foodSurchargeName, setFoodSurchargeName] = useState('Holiday Surcharge');
+  const [foodSurchargeRate, setFoodSurchargeRate] = useState(0);
+  const [foodSurchargeName, setFoodSurchargeName] = useState('');
   const [savingFoodSurcharge, setSavingFoodSurcharge] = useState(false);
 
   // Stripe Connect state (for restaurant to receive payments)
@@ -716,7 +716,7 @@ function SettingsContent() {
       const data = await response.json();
       if (data.success) {
         setCardSurchargeEnabled(data.credit_card_surcharge_enabled || false);
-        setCardSurchargeRate(data.credit_card_surcharge_rate || 2.50);
+        setCardSurchargeRate(data.credit_card_surcharge_rate || 0);
       }
     } catch (error) {
       console.error('Failed to load surcharge settings:', error);
@@ -757,8 +757,8 @@ function SettingsContent() {
       const data = await response.json();
       if (data.success) {
         setFoodSurchargeEnabled(data.food_surcharge_enabled || false);
-        setFoodSurchargeRate(data.food_surcharge_rate || 10.0);
-        setFoodSurchargeName(data.food_surcharge_name || 'Holiday Surcharge');
+        setFoodSurchargeRate(data.food_surcharge_rate || 0);
+        setFoodSurchargeName(data.food_surcharge_name || '');
       }
     } catch (error) {
       console.error('Failed to load food surcharge settings:', error);
@@ -3022,14 +3022,15 @@ function SettingsContent() {
                         min="0"
                         max="10"
                         step="0.1"
-                        value={cardSurchargeRate}
+                        value={cardSurchargeRate || ''}
+                        placeholder="e.g. 2.5"
                         onChange={(e) => setCardSurchargeRate(parseFloat(e.target.value) || 0)}
                         className="w-28 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
                       />
                       <span className="text-gray-500">%</span>
                     </div>
                     <p className="text-xs text-gray-500 mt-1">
-                      Typical card processing fee is 2-3%. Customers will see this before paying.
+                      Enter your desired surcharge rate. Customers will see this before paying.
                     </p>
                   </div>
 
@@ -3121,14 +3122,15 @@ function SettingsContent() {
                         min="0"
                         max="50"
                         step="0.5"
-                        value={foodSurchargeRate}
+                        value={foodSurchargeRate || ''}
+                        placeholder="e.g. 10"
                         onChange={(e) => setFoodSurchargeRate(parseFloat(e.target.value) || 0)}
                         className="w-28 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
                       />
                       <span className="text-gray-500">%</span>
                     </div>
                     <p className="text-xs text-gray-500 mt-1">
-                      This percentage will be added to the subtotal of every order.
+                      Enter your desired surcharge rate. This will be added to the subtotal of every order.
                     </p>
                   </div>
 

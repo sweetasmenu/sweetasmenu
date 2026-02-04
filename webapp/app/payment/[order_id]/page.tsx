@@ -407,7 +407,7 @@ export default function PaymentPage() {
   // Surcharge settings for card payments
   const [surchargeSettings, setSurchargeSettings] = useState({
     credit_card_surcharge_enabled: false,
-    credit_card_surcharge_rate: 2.50
+    credit_card_surcharge_rate: 0
   });
 
   // Calculate surcharge amount (only applies to card payments)
@@ -481,7 +481,7 @@ export default function PaymentPage() {
             if (surchargeData.success) {
               setSurchargeSettings({
                 credit_card_surcharge_enabled: surchargeData.credit_card_surcharge_enabled || false,
-                credit_card_surcharge_rate: surchargeData.credit_card_surcharge_rate || 2.50
+                credit_card_surcharge_rate: surchargeData.credit_card_surcharge_rate || 0
               });
             }
           }
