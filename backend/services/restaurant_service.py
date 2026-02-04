@@ -171,7 +171,9 @@ class RestaurantService:
             result = self.supabase_client.table('restaurants').select(
                 'id, slug, name, phone, email, address, logo_url, theme_color, '
                 'cover_image_url, menu_template, service_options, primary_language, '
-                'pos_theme_color, delivery_rates, is_active, payment_settings'
+                'pos_theme_color, delivery_rates, is_active, payment_settings, '
+                'credit_card_surcharge_enabled, credit_card_surcharge_rate, '
+                'food_surcharge_enabled, food_surcharge_rate, food_surcharge_name'
             ).eq('id', restaurant_id).limit(1).execute()
             
             if result.data and len(result.data) > 0:

@@ -248,7 +248,7 @@ function BankTransferPayment({
         <div className="bg-white p-4 inline-block rounded-lg shadow-inner">
           <QRCode value={qrData} size={180} />
         </div>
-        <p className="text-sm text-gray-500 mt-2">
+        <p className="text-sm text-gray-700 mt-2">
           Scan with your mobile banking app
         </p>
       </div>
@@ -259,21 +259,21 @@ function BankTransferPayment({
 
         <div className="flex justify-between items-center">
           <div>
-            <p className="text-sm text-gray-600">Bank</p>
+            <p className="text-sm text-gray-800">Bank</p>
             <p className="font-medium text-gray-900">{currentBank.bank_name}</p>
           </div>
         </div>
 
         <div className="flex justify-between items-center">
           <div>
-            <p className="text-sm text-gray-600">Account Name</p>
+            <p className="text-sm text-gray-800">Account Name</p>
             <p className="font-medium text-gray-900">{currentBank.account_name}</p>
           </div>
         </div>
 
         <div className="flex justify-between items-center">
           <div>
-            <p className="text-sm text-gray-600">Account Number</p>
+            <p className="text-sm text-gray-800">Account Number</p>
             <p className="font-mono font-medium text-gray-900">{currentBank.account_number}</p>
           </div>
           <button
@@ -286,14 +286,14 @@ function BankTransferPayment({
 
         <div className="flex justify-between items-center pt-2 border-t border-gray-200">
           <div>
-            <p className="text-sm text-gray-600">Amount</p>
+            <p className="text-sm text-gray-800">Amount</p>
             <p className="text-xl font-bold text-green-600">${order.total_price.toFixed(2)} NZD</p>
           </div>
         </div>
 
         <div className="flex justify-between items-center">
           <div>
-            <p className="text-sm text-gray-600">Reference</p>
+            <p className="text-sm text-gray-800">Reference</p>
             <p className="font-mono text-gray-900">Order {order.id.slice(0, 8)}</p>
           </div>
           <button
@@ -618,7 +618,7 @@ export default function PaymentPage() {
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-12 h-12 animate-spin mx-auto mb-4 text-blue-600" />
-          <p className="text-lg text-gray-600">Loading payment...</p>
+          <p className="text-lg text-gray-800">Loading payment...</p>
         </div>
       </div>
     );
@@ -631,7 +631,7 @@ export default function PaymentPage() {
         <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
           <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Payment Error</h1>
-          <p className="text-gray-600 mb-6">{error}</p>
+          <p className="text-gray-800 mb-6">{error}</p>
           <div className="flex flex-col gap-3">
             <button
               onClick={() => setError(null)}
@@ -675,13 +675,13 @@ export default function PaymentPage() {
             <CheckCircle className="w-12 h-12 text-green-600" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Payment Successful!</h1>
-          <p className="text-gray-600 mb-4">
+          <p className="text-gray-800 mb-4">
             Your payment is being verified. Your order will be sent to the kitchen shortly.
           </p>
 
           {/* Order Number */}
           <div className="bg-gray-100 rounded-xl p-4 mb-6">
-            <p className="text-sm text-gray-600 mb-1">Order Number</p>
+            <p className="text-sm text-gray-800 mb-1">Order Number</p>
             <p className="text-2xl font-mono font-bold text-gray-900">
               #{order?.id.slice(0, 8).toUpperCase()}
             </p>
@@ -690,11 +690,11 @@ export default function PaymentPage() {
 
           {/* QR Code for order tracking */}
           <div className="bg-white border border-gray-200 rounded-xl p-4 mb-6">
-            <p className="text-sm text-gray-600 mb-3">Scan to track your order</p>
+            <p className="text-sm text-gray-800 mb-3">Scan to track your order</p>
             <div className="flex justify-center">
               <QRCode value={orderTrackingUrl} size={150} />
             </div>
-            <p className="text-xs text-gray-500 mt-3">
+            <p className="text-xs text-gray-700 mt-3">
               Save this QR code to check your order status anytime
             </p>
           </div>
@@ -737,7 +737,7 @@ export default function PaymentPage() {
         <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
           <AlertCircle className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Payment Not Available</h1>
-          <p className="text-gray-600 mb-6">Payment settings not configured for this restaurant.</p>
+          <p className="text-gray-800 mb-6">Payment settings not configured for this restaurant.</p>
         </div>
       </div>
     );
@@ -750,13 +750,13 @@ export default function PaymentPage() {
         <div className="mb-6">
           <Link
             href={`/restaurant/${restaurant?.slug || order.restaurant_id}`}
-            className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-4"
+            className="inline-flex items-center text-gray-700 hover:text-gray-900 mb-4"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back
           </Link>
           <h1 className="text-2xl font-bold text-gray-900">Complete Payment</h1>
-          <p className="text-gray-600">{restaurant?.name || 'Restaurant'}</p>
+          <p className="text-gray-800">{restaurant?.name || 'Restaurant'}</p>
         </div>
 
         {/* Order Summary */}
@@ -766,7 +766,7 @@ export default function PaymentPage() {
           <div className="space-y-2 mb-4">
             {order.items.map((item, idx) => (
               <div key={idx} className="flex justify-between text-sm">
-                <span className="text-gray-600">
+                <span className="text-gray-800">
                   {item.quantity}x {item.name}
                 </span>
                 <span className="font-medium">${(item.price * item.quantity).toFixed(2)}</span>
@@ -776,18 +776,18 @@ export default function PaymentPage() {
 
           <div className="border-t border-gray-200 pt-3 space-y-2">
             <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Subtotal</span>
+              <span className="text-gray-800">Subtotal</span>
               <span>${order.subtotal.toFixed(2)}</span>
             </div>
             {order.delivery_fee && order.delivery_fee > 0 && (
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Delivery Fee</span>
+                <span className="text-gray-800">Delivery Fee</span>
                 <span>${order.delivery_fee.toFixed(2)}</span>
               </div>
             )}
             {order.food_surcharge_amount && order.food_surcharge_amount > 0 && (
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600">{order.food_surcharge_name || 'Surcharge'}</span>
+                <span className="text-gray-800">{order.food_surcharge_name || 'Surcharge'}</span>
                 <span>${order.food_surcharge_amount.toFixed(2)}</span>
               </div>
             )}
@@ -803,7 +803,7 @@ export default function PaymentPage() {
               <span className="text-blue-600">${getFinalTotal().toFixed(2)} NZD</span>
             </div>
             {/* Always show GST - NZ standard 15%, formula: total * 3 / 23 for GST-inclusive price */}
-            <div className="flex justify-between text-xs text-gray-500">
+            <div className="flex justify-between text-xs text-gray-700">
               <span>Incl. GST (15%)</span>
               <span>${(Math.round(getFinalTotal() * 3 / 23 * 100) / 100).toFixed(2)}</span>
             </div>
@@ -837,7 +837,7 @@ export default function PaymentPage() {
                 </div>
                 <div className="flex-1">
                   <h3 className="font-semibold text-gray-900">Credit/Debit Card</h3>
-                  <p className="text-sm text-gray-600">Visa, Mastercard, Amex, Apple Pay</p>
+                  <p className="text-sm text-gray-800">Visa, Mastercard, Amex, Apple Pay</p>
                   {surchargeSettings.credit_card_surcharge_enabled && (
                     <p className="text-xs text-orange-600 mt-1">
                       +{surchargeSettings.credit_card_surcharge_rate}% service fee applies
@@ -861,7 +861,7 @@ export default function PaymentPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900">Bank Transfer</h3>
-                  <p className="text-sm text-gray-600">Transfer directly to bank account</p>
+                  <p className="text-sm text-gray-800">Transfer directly to bank account</p>
                 </div>
               </button>
             )}
@@ -881,7 +881,7 @@ export default function PaymentPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900">Pay at Cashier</h3>
-                  <p className="text-sm text-gray-600">Pay with cash or card at the cashier</p>
+                  <p className="text-sm text-gray-800">Pay with cash or card at the cashier</p>
                 </div>
               </button>
             )}
@@ -930,7 +930,7 @@ export default function PaymentPage() {
                 <Banknote className="w-8 h-8 text-orange-600" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-2">Pay at Cashier</h3>
-              <p className="text-gray-600">
+              <p className="text-gray-800">
                 Please pay at the cashier first. Your order will start being prepared after payment is received.
               </p>
             </div>
@@ -974,7 +974,7 @@ export default function PaymentPage() {
         )}
 
         {/* Security Note */}
-        <div className="mt-6 text-center text-sm text-gray-500">
+        <div className="mt-6 text-center text-sm text-gray-700">
           <p>Your payment is secure and encrypted</p>
         </div>
       </div>
@@ -988,14 +988,14 @@ export default function PaymentPage() {
                 <AlertCircle className="w-8 h-8 text-orange-600" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-2">Service Fee Notice</h3>
-              <p className="text-gray-600">
+              <p className="text-gray-800">
                 A {surchargeSettings.credit_card_surcharge_rate}% service fee will be added for card payments.
               </p>
             </div>
 
             <div className="bg-gray-50 rounded-xl p-4 mb-6 space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Order Total</span>
+                <span className="text-gray-800">Order Total</span>
                 <span className="font-medium">${order.total_price.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-sm text-orange-600">
@@ -1054,11 +1054,11 @@ export default function PaymentPage() {
 
             <div className="bg-gray-50 rounded-xl p-4 mb-6">
               <div className="flex justify-between items-center mb-2">
-                <span className="text-gray-600">Table Number</span>
+                <span className="text-gray-800">Table Number</span>
                 <span className="font-bold text-gray-900">{order.table_no || '-'}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-gray-600">Amount to Pay</span>
+                <span className="text-gray-800">Amount to Pay</span>
                 <span className="text-xl font-bold text-orange-600">${order.total_price.toFixed(2)} NZD</span>
               </div>
             </div>
