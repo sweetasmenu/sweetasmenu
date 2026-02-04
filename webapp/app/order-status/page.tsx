@@ -318,13 +318,13 @@ export default function MyOrdersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 py-8">
-      <div className="max-w-2xl mx-auto px-4">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 py-4 sm:py-8">
+      <div className="max-w-2xl mx-auto px-3 sm:px-4">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">My Orders</h1>
-            <p className="text-gray-600 text-sm">Track your order status</p>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">My Orders</h1>
+            <p className="text-gray-600 text-xs sm:text-sm">Track your order status</p>
           </div>
           <button
             onClick={() => fetchOrders(true)}
@@ -361,33 +361,33 @@ export default function MyOrdersPage() {
                     return (
                       <div
                         key={order.id}
-                        className="bg-white rounded-xl shadow-md p-4 border-l-4 border-orange-500"
+                        className="bg-white rounded-xl shadow-md p-3 sm:p-4 border-l-4 border-orange-500"
                       >
                         <div
                           className="cursor-pointer"
                           onClick={() => router.push(`/order-status/${order.id}?restaurant=${restaurantSlug}`)}
                         >
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-1">
                                 {order.restaurant_name && (
-                                  <span className="font-semibold text-gray-900">{order.restaurant_name}</span>
+                                  <span className="font-semibold text-gray-900 text-sm sm:text-base truncate">{order.restaurant_name}</span>
                                 )}
                                 {getServiceTypeIcon(order.service_type)}
                               </div>
-                              <p className="text-sm text-gray-500">
+                              <p className="text-xs sm:text-sm text-gray-500">
                                 Order #{order.id.slice(0, 8)} • {formatTime(order.created_at)}
                               </p>
-                              <p className="text-sm text-gray-600 mt-1">
+                              <p className="text-xs sm:text-sm text-gray-600 mt-1">
                                 {order.items.length} item{order.items.length > 1 ? 's' : ''} • ${order.total_price?.toFixed(2) || '0.00'}
                               </p>
                             </div>
-                            <div className="flex items-center gap-2">
-                              <div className={`flex items-center gap-1 px-2 py-1 rounded-full ${statusInfo.bgColor} ${statusInfo.color}`}>
+                            <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+                              <div className={`flex items-center gap-1 px-1.5 sm:px-2 py-1 rounded-full ${statusInfo.bgColor} ${statusInfo.color}`}>
                                 {statusInfo.icon}
-                                <span className="text-sm font-medium">{statusInfo.text}</span>
+                                <span className="text-xs sm:text-sm font-medium whitespace-nowrap">{statusInfo.text}</span>
                               </div>
-                              <ChevronRight className="w-5 h-5 text-gray-400" />
+                              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
                             </div>
                           </div>
 
@@ -448,30 +448,30 @@ export default function MyOrdersPage() {
                     return (
                       <div
                         key={order.id}
-                        className="bg-white rounded-xl shadow-md p-4 opacity-80"
+                        className="bg-white rounded-xl shadow-md p-3 sm:p-4 opacity-80"
                       >
-                        <div className="flex items-start justify-between">
+                        <div className="flex items-start justify-between gap-2">
                           <div
-                            className="flex-1 cursor-pointer"
+                            className="flex-1 min-w-0 cursor-pointer"
                             onClick={() => router.push(`/order-status/${order.id}?restaurant=${restaurantSlug}`)}
                           >
                             <div className="flex items-center gap-2 mb-1">
                               {order.restaurant_name && (
-                                <span className="font-semibold text-gray-700">{order.restaurant_name}</span>
+                                <span className="font-semibold text-gray-700 text-sm sm:text-base truncate">{order.restaurant_name}</span>
                               )}
                               {getServiceTypeIcon(order.service_type)}
                             </div>
-                            <p className="text-sm text-gray-500">
+                            <p className="text-xs sm:text-sm text-gray-500">
                               Order #{order.id.slice(0, 8)} • {formatTime(order.created_at)}
                             </p>
-                            <p className="text-sm text-gray-600 mt-1">
+                            <p className="text-xs sm:text-sm text-gray-600 mt-1">
                               {order.items.length} item{order.items.length > 1 ? 's' : ''} • ${order.total_price?.toFixed(2) || '0.00'}
                             </p>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <div className={`flex items-center gap-1 px-2 py-1 rounded-full ${statusInfo.bgColor} ${statusInfo.color}`}>
+                          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+                            <div className={`flex items-center gap-1 px-1.5 sm:px-2 py-1 rounded-full ${statusInfo.bgColor} ${statusInfo.color}`}>
                               {statusInfo.icon}
-                              <span className="text-sm font-medium">{statusInfo.text}</span>
+                              <span className="text-xs sm:text-sm font-medium whitespace-nowrap">{statusInfo.text}</span>
                             </div>
                             <button
                               onClick={(e) => {
