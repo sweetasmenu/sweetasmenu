@@ -1116,12 +1116,8 @@ export default function RestaurantMenuPage() {
       groups['Bestseller'] = bestSellerItems;
     }
 
-    // Get bestseller menu IDs to avoid showing them twice
-    const bestSellerMenuIds = new Set(bestSellers.map(bs => bs.menu_id));
-
-    // Add other categories (skip items already in Bestseller section)
+    // Add other categories
     menus.forEach(menu => {
-      if (bestSellerMenuIds.has(menu.menu_id)) return;
       const category = menu.category || 'Other';
       if (!groups[category]) {
         groups[category] = [];
