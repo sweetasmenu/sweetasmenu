@@ -40,6 +40,7 @@ export default function RestaurantsManagementPage() {
   const [saving, setSaving] = useState(false);
   const [currentRestaurantId, setCurrentRestaurantId] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const [accessDenied, setAccessDenied] = useState(false);
   
   // Modal states
   const [showAddModal, setShowAddModal] = useState(false);
@@ -82,6 +83,16 @@ export default function RestaurantsManagementPage() {
       }
 
       setUserId(session.user.id);
+
+      // Check user role - only enterprise/premium/admin can access this page
+      const profileRes = await fetch(`${API_URL}/api/user/profile?user_id=${session.user.id}`);
+      const profileData = await profileRes.json();
+      const role = profileData?.subscription?.role || profileData?.subscription?.plan || 'free_trial';
+      if (!['enterprise', 'premium', 'admin'].includes(role)) {
+        setAccessDenied(true);
+        setLoading(false);
+        return;
+      }
 
       // Fetch all restaurants for this user
       const response = await fetch(`${API_URL}/api/restaurants?user_id=${session.user.id}`);
@@ -256,6 +267,27 @@ export default function RestaurantsManagementPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+      </div>
+    );
+  }
+
+  if (accessDenied) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
+          <Store className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Enterprise Feature</h1>
+          <p className="text-gray-600 mb-6">
+            Multi-branch management is available on the Enterprise plan. Upgrade to manage multiple restaurant branches.
+          </p>
+          <Link
+            href="/dashboard/settings"
+            className="inline-flex items-center px-6 py-3 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Settings
+          </Link>
+        </div>
       </div>
     );
   }

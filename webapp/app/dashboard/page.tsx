@@ -459,8 +459,8 @@ export default function DashboardPage() {
                 </h1>
               </div>
 
-              {/* Branch Dropdown */}
-              {restaurants.length > 1 && (
+              {/* Branch Dropdown - Enterprise/Admin only */}
+              {restaurants.length > 1 && ['enterprise', 'premium', 'admin'].includes(userRole) && (
                 <div className="relative flex-shrink-0">
                   <button
                     onClick={() => setShowBranchDropdown(!showBranchDropdown)}

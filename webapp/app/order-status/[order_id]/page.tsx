@@ -444,25 +444,25 @@ export default function OrderStatusPage() {
   const statusInfo = getStatusInfo(order);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 py-8">
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 py-4 sm:py-8">
+      <div className="max-w-2xl mx-auto px-3 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('header', 'orderStatus', lang)}</h1>
-          <p className="text-gray-600">{t('header', 'orderNumber', lang)} #{order.id.slice(0, 8)}</p>
+        <div className="mb-4 sm:mb-8 text-center">
+          <h1 className="text-xl sm:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">{t('header', 'orderStatus', lang)}</h1>
+          <p className="text-sm sm:text-base text-gray-600">{t('header', 'orderNumber', lang)} #{order.id.slice(0, 8)}</p>
         </div>
 
         {/* Status Card */}
-        <div className={`bg-white rounded-2xl shadow-xl p-8 mb-6 border-2 ${statusInfo.borderColor}`}>
-          <div className="flex items-center justify-center mb-4">
-            <div className={`p-4 rounded-full ${statusInfo.bgColor} ${statusInfo.color}`}>
+        <div className={`bg-white rounded-2xl shadow-xl p-4 sm:p-8 mb-4 sm:mb-6 border-2 ${statusInfo.borderColor}`}>
+          <div className="flex items-center justify-center mb-3 sm:mb-4">
+            <div className={`p-3 sm:p-4 rounded-full ${statusInfo.bgColor} ${statusInfo.color}`}>
               {statusInfo.icon}
             </div>
           </div>
-          <h2 className={`text-2xl font-bold text-center mb-2 ${statusInfo.color}`}>
+          <h2 className={`text-lg sm:text-2xl font-bold text-center mb-1 sm:mb-2 ${statusInfo.color}`}>
             {statusInfo.text}
           </h2>
-          <p className="text-center text-gray-600 mb-4">
+          <p className="text-center text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">
             {statusInfo.description}
           </p>
           
@@ -482,12 +482,12 @@ export default function OrderStatusPage() {
             </div>
           )}
 
-          <div className="text-center text-sm text-gray-500">
+          <div className="text-center text-xs sm:text-sm text-gray-500">
             {t('labels', 'placedOn', lang)} {formatTime(order.created_at)}
           </div>
           
           {/* Real-time indicator */}
-          <div className="mt-4 flex items-center justify-center gap-2 text-xs text-gray-500">
+          <div className="mt-3 sm:mt-4 flex items-center justify-center gap-2 text-xs text-gray-500">
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
             <span>{t('labels', 'updatesAutomatically', lang)}</span>
           </div>
@@ -496,8 +496,8 @@ export default function OrderStatusPage() {
 
         {/* Customer Info Card - based on service type */}
         {order.service_type && (
-          <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
-            <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-6 mb-4 sm:mb-6">
+            <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4 flex items-center gap-2">
               {order.service_type === 'dine_in' ? (
                 <><Store className="w-5 h-5 text-orange-500" /> {t('serviceType', 'dineIn', lang)}</>
               ) : order.service_type === 'pickup' ? (
@@ -595,14 +595,14 @@ export default function OrderStatusPage() {
         )}
 
         {/* Order Details */}
-        <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
-          <h3 className="text-xl font-bold text-gray-900 mb-4">{t('labels', 'orderItems', lang)}</h3>
+        <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-6 mb-4 sm:mb-6">
+          <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">{t('labels', 'orderItems', lang)}</h3>
 
-          <div className="space-y-4 mb-4">
+          <div className="space-y-3 sm:space-y-4 mb-4">
             {order.items.map((item, idx) => (
-              <div key={idx} className="flex items-start justify-between p-4 bg-gray-50 rounded-lg">
-                <div className="flex-1">
-                  <p className="font-semibold text-gray-900">
+              <div key={idx} className="flex items-start justify-between p-3 sm:p-4 bg-gray-50 rounded-lg">
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-sm sm:text-base text-gray-900">
                     {item.quantity}x {item.nameEn || item.name}
                   </p>
                   {item.selectedMeat && (
@@ -617,7 +617,7 @@ export default function OrderStatusPage() {
                     <p className="text-sm text-gray-500 italic mt-1">{t('labels', 'note', lang)}: {item.notes}</p>
                   )}
                 </div>
-                <p className="font-bold text-gray-900">
+                <p className="font-bold text-sm sm:text-base text-gray-900 ml-2 shrink-0">
                   ${item.itemTotal.toFixed(2)}
                 </p>
               </div>
@@ -643,8 +643,8 @@ export default function OrderStatusPage() {
               </div>
             )}
             <div className="flex justify-between items-center pt-2 border-t border-gray-200">
-              <span className="text-lg font-bold text-gray-900">{t('labels', 'total', lang)}:</span>
-              <span className="text-2xl font-bold text-orange-500">${order.total_price.toFixed(2)} NZD</span>
+              <span className="text-base sm:text-lg font-bold text-gray-900">{t('labels', 'total', lang)}:</span>
+              <span className="text-lg sm:text-2xl font-bold text-orange-500">${order.total_price.toFixed(2)} NZD</span>
             </div>
             {order.tax > 0 && (
               <div className="flex justify-between items-center text-sm text-gray-500 mt-1">
@@ -656,9 +656,9 @@ export default function OrderStatusPage() {
         </div>
 
         {/* Status Timeline */}
-        <div className="bg-white rounded-2xl shadow-xl p-6">
-          <h3 className="text-xl font-bold text-gray-900 mb-4">{t('labels', 'orderTimeline', lang)}</h3>
-          <div className="space-y-4">
+        <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-6">
+          <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">{t('labels', 'orderTimeline', lang)}</h3>
+          <div className="space-y-3 sm:space-y-4">
             {/* Step 1: Order Received */}
             <div className="flex items-start gap-4">
               <div className={`p-2 rounded-full ${order.status === 'pending' ? 'bg-yellow-100' : 'bg-green-100'}`}>
@@ -774,10 +774,10 @@ export default function OrderStatusPage() {
         </div>
 
         {/* Back Button */}
-        <div className="mt-6 text-center">
+        <div className="mt-4 sm:mt-6 text-center">
           <Link
             href="/order-status"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold"
+            className="inline-flex items-center gap-2 px-4 py-2.5 sm:px-6 sm:py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold text-sm sm:text-base"
           >
             <ArrowLeft className="w-5 h-5" />
             {t('buttons', 'backToMyOrders', lang)}
