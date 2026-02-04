@@ -257,6 +257,17 @@ function SettingsContent() {
     account_number: ''
   });
 
+  // Credit Card Surcharge state
+  const [cardSurchargeEnabled, setCardSurchargeEnabled] = useState(false);
+  const [cardSurchargeRate, setCardSurchargeRate] = useState(2.50);
+  const [savingSurcharge, setSavingSurcharge] = useState(false);
+
+  // Food/Festival Surcharge state
+  const [foodSurchargeEnabled, setFoodSurchargeEnabled] = useState(false);
+  const [foodSurchargeRate, setFoodSurchargeRate] = useState(10.0);
+  const [foodSurchargeName, setFoodSurchargeName] = useState('Holiday Surcharge');
+  const [savingFoodSurcharge, setSavingFoodSurcharge] = useState(false);
+
   // Stripe Connect state (for restaurant to receive payments)
   const [stripeConnectStatus, setStripeConnectStatus] = useState<{
     connected: boolean;
@@ -486,6 +497,10 @@ function SettingsContent() {
       // Load payment settings
       loadPaymentSettings(profile.restaurant.restaurant_id);
 
+      // Load surcharge settings
+      loadSurchargeSettings(profile.restaurant.restaurant_id);
+      loadFoodSurchargeSettings(profile.restaurant.restaurant_id);
+
       // Load Stripe Connect status
       loadStripeConnectStatus(profile.restaurant.restaurant_id);
     }
@@ -693,6 +708,90 @@ function SettingsContent() {
     }
   };
 
+
+  // Load credit card surcharge settings
+  const loadSurchargeSettings = async (restaurantId: string) => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/restaurant/${restaurantId}/surcharge-settings`);
+      const data = await response.json();
+      if (data.success) {
+        setCardSurchargeEnabled(data.credit_card_surcharge_enabled || false);
+        setCardSurchargeRate(data.credit_card_surcharge_rate || 2.50);
+      }
+    } catch (error) {
+      console.error('Failed to load surcharge settings:', error);
+    }
+  };
+
+  // Save credit card surcharge settings
+  const saveSurchargeSettings = async () => {
+    if (!profile?.restaurant?.restaurant_id) return;
+    setSavingSurcharge(true);
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/restaurant/${profile.restaurant.restaurant_id}/surcharge-settings`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          credit_card_surcharge_enabled: cardSurchargeEnabled,
+          credit_card_surcharge_rate: cardSurchargeRate
+        })
+      });
+      const data = await response.json();
+      if (data.success) {
+        alert('Credit card surcharge settings saved!');
+      } else {
+        alert(data.detail || 'Failed to save surcharge settings');
+      }
+    } catch (error) {
+      console.error('Failed to save surcharge settings:', error);
+      alert('Failed to save surcharge settings');
+    } finally {
+      setSavingSurcharge(false);
+    }
+  };
+
+  // Load food surcharge settings
+  const loadFoodSurchargeSettings = async (restaurantId: string) => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/restaurant/${restaurantId}/food-surcharge-settings`);
+      const data = await response.json();
+      if (data.success) {
+        setFoodSurchargeEnabled(data.food_surcharge_enabled || false);
+        setFoodSurchargeRate(data.food_surcharge_rate || 10.0);
+        setFoodSurchargeName(data.food_surcharge_name || 'Holiday Surcharge');
+      }
+    } catch (error) {
+      console.error('Failed to load food surcharge settings:', error);
+    }
+  };
+
+  // Save food surcharge settings
+  const saveFoodSurchargeSettings = async () => {
+    if (!profile?.restaurant?.restaurant_id) return;
+    setSavingFoodSurcharge(true);
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/restaurant/${profile.restaurant.restaurant_id}/food-surcharge-settings`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          food_surcharge_enabled: foodSurchargeEnabled,
+          food_surcharge_rate: foodSurchargeRate,
+          food_surcharge_name: foodSurchargeName
+        })
+      });
+      const data = await response.json();
+      if (data.success) {
+        alert('Food surcharge settings saved!');
+      } else {
+        alert(data.detail || 'Failed to save food surcharge settings');
+      }
+    } catch (error) {
+      console.error('Failed to save food surcharge settings:', error);
+      alert('Failed to save food surcharge settings');
+    } finally {
+      setSavingFoodSurcharge(false);
+    }
+  };
 
   const addBankAccount = () => {
     if (!newBankAccount.bank_name || !newBankAccount.account_name || !newBankAccount.account_number) {
@@ -2886,6 +2985,188 @@ function SettingsContent() {
               )}
             </div>
 
+            {/* Credit Card Surcharge */}
+            <div className="border border-gray-200 rounded-lg p-3 sm:p-4 mb-4">
+              <div className="flex items-center justify-between gap-3 mb-3">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <CreditCard className="w-5 h-5 text-orange-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900">Credit Card Surcharge</h3>
+                    <p className="text-sm text-gray-600">
+                      Pass credit card processing fee to customers
+                    </p>
+                  </div>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={cardSurchargeEnabled}
+                    onChange={(e) => setCardSurchargeEnabled(e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
+                </label>
+              </div>
+
+              {cardSurchargeEnabled && (
+                <div className="space-y-3 mt-3 pt-3 border-t border-gray-100">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Surcharge Rate (%)
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        min="0"
+                        max="10"
+                        step="0.1"
+                        value={cardSurchargeRate}
+                        onChange={(e) => setCardSurchargeRate(parseFloat(e.target.value) || 0)}
+                        className="w-28 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
+                      />
+                      <span className="text-gray-500">%</span>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Typical card processing fee is 2-3%. Customers will see this before paying.
+                    </p>
+                  </div>
+
+                  <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
+                    <p className="text-sm text-orange-800">
+                      When enabled, customers choosing card payment will see a popup showing the {cardSurchargeRate}% surcharge and must accept before proceeding.
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={saveSurchargeSettings}
+                    disabled={savingSurcharge}
+                    className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm"
+                  >
+                    {savingSurcharge ? (
+                      <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</>
+                    ) : (
+                      <><Save className="w-4 h-4" /> Save Surcharge Settings</>
+                    )}
+                  </button>
+                </div>
+              )}
+
+              {!cardSurchargeEnabled && (
+                <button
+                  onClick={saveSurchargeSettings}
+                  disabled={savingSurcharge}
+                  className="mt-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm"
+                >
+                  {savingSurcharge ? (
+                    <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</>
+                  ) : (
+                    <><Save className="w-4 h-4" /> Save</>
+                  )}
+                </button>
+              )}
+            </div>
+
+            {/* Food/Festival Surcharge */}
+            <div className="border border-gray-200 rounded-lg p-3 sm:p-4 mb-4">
+              <div className="flex items-center justify-between gap-3 mb-3">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Utensils className="w-5 h-5 text-purple-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900">Food/Festival Surcharge</h3>
+                    <p className="text-sm text-gray-600">
+                      Add surcharge during holidays or special events
+                    </p>
+                  </div>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={foodSurchargeEnabled}
+                    onChange={(e) => setFoodSurchargeEnabled(e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                </label>
+              </div>
+
+              {foodSurchargeEnabled && (
+                <div className="space-y-3 mt-3 pt-3 border-t border-gray-100">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Surcharge Name
+                    </label>
+                    <input
+                      type="text"
+                      value={foodSurchargeName}
+                      onChange={(e) => setFoodSurchargeName(e.target.value)}
+                      placeholder="e.g. Holiday Surcharge, New Year Festival"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      This name will be shown to customers on their order summary.
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Surcharge Rate (%)
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        min="0"
+                        max="50"
+                        step="0.5"
+                        value={foodSurchargeRate}
+                        onChange={(e) => setFoodSurchargeRate(parseFloat(e.target.value) || 0)}
+                        className="w-28 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
+                      />
+                      <span className="text-gray-500">%</span>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      This percentage will be added to the subtotal of every order.
+                    </p>
+                  </div>
+
+                  <div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
+                    <p className="text-sm text-purple-800">
+                      When enabled, all orders will include a "{foodSurchargeName}" of {foodSurchargeRate}% on the subtotal. Remember to disable when the event ends.
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={saveFoodSurchargeSettings}
+                    disabled={savingFoodSurcharge}
+                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm"
+                  >
+                    {savingFoodSurcharge ? (
+                      <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</>
+                    ) : (
+                      <><Save className="w-4 h-4" /> Save Food Surcharge Settings</>
+                    )}
+                  </button>
+                </div>
+              )}
+
+              {!foodSurchargeEnabled && (
+                <button
+                  onClick={saveFoodSurchargeSettings}
+                  disabled={savingFoodSurcharge}
+                  className="mt-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm"
+                >
+                  {savingFoodSurcharge ? (
+                    <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</>
+                  ) : (
+                    <><Save className="w-4 h-4" /> Save</>
+                  )}
+                </button>
+              )}
+            </div>
+
             {/* Info Box */}
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
               <h4 className="font-medium text-yellow-800 mb-2">📋 How it works</h4>
@@ -2895,6 +3176,8 @@ function SettingsContent() {
                 <li>• If QR Code is enabled, customers will also see a QR code to scan</li>
                 <li>• You must manually verify transfers in the Orders Dashboard</li>
                 <li>• At least one payment method must be enabled</li>
+                <li>• Credit card surcharge: Customers see a popup before card payment</li>
+                <li>• Food surcharge: Applied to all orders when enabled (e.g. holidays)</li>
               </ul>
             </div>
 

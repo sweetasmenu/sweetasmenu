@@ -3661,6 +3661,10 @@ class CreateOrderRequest(BaseModel):
     subtotal: Optional[float] = 0  # Subtotal before fees
     service_type: Optional[str] = "dine_in"  # 'dine_in', 'pickup', 'delivery'
     customer_details: Optional[Dict[str, Any]] = None
+    surcharge_amount: Optional[float] = None  # Credit card surcharge (calculated in payment page)
+    food_surcharge_amount: Optional[float] = None  # Food/holiday surcharge
+    food_surcharge_name: Optional[str] = None  # Display name for food surcharge
+    payment_method: Optional[str] = "card"  # Payment method: card, bank_transfer, cash_at_counter
 
 @app.post("/api/orders", summary="Create New Order")
 async def create_order(request: CreateOrderRequest):
@@ -3698,6 +3702,10 @@ async def create_order(request: CreateOrderRequest):
             "subtotal": request.subtotal or 0,
             "service_type": request.service_type or "dine_in",
             "customer_details": request.customer_details or {},
+            "surcharge_amount": request.surcharge_amount,
+            "food_surcharge_amount": request.food_surcharge_amount,
+            "food_surcharge_name": request.food_surcharge_name,
+            "payment_method": request.payment_method or "card",
         }
         
         order = orders_service.create_order(actual_restaurant_id, order_data)

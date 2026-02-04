@@ -25,6 +25,9 @@ interface Order {
   tax: number;
   total_price: number;
   delivery_fee?: number;
+  surcharge_amount?: number;
+  food_surcharge_amount?: number;
+  food_surcharge_name?: string;
   service_type: 'dine_in' | 'pickup' | 'delivery';
   table_no?: string;
   customer_name?: string;
@@ -412,15 +415,16 @@ export default function PaymentPage() {
     if (selectedMethod !== 'card' || !surchargeSettings.credit_card_surcharge_enabled) {
       return 0;
     }
+    // Surcharge is calculated on the base amount (subtotal + delivery_fee)
     const baseAmount = order ? order.subtotal + (order.delivery_fee || 0) : 0;
     return Math.round(baseAmount * surchargeSettings.credit_card_surcharge_rate) / 100;
   };
 
   // Get final total with surcharge for card payments
+  // Uses order.total_price which already includes subtotal + delivery_fee + food_surcharge (GST inclusive)
   const getFinalTotal = () => {
     if (!order) return 0;
-    const baseTotal = order.subtotal + (order.delivery_fee || 0);
-    return baseTotal + getSurchargeAmount();
+    return order.total_price + getSurchargeAmount();
   };
 
   // Fetch order and payment settings
@@ -781,6 +785,12 @@ export default function PaymentPage() {
                 <span>${order.delivery_fee.toFixed(2)}</span>
               </div>
             )}
+            {order.food_surcharge_amount && order.food_surcharge_amount > 0 && (
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">{order.food_surcharge_name || 'Surcharge'}</span>
+                <span>${order.food_surcharge_amount.toFixed(2)}</span>
+              </div>
+            )}
             {/* Card Payment Surcharge - only show when card is selected */}
             {selectedMethod === 'card' && getSurchargeAmount() > 0 && (
               <div className="flex justify-between text-sm text-orange-600">
@@ -985,25 +995,19 @@ export default function PaymentPage() {
 
             <div className="bg-gray-50 rounded-xl p-4 mb-6 space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Subtotal</span>
-                <span className="font-medium">${order.subtotal.toFixed(2)}</span>
+                <span className="text-gray-600">Order Total</span>
+                <span className="font-medium">${order.total_price.toFixed(2)}</span>
               </div>
-              {order.delivery_fee && order.delivery_fee > 0 && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Delivery Fee</span>
-                  <span className="font-medium">${order.delivery_fee.toFixed(2)}</span>
-                </div>
-              )}
               <div className="flex justify-between text-sm text-orange-600">
                 <span>Service Fee ({surchargeSettings.credit_card_surcharge_rate}%)</span>
                 <span className="font-medium">
-                  +${(Math.round((order.subtotal + (order.delivery_fee || 0)) * surchargeSettings.credit_card_surcharge_rate) / 100).toFixed(2)}
+                  +${getSurchargeAmount().toFixed(2)}
                 </span>
               </div>
               <div className="flex justify-between text-lg font-bold pt-2 border-t border-gray-200">
                 <span>Total</span>
                 <span className="text-blue-600">
-                  ${((order.subtotal + (order.delivery_fee || 0)) * (1 + surchargeSettings.credit_card_surcharge_rate / 100)).toFixed(2)} NZD
+                  ${getFinalTotal().toFixed(2)} NZD
                 </span>
               </div>
             </div>

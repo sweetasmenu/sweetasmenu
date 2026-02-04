@@ -230,10 +230,11 @@ export default function StaffOrdersPage() {
       );
       const data = await response.json();
       if (data.success) {
-        // Filter out only completed/cancelled orders
-        // Include pending_payment orders so staff can verify payment
+        // Filter out completed/cancelled AND pending_payment orders
+        // Orders should only appear on POS after payment is completed
+        // pending_payment = customer hasn't paid yet (stays in My Orders)
         setOrders((data.orders || []).filter((o: Order) =>
-          !['completed', 'cancelled'].includes(o.status)
+          !['completed', 'cancelled', 'pending_payment'].includes(o.status)
         ));
       }
     } catch (error) {
@@ -423,26 +424,27 @@ export default function StaffOrdersPage() {
 
           if (payload.eventType === 'INSERT') {
             const newOrder = payload.new as Order;
-            // Show all orders except completed/cancelled (including pending_payment for staff to verify)
-            if (!['completed', 'cancelled'].includes(newOrder.status)) {
+            // Only show orders that have been paid (not pending_payment)
+            // Orders appear on POS only after customer completes payment
+            if (!['completed', 'cancelled', 'pending_payment'].includes(newOrder.status)) {
               playNotification('order');
               setOrders((prev) => [newOrder, ...prev]);
             }
           } else if (payload.eventType === 'UPDATE') {
             const newOrder = payload.new as Order;
 
-            // Remove completed/cancelled orders from list
-            if (['completed', 'cancelled'].includes(newOrder.status)) {
+            // Remove completed/cancelled/pending_payment orders from list
+            if (['completed', 'cancelled', 'pending_payment'].includes(newOrder.status)) {
               setOrders((prev) => prev.filter((o) => o.id !== newOrder.id));
             }
-            // Otherwise update existing order or add if new
+            // Otherwise update existing order or add if new (e.g., payment completed → order appears)
             else {
               setOrders((prev) => {
                 const exists = prev.some(o => o.id === newOrder.id);
                 if (exists) {
                   return prev.map((order) => order.id === newOrder.id ? newOrder : order);
                 }
-                // New order, add it to the list
+                // Order just became visible (e.g., pending_payment → pending after payment)
                 playNotification('order');
                 return [newOrder, ...prev];
               });
