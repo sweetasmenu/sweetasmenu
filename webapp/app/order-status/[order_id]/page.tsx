@@ -481,17 +481,6 @@ export default function OrderStatusPage() {
             <span>{t('labels', 'updatesAutomatically', lang)}</span>
           </div>
 
-          {/* Complete Payment Button for pending_payment orders */}
-          {order.status === 'pending_payment' && (
-            <div className="mt-6 pt-6 border-t border-gray-200">
-              <Link
-                href={`/payment/${order.id}?restaurant=${restaurantSlug}&lang=${lang}`}
-                className="block w-full py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-semibold text-center"
-              >
-                {t('buttons', 'completePayment', lang)}
-              </Link>
-            </div>
-          )}
         </div>
 
         {/* Customer Info Card - based on service type */}
@@ -752,23 +741,13 @@ export default function OrderStatusPage() {
 
         {/* Back Button */}
         <div className="mt-6 text-center">
-          {order.status === 'verifying_payment' ? (
-            <Link
-              href="/order-status"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold"
-            >
-              <ArrowLeft className="w-5 h-5" />
-              {t('buttons', 'backToMyOrders', lang)}
-            </Link>
-          ) : (
-            <Link
-              href={menuUrl}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold"
-            >
-              <ArrowLeft className="w-5 h-5" />
-              {restaurantSlug ? t('buttons', 'backToMenu', lang) : t('buttons', 'goHome', lang)}
-            </Link>
-          )}
+          <Link
+            href="/order-status"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            {t('buttons', 'backToMyOrders', lang)}
+          </Link>
         </div>
       </div>
     </div>
