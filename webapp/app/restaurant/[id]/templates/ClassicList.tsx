@@ -62,7 +62,7 @@ export default function ClassicList({ menus, groupedMenus, themeColor, onItemCli
   const t = (key: keyof typeof translations) => translations[key][selectedLanguage] || translations[key]['en'];
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-8 sm:space-y-12">
       {Object.entries(groupedMenus).map(([category, items]) => (
         <div key={category} id={`category-${category.replace(/\s+/g, '-')}`} className="scroll-mt-20">
           {/* Category Header - Special style for Bestseller */}
@@ -70,10 +70,10 @@ export default function ClassicList({ menus, groupedMenus, themeColor, onItemCli
             className={`mb-6 pb-2 border-b-2 ${isBestsellerCategory(category) ? 'bg-gradient-to-r from-orange-50 to-red-50 -mx-4 px-4 py-4 rounded-xl border-orange-400' : ''}`}
             style={{ borderColor: isBestsellerCategory(category) ? '#f97316' : themeColor }}
           >
-            <h2 className={`text-3xl font-bold flex items-center gap-3 ${isBestsellerCategory(category) ? 'text-orange-600' : 'text-gray-900'}`}>
-              {isBestsellerCategory(category) && <Flame className="w-8 h-8 text-orange-500 fill-orange-500" />}
+            <h2 className={`text-2xl sm:text-3xl font-bold flex items-center gap-2 sm:gap-3 ${isBestsellerCategory(category) ? 'text-orange-600' : 'text-gray-900'}`}>
+              {isBestsellerCategory(category) && <Flame className="w-6 h-6 sm:w-8 sm:h-8 text-orange-500 fill-orange-500" />}
               {isBestsellerCategory(category) ? t('bestseller') : category}
-              {isBestsellerCategory(category) && <span className="text-lg font-normal text-orange-500">{t('popularDishes')}</span>}
+              {isBestsellerCategory(category) && <span className="text-sm sm:text-lg font-normal text-orange-500">{t('popularDishes')}</span>}
             </h2>
           </div>
 
@@ -132,7 +132,7 @@ export default function ClassicList({ menus, groupedMenus, themeColor, onItemCli
                     
                     {/* Price & Add Button */}
                     <div className="flex flex-row sm:flex-col items-start sm:items-end gap-2 ml-0 sm:ml-4 w-full sm:w-auto">
-                      <span className="text-2xl font-bold" style={{ color: themeColor }}>
+                      <span className="text-xl sm:text-2xl font-bold" style={{ color: themeColor }}>
                         ${menu.price}
                       </span>
                       <button

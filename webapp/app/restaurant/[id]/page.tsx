@@ -1141,7 +1141,7 @@ export default function RestaurantMenuPage() {
       {/* Hero Section with Logo */}
       <div className="relative overflow-hidden">
         <div
-          className="py-16 px-4 relative"
+          className="py-8 sm:py-16 px-4 relative"
           style={{
             background: branding.cover_image_url
               ? `url(${branding.cover_image_url})`
@@ -1167,12 +1167,12 @@ export default function RestaurantMenuPage() {
             )}
             
             {/* Restaurant Name */}
-            <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 drop-shadow-lg">
+            <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold text-white mb-4 drop-shadow-lg">
               {branding.name || 'Our Menu'}
             </h1>
             
             {/* Restaurant Info */}
-            <div className="flex flex-wrap items-center justify-center gap-6 text-white/90 text-sm md:text-base">
+            <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-white/90 text-sm md:text-base">
               {menus.length > 0 && (
                 <div className="flex items-center gap-2">
                   <Utensils className="w-5 h-5" />
@@ -1202,35 +1202,35 @@ export default function RestaurantMenuPage() {
       </div>
 
       {/* Language Selector & My Orders */}
-      <div className="container mx-auto px-4 max-w-6xl mt-4">
-        <div className="flex items-center justify-between">
+      <div className="container mx-auto px-3 sm:px-4 max-w-6xl mt-3 sm:mt-4">
+        <div className="flex items-center justify-between gap-2">
           {/* My Orders Link */}
           <button
             onClick={() => router.push('/order-status')}
-            className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-md border border-gray-200 hover:bg-gray-50 transition-colors"
+            className="flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-white rounded-lg shadow-md border border-gray-200 hover:bg-gray-50 transition-colors"
           >
             <ClipboardList className="w-4 h-4 text-orange-500" />
-            <span className="text-sm font-medium text-gray-700">My Orders</span>
+            <span className="text-xs sm:text-sm font-medium text-gray-700">My Orders</span>
           </button>
 
           {/* Language Selector */}
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600">
+          <div className="flex items-center gap-1 sm:gap-2">
+            <span className="text-xs sm:text-sm text-gray-600 hidden sm:inline">
               <Globe className="w-4 h-4 inline mr-1" />
               Language:
             </span>
             <div className="relative">
               <button
                 onClick={() => setShowLanguageSelector(!showLanguageSelector)}
-                className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-md border border-gray-200 hover:bg-gray-50 transition-colors"
+                className="flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-white rounded-lg shadow-md border border-gray-200 hover:bg-gray-50 transition-colors"
               >
-                <span className="text-lg">
+                <span className="text-base sm:text-lg">
                   {AVAILABLE_LANGUAGES.find(l => l.code === selectedLanguage)?.flag || '📝'}
                 </span>
-                <span className="text-sm font-medium text-gray-900">
+                <span className="text-xs sm:text-sm font-medium text-gray-900">
                   {AVAILABLE_LANGUAGES.find(l => l.code === selectedLanguage)?.name || 'Original'}
                 </span>
-                <Languages className="w-4 h-4 text-gray-500" />
+                <Languages className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500" />
               </button>
 
               {showLanguageSelector && (
@@ -1278,11 +1278,11 @@ export default function RestaurantMenuPage() {
         )}
       </div>
 
-      <div className="container mx-auto px-4 max-w-6xl mt-8">
+      <div className="container mx-auto px-3 sm:px-4 max-w-6xl mt-4 sm:mt-8">
 
         {/* Category Navigation Bar */}
         {Object.keys(groupedMenus).length > 0 && (
-          <div className="sticky top-0 z-30 bg-white shadow-md mb-6 -mx-4 px-4 py-3 overflow-x-auto">
+          <div className="sticky top-0 z-30 bg-white shadow-md mb-4 sm:mb-6 -mx-3 sm:-mx-4 px-3 sm:px-4 py-2 sm:py-3 overflow-x-auto">
             <div className="flex gap-2 min-w-max">
               {Object.keys(groupedMenus).map((category, idx) => (
                 <button
@@ -1293,7 +1293,7 @@ export default function RestaurantMenuPage() {
                       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }
                   }}
-                  className="px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all hover:scale-105"
+                  className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap transition-all hover:scale-105"
                   style={{
                     backgroundColor: themeColor,
                     color: 'white',
@@ -1308,9 +1308,9 @@ export default function RestaurantMenuPage() {
 
         {/* Menu by Category - Using Selected Template */}
         {Object.keys(groupedMenus).length === 0 ? (
-          <div className="bg-white rounded-2xl shadow-xl p-12 text-center">
-            <Utensils className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-2xl font-semibold text-gray-900 mb-2">
+          <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-12 text-center">
+            <Utensils className="w-12 h-12 sm:w-16 sm:h-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2">
               No menu items available
             </h3>
             <p className="text-gray-600">
@@ -1373,10 +1373,10 @@ export default function RestaurantMenuPage() {
       {serviceOptions.dine_in && (
         <button
           onClick={() => setShowServiceModal(true)}
-          className="fixed bottom-6 left-6 w-14 h-14 rounded-full shadow-lg flex items-center justify-center z-40 transition-all hover:scale-110 bg-gradient-to-br from-blue-500 to-blue-600 text-white"
+          className="fixed bottom-4 left-4 sm:bottom-6 sm:left-6 w-12 h-12 sm:w-14 sm:h-14 rounded-full shadow-lg flex items-center justify-center z-40 transition-all hover:scale-110 bg-gradient-to-br from-blue-500 to-blue-600 text-white"
           title={`${dt('customer', 'callWaiter', getCustomerLang())}${getCustomerLang() !== 'en' ? ` / ${dt('customer', 'callWaiter', 'en')}` : ''}`}
         >
-          <MessageCircle className="w-7 h-7" />
+          <MessageCircle className="w-6 h-6 sm:w-7 sm:h-7" />
         </button>
       )}
 
@@ -1516,12 +1516,12 @@ export default function RestaurantMenuPage() {
       {cart.length > 0 && (
         <button
           onClick={() => setShowCart(true)}
-          className="fixed bottom-6 right-6 text-white px-6 py-4 rounded-full shadow-lg font-semibold flex items-center gap-3 z-40 transition-all hover:scale-105"
+          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 text-white px-4 py-3 sm:px-6 sm:py-4 rounded-full shadow-lg font-semibold flex items-center gap-2 sm:gap-3 z-40 transition-all hover:scale-105 text-sm sm:text-base"
           style={{ backgroundColor: themeColor }}
         >
-          <ShoppingCart className="w-6 h-6" />
+          <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6" />
           <span>{dt('customer', 'cart', getCustomerLang())} ({cart.length})</span>
-          <span className="bg-white px-3 py-1 rounded-full" style={{ color: themeColor }}>
+          <span className="bg-white px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-sm sm:text-base" style={{ color: themeColor }}>
             ${getTotalPrice().toFixed(2)}
           </span>
         </button>

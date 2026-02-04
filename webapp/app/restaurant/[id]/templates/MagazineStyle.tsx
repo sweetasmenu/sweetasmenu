@@ -57,7 +57,7 @@ export default function MagazineStyle({ menus, groupedMenus, themeColor, onItemC
   const t = (key: keyof typeof translations) => translations[key][selectedLanguage] || translations[key]['en'];
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-8 sm:space-y-12">
       {Object.entries(groupedMenus).map(([category, items]) => {
         // For Bestseller category, show all items as featured
         const isBestseller = isBestsellerCategory(category);
@@ -72,10 +72,10 @@ export default function MagazineStyle({ menus, groupedMenus, themeColor, onItemC
               className={`mb-6 pb-2 border-b-2 ${isBestseller ? 'bg-gradient-to-r from-orange-50 to-red-50 -mx-4 px-4 py-4 rounded-xl border-orange-400' : ''}`}
               style={{ borderColor: isBestseller ? '#f97316' : themeColor }}
             >
-              <h2 className={`text-3xl font-bold flex items-center gap-3 ${isBestseller ? 'text-orange-600' : 'text-gray-900'}`}>
-                {isBestseller && <Flame className="w-8 h-8 text-orange-500 fill-orange-500" />}
+              <h2 className={`text-2xl sm:text-3xl font-bold flex items-center gap-2 sm:gap-3 ${isBestseller ? 'text-orange-600' : 'text-gray-900'}`}>
+                {isBestseller && <Flame className="w-6 h-6 sm:w-8 sm:h-8 text-orange-500 fill-orange-500" />}
                 {isBestseller ? t('bestseller') : category}
-                {isBestseller && <span className="text-lg font-normal text-orange-500">{t('popularDishes')}</span>}
+                {isBestseller && <span className="text-sm sm:text-lg font-normal text-orange-500">{t('popularDishes')}</span>}
               </h2>
             </div>
             
@@ -99,7 +99,7 @@ export default function MagazineStyle({ menus, groupedMenus, themeColor, onItemC
                     >
                       {/* Large Photo for Best Sellers */}
                       {menu.photo_url && (
-                        <div className="relative w-full h-64 bg-gray-200">
+                        <div className="relative w-full h-48 sm:h-64 bg-gray-200">
                           <img
                             src={menu.photo_url}
                             alt={menu.name}
@@ -116,8 +116,8 @@ export default function MagazineStyle({ menus, groupedMenus, themeColor, onItemC
                       )}
 
                       {/* Content */}
-                      <div className="p-6">
-                        <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                      <div className="p-4 sm:p-6">
+                        <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
                           {selectedLanguage === 'en' && menu.nameEn ? menu.nameEn : menu.name}
                         </h3>
 
@@ -129,16 +129,16 @@ export default function MagazineStyle({ menus, groupedMenus, themeColor, onItemC
 
                         {/* Price & Button */}
                         <div className="flex items-center justify-between">
-                          <span className="text-3xl font-bold" style={{ color: themeColor }}>
+                          <span className="text-2xl sm:text-3xl font-bold" style={{ color: themeColor }}>
                             ${menu.price}
-                            <span className="text-lg ml-1 text-gray-500">NZD</span>
+                            <span className="text-sm sm:text-lg ml-1 text-gray-500">NZD</span>
                           </span>
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               onItemClick(menu);
                             }}
-                            className="px-6 py-3 text-white rounded-lg font-bold transition-all hover:scale-105 shadow-lg flex items-center gap-2"
+                            className="px-4 py-2 sm:px-6 sm:py-3 text-white rounded-lg font-bold transition-all hover:scale-105 shadow-lg flex items-center gap-1 sm:gap-2 text-sm sm:text-base"
                             style={{ backgroundColor: themeColor }}
                           >
                             <Plus className="w-5 h-5" />

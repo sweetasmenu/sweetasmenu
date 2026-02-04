@@ -57,33 +57,33 @@ export default function Elegant({ menus, groupedMenus, themeColor, onItemClick, 
   const t = (key: keyof typeof translations) => translations[key][selectedLanguage] || translations[key]['en'];
 
   return (
-    <div className="max-w-4xl mx-auto space-y-16">
+    <div className="max-w-4xl mx-auto space-y-10 sm:space-y-16">
       {Object.entries(groupedMenus).map(([category, items]) => (
         <div key={category} id={`category-${category.replace(/\s+/g, '-')}`} className="scroll-mt-20">
           {/* Category Header - Elegant Style / Special for Bestseller */}
           {isBestsellerCategory(category) ? (
-            <div className="bg-gradient-to-r from-orange-50 to-red-50 -mx-4 px-4 py-6 rounded-xl border-2 border-orange-400 mb-10">
-              <h2 className="text-4xl font-serif font-bold text-orange-600 flex items-center justify-center gap-4">
-                <Flame className="w-10 h-10 text-orange-500 fill-orange-500" />
+            <div className="bg-gradient-to-r from-orange-50 to-red-50 -mx-4 px-4 py-4 sm:py-6 rounded-xl border-2 border-orange-400 mb-6 sm:mb-10">
+              <h2 className="text-2xl sm:text-4xl font-serif font-bold text-orange-600 flex items-center justify-center gap-2 sm:gap-4 flex-wrap">
+                <Flame className="w-7 h-7 sm:w-10 sm:h-10 text-orange-500 fill-orange-500" />
                 {t('bestseller')}
-                <span className="text-xl font-normal text-orange-500">{t('popularDishes')}</span>
+                <span className="text-sm sm:text-xl font-normal text-orange-500">{t('popularDishes')}</span>
               </h2>
             </div>
           ) : (
-            <div className="text-center mb-10">
+            <div className="text-center mb-6 sm:mb-10">
               <div className="flex items-center justify-center gap-4 mb-3">
                 <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
                 <Sparkles className="w-5 h-5" style={{ color: themeColor }} />
                 <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
               </div>
-              <h2 className="text-4xl font-serif font-bold text-gray-900">
+              <h2 className="text-2xl sm:text-4xl font-serif font-bold text-gray-900">
                 {category}
               </h2>
             </div>
           )}
           
           {/* Items */}
-          <div className="space-y-8">
+          <div className="space-y-6 sm:space-y-8">
             {items.map((menu) => (
               <div
                 key={menu.menu_id}
@@ -100,7 +100,7 @@ export default function Elegant({ menus, groupedMenus, themeColor, onItemClick, 
                     <div className={`relative bg-gray-200 ${
                       menu.is_best_seller ? 'w-full lg:w-1/2' : 'w-full lg:w-1/3'
                     }`}>
-                      <div className={menu.is_best_seller ? 'h-80' : 'h-64'}>
+                      <div className={menu.is_best_seller ? 'h-56 sm:h-80' : 'h-48 sm:h-64'}>
                         <img
                           src={menu.photo_url}
                           alt={menu.name}
@@ -138,7 +138,7 @@ export default function Elegant({ menus, groupedMenus, themeColor, onItemClick, 
 
                     {/* Description */}
                     {menu.description && (
-                      <p className="text-gray-600 leading-relaxed mb-6">
+                      <p className="text-sm sm:text-base text-gray-600 leading-relaxed mb-4 sm:mb-6">
                         {selectedLanguage === 'en' && menu.descriptionEn ? menu.descriptionEn : menu.description}
                       </p>
                     )}
@@ -147,7 +147,7 @@ export default function Elegant({ menus, groupedMenus, themeColor, onItemClick, 
                     <div className="flex items-center justify-between">
                       <div>
                         <span className="text-sm text-gray-500 block mb-1">{t('price')}</span>
-                        <span className="text-3xl font-bold" style={{ color: themeColor }}>
+                        <span className="text-2xl sm:text-3xl font-bold" style={{ color: themeColor }}>
                           ${menu.price}
                         </span>
                       </div>
@@ -156,7 +156,7 @@ export default function Elegant({ menus, groupedMenus, themeColor, onItemClick, 
                           e.stopPropagation();
                           onItemClick(menu);
                         }}
-                        className="px-6 py-3 text-white rounded-full font-semibold transition-all hover:scale-105 shadow-md flex items-center gap-2"
+                        className="px-4 py-2 sm:px-6 sm:py-3 text-white rounded-full font-semibold transition-all hover:scale-105 shadow-md flex items-center gap-1 sm:gap-2 text-sm sm:text-base"
                         style={{ backgroundColor: themeColor }}
                       >
                         <Plus className="w-5 h-5" />

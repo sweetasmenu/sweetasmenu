@@ -149,7 +149,7 @@ export default function GridView({ menus, groupedMenus, themeColor, onItemClick,
   const t = (key: keyof typeof translations) => translations[key][selectedLanguage] || translations[key]['en'];
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-8 sm:space-y-12">
       {Object.entries(groupedMenus).map(([category, items]) => {
         const isExpanded = expandedCategories.has(category);
         const showScrollView = !isExpanded && items.length > 3;
@@ -161,11 +161,11 @@ export default function GridView({ menus, groupedMenus, themeColor, onItemClick,
               className={`mb-6 pb-2 border-b-2 flex items-center justify-between ${isBestsellerCategory(category) ? 'bg-gradient-to-r from-orange-50 to-red-50 -mx-4 px-4 py-4 rounded-xl border-orange-400' : ''}`}
               style={{ borderColor: isBestsellerCategory(category) ? '#f97316' : themeColor }}
             >
-              <h2 className={`text-3xl font-bold flex items-center gap-3 ${isBestsellerCategory(category) ? 'text-orange-600' : 'text-gray-900'}`}>
-                {isBestsellerCategory(category) && <Flame className="w-8 h-8 text-orange-500 fill-orange-500" />}
+              <h2 className={`text-2xl sm:text-3xl font-bold flex items-center gap-2 sm:gap-3 flex-wrap ${isBestsellerCategory(category) ? 'text-orange-600' : 'text-gray-900'}`}>
+                {isBestsellerCategory(category) && <Flame className="w-6 h-6 sm:w-8 sm:h-8 text-orange-500 fill-orange-500" />}
                 {isBestsellerCategory(category) ? t('bestseller') : category}
-                {isBestsellerCategory(category) && <span className="text-lg font-normal text-orange-500">{t('popularDishes')}</span>}
-                <span className="text-lg font-normal text-gray-500">({items.length})</span>
+                {isBestsellerCategory(category) && <span className="text-sm sm:text-lg font-normal text-orange-500">{t('popularDishes')}</span>}
+                <span className="text-sm sm:text-lg font-normal text-gray-500">({items.length})</span>
               </h2>
 
               {/* View All / Collapse button */}
@@ -198,7 +198,7 @@ export default function GridView({ menus, groupedMenus, themeColor, onItemClick,
                 {/* Scrollable Container */}
                 <div
                   ref={(el) => { scrollRefs.current[category] = el; }}
-                  className="flex gap-6 overflow-x-auto scrollbar-hide pb-4 scroll-smooth"
+                  className="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-hide pb-4 scroll-smooth"
                   style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                 >
                   {items.map((menu) => (
@@ -235,8 +235,8 @@ export default function GridView({ menus, groupedMenus, themeColor, onItemClick,
                       </div>
 
                       {/* Content */}
-                      <div className="p-5">
-                        <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-1">
+                      <div className="p-3 sm:p-5">
+                        <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2 line-clamp-1">
                           {selectedLanguage === 'en' && menu.nameEn ? menu.nameEn : menu.name}
                         </h3>
                         {menu.description && (
@@ -311,9 +311,9 @@ export default function GridView({ menus, groupedMenus, themeColor, onItemClick,
                     </div>
 
                     {/* Content */}
-                    <div className="p-6">
+                    <div className="p-4 sm:p-6">
                       <div className="mb-2">
-                        <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                        <h3 className="text-lg sm:text-xl font-bold text-gray-900 flex items-center gap-2">
                           {selectedLanguage === 'en' && menu.nameEn ? menu.nameEn : menu.name}
                           {menu.is_best_seller && !menu.photo_url && (
                             <Star className="w-4 h-4 fill-orange-500 text-orange-500" />
@@ -326,7 +326,7 @@ export default function GridView({ menus, groupedMenus, themeColor, onItemClick,
                         </p>
                       )}
                       <div className="flex items-center justify-between">
-                        <span className="text-2xl font-bold" style={{ color: themeColor }}>
+                        <span className="text-xl sm:text-2xl font-bold" style={{ color: themeColor }}>
                           ${menu.price}
                         </span>
                         <button
@@ -334,7 +334,7 @@ export default function GridView({ menus, groupedMenus, themeColor, onItemClick,
                             e.stopPropagation();
                             onItemClick(menu);
                           }}
-                          className="px-4 py-2 text-white rounded-lg font-semibold transition-all hover:scale-105 flex items-center gap-2"
+                          className="px-3 py-1.5 sm:px-4 sm:py-2 text-white rounded-lg font-semibold transition-all hover:scale-105 flex items-center gap-1 sm:gap-2 text-sm sm:text-base"
                           style={{ backgroundColor: themeColor }}
                         >
                           <Plus className="w-4 h-4" />

@@ -60,16 +60,16 @@ export default function Casual({ menus, groupedMenus, themeColor, onItemClick, s
         <div key={category} id={`category-${category.replace(/\s+/g, '-')}`} className="scroll-mt-20">
           {/* Category Header - Fun Style / Special for Bestseller */}
           {isBestsellerCategory(category) ? (
-            <div className="bg-gradient-to-r from-orange-200 to-red-200 rounded-2xl p-6 mb-6 shadow-lg border-2 border-orange-400">
-              <h2 className="text-3xl font-bold text-orange-700 text-center flex items-center justify-center gap-3">
-                <Flame className="w-8 h-8 text-orange-600 fill-orange-600" />
+            <div className="bg-gradient-to-r from-orange-200 to-red-200 rounded-2xl p-4 sm:p-6 mb-6 shadow-lg border-2 border-orange-400">
+              <h2 className="text-2xl sm:text-3xl font-bold text-orange-700 text-center flex items-center justify-center gap-2 sm:gap-3 flex-wrap">
+                <Flame className="w-6 h-6 sm:w-8 sm:h-8 text-orange-600 fill-orange-600" />
                 {t('bestseller')}
-                <span className="text-lg font-normal text-orange-600">{t('popularDishes')}</span>
+                <span className="text-sm sm:text-lg font-normal text-orange-600">{t('popularDishes')}</span>
               </h2>
             </div>
           ) : (
-            <div className={`bg-gradient-to-r ${categoryColors[categoryIndex % categoryColors.length]} rounded-2xl p-6 mb-6 shadow-lg`}>
-              <h2 className="text-3xl font-bold text-gray-900 text-center">
+            <div className={`bg-gradient-to-r ${categoryColors[categoryIndex % categoryColors.length]} rounded-2xl p-4 sm:p-6 mb-6 shadow-lg`}>
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center">
                 🍽️ {category}
               </h2>
             </div>
@@ -125,9 +125,9 @@ export default function Casual({ menus, groupedMenus, themeColor, onItemClick, s
                 )}
 
                 {/* Content */}
-                <div className="p-5">
+                <div className="p-4 sm:p-5">
                   {/* Name */}
-                  <h3 className="text-xl font-bold text-gray-900 mb-1 flex items-center gap-2">
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-1 flex items-center gap-2">
                     {selectedLanguage === 'en' && menu.nameEn ? menu.nameEn : menu.name}
                     {menu.is_best_seller && (
                       <Heart className="w-4 h-4 fill-red-500 text-red-500 animate-pulse" />
@@ -143,7 +143,7 @@ export default function Casual({ menus, groupedMenus, themeColor, onItemClick, s
 
                   {/* Price & Button */}
                   <div className="flex items-center justify-between">
-                    <span className="text-2xl font-black" style={{ color: themeColor }}>
+                    <span className="text-xl sm:text-2xl font-black" style={{ color: themeColor }}>
                       ${menu.price}
                     </span>
                     <button
