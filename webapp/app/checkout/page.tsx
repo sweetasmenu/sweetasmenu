@@ -256,45 +256,45 @@ function CheckoutContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 py-6 sm:py-12 px-3 sm:px-4">
       <div className="max-w-5xl mx-auto">
         {/* Back Button */}
         <Link
           href="/pricing"
-          className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-8 transition-colors"
+          className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-6 sm:mb-8 transition-colors text-sm sm:text-base"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Pricing
         </Link>
 
-        <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 sm:mb-8 text-center">
           Complete Your Subscription
         </h1>
 
-        <div className="grid lg:grid-cols-5 gap-8">
+        <div className="grid lg:grid-cols-5 gap-6 sm:gap-8">
           {/* Left Column - Options */}
           <div className="lg:col-span-3 space-y-6">
             {/* Billing Interval Selection */}
-            <div className="bg-white rounded-2xl shadow-xl p-6">
+            <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-6">
               <h2 className="text-lg font-bold text-gray-900 mb-4">Billing Period</h2>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
                 <button
                   onClick={() => setBillingInterval('monthly')}
-                  className={`p-4 rounded-xl border-2 transition-all ${
+                  className={`p-3 sm:p-4 rounded-xl border-2 transition-all ${
                     billingInterval === 'monthly'
                       ? 'border-orange-500 bg-orange-50'
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
                   <p className="font-semibold text-gray-900">Monthly</p>
-                  <p className="text-2xl font-bold text-gray-900 mt-1">
+                  <p className="text-xl sm:text-2xl font-bold text-gray-900 mt-1">
                     ${monthlyPrice}
-                    <span className="text-sm font-normal text-gray-500">/mo</span>
+                    <span className="text-xs sm:text-sm font-normal text-gray-500">/mo</span>
                   </p>
                 </button>
                 <button
                   onClick={() => setBillingInterval('yearly')}
-                  className={`p-4 rounded-xl border-2 transition-all relative ${
+                  className={`p-3 sm:p-4 rounded-xl border-2 transition-all relative ${
                     billingInterval === 'yearly'
                       ? 'border-green-500 bg-green-50'
                       : 'border-gray-200 hover:border-gray-300'
@@ -304,9 +304,9 @@ function CheckoutContent() {
                     SAVE 10%
                   </span>
                   <p className="font-semibold text-gray-900">Yearly</p>
-                  <p className="text-2xl font-bold text-gray-900 mt-1">
+                  <p className="text-xl sm:text-2xl font-bold text-gray-900 mt-1">
                     ${yearlyMonthlyEquivalent}
-                    <span className="text-sm font-normal text-gray-500">/mo</span>
+                    <span className="text-xs sm:text-sm font-normal text-gray-500">/mo</span>
                   </p>
                   <p className="text-xs text-green-600 mt-1">
                     ${yearlyPrice}/year (Save ${savings})
@@ -316,7 +316,7 @@ function CheckoutContent() {
             </div>
 
             {/* Payment Method Selection */}
-            <div className="bg-white rounded-2xl shadow-xl p-6">
+            <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-6">
               <h2 className="text-lg font-bold text-gray-900 mb-4">Payment Method</h2>
               <div className="space-y-3">
                 {/* Credit/Debit Card */}
@@ -342,7 +342,7 @@ function CheckoutContent() {
                         <p className="text-sm text-gray-500">Visa, Mastercard, Amex</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="hidden sm:flex items-center gap-2">
                       <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa" className="h-5" />
                       <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard" className="h-5" />
                     </div>
@@ -510,7 +510,7 @@ function CheckoutContent() {
             </div>
 
             {/* Coupon Code */}
-            <div className="bg-white rounded-2xl shadow-xl p-6">
+            <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-6">
               <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                 <Tag className="w-5 h-5" />
                 Coupon Code
@@ -538,18 +538,18 @@ function CheckoutContent() {
                   </button>
                 </div>
               ) : (
-                <div className="flex gap-3">
+                <div className="flex gap-2 sm:gap-3">
                   <input
                     type="text"
                     value={couponCode}
                     onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
                     placeholder="Enter coupon code"
-                    className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none uppercase"
+                    className="flex-1 min-w-0 px-3 sm:px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none uppercase text-sm sm:text-base"
                   />
                   <button
                     onClick={handleApplyCoupon}
                     disabled={couponLoading || !couponCode.trim()}
-                    className="px-6 py-3 bg-orange-500 text-white rounded-xl font-semibold hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                    className="px-4 sm:px-6 py-3 bg-orange-500 text-white rounded-xl font-semibold hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 text-sm sm:text-base flex-shrink-0"
                   >
                     {couponLoading ? (
                       <Loader2 className="w-5 h-5 animate-spin" />
@@ -568,7 +568,7 @@ function CheckoutContent() {
 
           {/* Right Column - Summary */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-2xl shadow-xl p-6 sticky top-6">
+            <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-6 sticky top-6">
               <h2 className="text-lg font-bold text-gray-900 mb-4">Order Summary</h2>
 
               {/* Plan Info */}
@@ -606,7 +606,7 @@ function CheckoutContent() {
               <div className="py-4">
                 <div className="flex items-center justify-between">
                   <span className="text-lg font-bold text-gray-900">Total</span>
-                  <span className="text-2xl font-bold text-orange-500">
+                  <span className="text-xl sm:text-2xl font-bold text-orange-500">
                     ${finalPrice.toFixed(2)} NZD
                   </span>
                 </div>
@@ -629,7 +629,7 @@ function CheckoutContent() {
               <button
                 onClick={handleCheckout}
                 disabled={loading || (paymentMethod === 'bank_transfer' && !bankSlipFile)}
-                className={`w-full py-4 rounded-xl font-bold text-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg ${
+                className={`w-full py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg ${
                   paymentMethod === 'apple_pay'
                     ? 'bg-black hover:bg-gray-800 text-white'
                     : paymentMethod === 'google_pay'
