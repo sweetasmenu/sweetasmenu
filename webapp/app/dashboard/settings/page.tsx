@@ -1562,9 +1562,9 @@ function SettingsContent() {
                 <p className="text-xs text-gray-500 mb-2">
                   📏 Recommended: 200x200px to 500x500px, Max 4MB (PNG, JPG, WebP)
                 </p>
-                <div className="flex items-center space-x-4">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                   {logoPreview && (
-                    <div className="relative">
+                    <div className="relative flex-shrink-0 w-20 h-20">
                       <img
                         src={logoPreview}
                         alt="Logo preview"
@@ -1582,7 +1582,7 @@ function SettingsContent() {
                       </button>
                     </div>
                   )}
-                  <div>
+                  <div className="min-w-0 flex-1">
                     <input
                       type="file"
                       accept="image/*"
@@ -1604,7 +1604,7 @@ function SettingsContent() {
                           reader.readAsDataURL(file);
                         }
                       }}
-                      className="text-sm text-gray-900 bg-white file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                      className="w-full text-sm text-gray-900 bg-white file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                     />
                     {logoFile && (
                       <div className="mt-2">
