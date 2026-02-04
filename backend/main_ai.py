@@ -2126,12 +2126,12 @@ async def confirm_payment(request: ConfirmPaymentRequest):
                     "payment_status": "paid",
                     "paid_at": datetime.now().isoformat(),
                     "payment_receipt_url": result.get("receipt_url"),
-                    "status": "pending"  # Move to kitchen queue
+                    "status": "verifying_payment"  # Staff will verify payment before sending to kitchen
                 }
             )
 
             if updated_order:
-                print(f"✅ Order {request.order_id} status updated to 'pending' - should appear in POS now")
+                print(f"✅ Order {request.order_id} status updated to 'verifying_payment' - awaiting staff verification in POS")
             else:
                 print(f"⚠️ Failed to update order {request.order_id} status")
 
@@ -2139,7 +2139,7 @@ async def confirm_payment(request: ConfirmPaymentRequest):
                 "success": True,
                 "paid": True,
                 "receipt_url": result.get("receipt_url"),
-                "message": "Payment successful. Order sent to kitchen."
+                "message": "Payment successful. Awaiting staff verification."
             }
         else:
             print(f"⚠️ Payment not completed for order {request.order_id}: status={result.get('status')}")
@@ -2291,7 +2291,8 @@ async def upload_payment_slip(request: UploadPaymentSlipRequest):
                 data={
                     "payment_slip_url": public_url,
                     "payment_status": "processing",  # Waiting for verification
-                    "payment_method": "bank_transfer"
+                    "payment_method": "bank_transfer",
+                    "status": "verifying_payment"  # Staff will verify payment before sending to kitchen
                 }
             )
         except Exception as update_error:
@@ -4046,11 +4047,11 @@ async def confirm_order_paid(order_id: str):
                 "order": order
             }
 
-        # Update order status to pending (move to kitchen queue)
+        # Update order status to verifying_payment (staff will verify before kitchen)
         updated_order = orders_service.update_order(
             order_id=order_id,
             data={
-                "status": "pending",
+                "status": "verifying_payment",
                 "payment_status": "paid",
                 "paid_at": datetime.now().isoformat()
             }
@@ -4059,11 +4060,11 @@ async def confirm_order_paid(order_id: str):
         if not updated_order:
             raise HTTPException(status_code=500, detail="Failed to update order")
 
-        print(f"✅ Order {order_id} confirmed as paid via fallback endpoint")
+        print(f"✅ Order {order_id} confirmed as paid via fallback endpoint - awaiting staff verification")
 
         return {
             "success": True,
-            "message": "Order confirmed and sent to kitchen",
+            "message": "Payment confirmed. Awaiting staff verification.",
             "order": updated_order
         }
     except HTTPException:

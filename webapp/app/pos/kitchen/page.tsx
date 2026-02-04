@@ -30,13 +30,16 @@ interface Order {
   id: string;
   table_no: string | null;
   items: OrderItem[];
-  status: 'pending' | 'confirmed' | 'preparing' | 'ready' | 'completed' | 'cancelled';
+  status: 'verifying_payment' | 'pending' | 'confirmed' | 'preparing' | 'ready' | 'completed' | 'cancelled';
   service_type: 'dine_in' | 'pickup' | 'delivery';
   special_instructions?: string;
   created_at: string;
   customer_name?: string;
   estimated_minutes?: number;
   cooking_started_at?: string;
+  payment_method?: 'card' | 'bank_transfer' | 'cash_at_cashier' | 'cashier_cash' | 'cashier_eftpos';
+  payment_slip_url?: string;
+  payment_status?: string;
 }
 
 interface ServiceRequest {
@@ -208,7 +211,7 @@ export default function KitchenDisplayPage() {
 
     try {
       const response = await fetch(
-        `${BACKEND_URL}/api/orders?restaurant_id=${session.restaurantId}&status=pending,confirmed,preparing`
+        `${BACKEND_URL}/api/orders?restaurant_id=${session.restaurantId}&status=verifying_payment,pending,confirmed,preparing`
       );
       const data = await response.json();
       if (data.success) {
@@ -358,15 +361,25 @@ export default function KitchenDisplayPage() {
 
           if (payload.eventType === 'INSERT') {
             // New order
-            playNotification();
-            setOrders((prev) => [payload.new as Order, ...prev]);
+            const newOrder = payload.new as Order;
+            if (['verifying_payment', 'pending', 'confirmed', 'preparing'].includes(newOrder.status)) {
+              playNotification();
+              setOrders((prev) => [newOrder, ...prev]);
+            }
           } else if (payload.eventType === 'UPDATE') {
             // Order updated
-            setOrders((prev) =>
-              prev.map((order) =>
-                order.id === payload.new.id ? (payload.new as Order) : order
-              ).filter(o => !['completed', 'cancelled'].includes(o.status))
-            );
+            const updatedOrder = payload.new as Order;
+            setOrders((prev) => {
+              const exists = prev.some(o => o.id === updatedOrder.id);
+              if (!exists && ['verifying_payment', 'pending', 'confirmed', 'preparing'].includes(updatedOrder.status)) {
+                // Order transitioned into our status range (e.g. pending_payment → verifying_payment)
+                playNotification();
+                return [updatedOrder, ...prev];
+              }
+              return prev
+                .map((order) => order.id === updatedOrder.id ? updatedOrder : order)
+                .filter(o => !['completed', 'cancelled', 'pending_payment'].includes(o.status));
+            });
           } else if (payload.eventType === 'DELETE') {
             setOrders((prev) => prev.filter((order) => order.id !== payload.old.id));
           }
@@ -672,6 +685,7 @@ export default function KitchenDisplayPage() {
 
   const getStatusColor = (status: Order['status']) => {
     switch (status) {
+      case 'verifying_payment': return 'bg-purple-500';
       case 'pending': return 'bg-yellow-500';
       case 'confirmed': return 'bg-blue-500';
       case 'preparing': return 'bg-orange-500';
@@ -682,6 +696,7 @@ export default function KitchenDisplayPage() {
 
   const getStatusText = (status: Order['status']) => {
     switch (status) {
+      case 'verifying_payment': return lang === 'th' ? 'รอตรวจสอบ' : 'Verify Payment';
       case 'pending': return t('kitchen', 'pending', lang);
       case 'confirmed': return lang === 'th' ? 'ยืนยันแล้ว' : 'Confirmed';
       case 'preparing': return t('kitchen', 'cooking', lang);
@@ -910,13 +925,22 @@ export default function KitchenDisplayPage() {
                   >
                     <Printer className="w-5 h-5" />
                   </button>
-                  {(order.status === 'pending' || order.status === 'confirmed') && (
+                  {(order.status === 'verifying_payment' || order.status === 'pending' || order.status === 'confirmed') && (
                     <button
                       onClick={() => openVoidModal(order)}
                       className="px-3 py-2 bg-red-500 hover:bg-red-600 rounded-lg font-semibold transition-colors flex items-center justify-center"
                       title={lang === 'th' ? 'ยกเลิกออเดอร์' : 'Void Order'}
                     >
                       <XCircle className="w-5 h-5" />
+                    </button>
+                  )}
+                  {order.status === 'verifying_payment' && (
+                    <button
+                      onClick={() => updateOrderStatus(order.id, 'confirmed')}
+                      className="flex-1 py-2 bg-purple-500 hover:bg-purple-600 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+                    >
+                      <CheckCircle className="w-5 h-5" />
+                      <span>{lang === 'th' ? 'ยืนยันชำระเงิน' : 'Verify Payment'}</span>
                     </button>
                   )}
                   {order.status === 'pending' && (

@@ -16,7 +16,8 @@ import {
   Phone,
   MapPin,
   Store,
-  ArrowLeft
+  ArrowLeft,
+  CreditCard
 } from 'lucide-react';
 
 // Bilingual translations for order status page
@@ -29,7 +30,7 @@ const translations: Record<string, Record<string, Record<string, string>>> = {
     awaitingPayment: { en: 'Awaiting Payment', th: 'รอชำระเงิน', ko: '결제 대기 중', zh: '等待付款', ja: '支払い待ち' },
     awaitingPaymentDesc: { en: 'Please complete your payment to confirm the order', th: 'กรุณาชำระเงินเพื่อยืนยันออเดอร์', ko: '주문을 확인하려면 결제를 완료해주세요', zh: '请完成付款以确认订单', ja: 'ご注文を確定するには、お支払いを完了してください' },
     verifyingPayment: { en: 'Verifying Payment', th: 'กำลังตรวจสอบการชำระเงิน', ko: '결제 확인 중', zh: '正在验证付款', ja: '支払い確認中' },
-    verifyingPaymentDesc: { en: 'Your payment slip has been submitted and is being verified', th: 'สลิปของคุณถูกส่งแล้วและกำลังตรวจสอบ', ko: '결제 영수증이 제출되었으며 확인 중입니다', zh: '您的付款凭证已提交，正在验证中', ja: '支払い明細が提出され、確認中です' },
+    verifyingPaymentDesc: { en: 'Your payment has been received and is being verified by staff', th: 'การชำระเงินของคุณได้รับแล้วและกำลังตรวจสอบโดยพนักงาน', ko: '결제가 접수되었으며 직원이 확인 중입니다', zh: '您的付款已收到，工作人员正在验证中', ja: 'お支払いが受領され、スタッフが確認中です' },
     paymentRejected: { en: 'Payment Rejected', th: 'การชำระเงินถูกปฏิเสธ', ko: '결제 거부됨', zh: '付款被拒绝', ja: '支払いが拒否されました' },
     paymentRejectedDesc: { en: 'Your payment could not be verified. Please contact the restaurant.', th: 'ไม่สามารถตรวจสอบการชำระเงินได้ กรุณาติดต่อร้านอาหาร', ko: '결제를 확인할 수 없습니다. 레스토랑에 문의해주세요.', zh: '无法验证您的付款。请联系餐厅。', ja: 'お支払いを確認できませんでした。レストランにお問い合わせください。' },
     orderSent: { en: 'Order Sent', th: 'ส่งออเดอร์แล้ว', ko: '주문 전송됨', zh: '订单已发送', ja: '注文送信済み' },
@@ -227,6 +228,7 @@ export default function OrderStatusPage() {
     switch (order.status) {
       case 'pending':
       case 'pending_payment':
+      case 'verifying_payment':
       case 'confirmed':
         setEstimatedTime(`15-30 ${t('labels', 'minutes', lang)}`);
         return;
@@ -319,6 +321,15 @@ export default function OrderStatusPage() {
           color: 'text-orange-600',
           bgColor: 'bg-orange-100',
           borderColor: 'border-orange-300'
+        };
+      case 'verifying_payment':
+        return {
+          icon: <Clock className="w-6 h-6" />,
+          text: t('status', 'verifyingPayment', lang),
+          description: t('status', 'verifyingPaymentDesc', lang),
+          color: 'text-blue-600',
+          bgColor: 'bg-blue-100',
+          borderColor: 'border-blue-300'
         };
       case 'pending':
         return {
@@ -663,6 +674,29 @@ export default function OrderStatusPage() {
                 <CheckCircle className="w-5 h-5 text-green-500 mt-1" />
               )}
             </div>
+
+            {/* Step 1.5: Payment Verification */}
+            {['verifying_payment', 'confirmed', 'preparing', 'ready', 'completed'].includes(order.status) &&
+             order.payment_method !== 'cashier_cash' && order.payment_method !== 'cashier_eftpos' && (
+              <div className="flex items-start gap-4">
+                <div className={`p-2 rounded-full ${order.status === 'verifying_payment' ? 'bg-blue-100' : 'bg-green-100'}`}>
+                  <CreditCard className={`w-5 h-5 ${order.status === 'verifying_payment' ? 'text-blue-600' : 'text-green-600'}`} />
+                </div>
+                <div className="flex-1">
+                  <p className={`font-semibold ${order.status === 'verifying_payment' ? 'text-gray-900' : 'text-gray-500'}`}>
+                    {t('status', 'verifyingPayment', lang)}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    {order.status === 'verifying_payment'
+                      ? (lang === 'th' ? 'กำลังรอการตรวจสอบจากพนักงาน' : 'Waiting for staff verification')
+                      : (lang === 'th' ? 'ชำระเงินสำเร็จ' : 'Payment verified')}
+                  </p>
+                </div>
+                {['confirmed', 'preparing', 'ready', 'completed'].includes(order.status) && (
+                  <CheckCircle className="w-5 h-5 text-green-500 mt-1" />
+                )}
+              </div>
+            )}
 
             {/* Step 2: Confirmed */}
             {['confirmed', 'preparing', 'ready', 'completed'].includes(order.status) && (

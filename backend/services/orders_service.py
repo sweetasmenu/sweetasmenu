@@ -401,7 +401,7 @@ class OrdersService:
         if not self._is_valid_uuid(order_id):
             return None
 
-        valid_statuses = ['pending_payment', 'pending', 'confirmed', 'preparing', 'ready', 'completed', 'cancelled']
+        valid_statuses = ['pending_payment', 'awaiting_cashier_payment', 'verifying_payment', 'pending', 'confirmed', 'preparing', 'ready', 'completed', 'cancelled']
         if status not in valid_statuses:
             print(f"⚠️ Orders Service: Invalid status '{status}'")
             return None

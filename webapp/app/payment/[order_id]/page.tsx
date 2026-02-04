@@ -440,8 +440,8 @@ export default function PaymentPage() {
         const orderInfo = orderData.order;
         setOrder(orderInfo);
 
-        // Check if already paid
-        if (orderInfo.payment_status === 'paid') {
+        // Check if already paid or verifying payment
+        if (orderInfo.payment_status === 'paid' || orderInfo.status === 'verifying_payment') {
           setPaymentSuccess(true);
           setLoading(false);
           return;
@@ -672,7 +672,7 @@ export default function PaymentPage() {
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Payment Successful!</h1>
           <p className="text-gray-600 mb-4">
-            Your order has been confirmed and sent to the kitchen.
+            Your payment is being verified. Your order will be sent to the kitchen shortly.
           </p>
 
           {/* Order Number */}

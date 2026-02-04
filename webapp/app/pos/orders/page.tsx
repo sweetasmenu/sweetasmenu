@@ -39,7 +39,7 @@ interface Order {
   id: string;
   table_no: string | null;
   items: OrderItem[];
-  status: 'pending_payment' | 'awaiting_cashier_payment' | 'pending' | 'confirmed' | 'preparing' | 'ready' | 'completed' | 'cancelled';
+  status: 'pending_payment' | 'awaiting_cashier_payment' | 'verifying_payment' | 'pending' | 'confirmed' | 'preparing' | 'ready' | 'completed' | 'cancelled';
   service_type: 'dine_in' | 'pickup' | 'delivery';
   special_instructions?: string;
   created_at: string;
@@ -640,7 +640,7 @@ export default function StaffOrdersPage() {
       const response = await fetch(`${BACKEND_URL}/api/orders/${paymentModalOrder.id}/status`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'pending' })
+        body: JSON.stringify({ status: 'confirmed' })
       });
 
       if (response.ok) {
@@ -1281,6 +1281,7 @@ export default function StaffOrdersPage() {
     switch (status) {
       case 'pending_payment': return 'bg-purple-500';
       case 'awaiting_cashier_payment': return 'bg-orange-500';
+      case 'verifying_payment': return 'bg-purple-500';
       case 'pending': return 'bg-yellow-500';
       case 'confirmed': return 'bg-blue-500';
       case 'preparing': return 'bg-orange-500';
@@ -1413,6 +1414,7 @@ export default function StaffOrdersPage() {
                         <span className={`px-2 py-1 rounded text-xs font-semibold ${getStatusColor(order.status)}`}>
                           {order.status === 'pending_payment' ? (lang === 'th' ? 'รอยืนยันชำระเงิน' : 'Awaiting Payment') :
                            order.status === 'awaiting_cashier_payment' ? (lang === 'th' ? 'รอรับเงินที่แคชเชียร์' : 'Pay at Cashier') :
+                           order.status === 'verifying_payment' ? (lang === 'th' ? 'รอตรวจสอบชำระเงิน' : 'Verifying Payment') :
                            order.status === 'pending' ? t('orders', 'pending', lang) :
                            order.status === 'confirmed' ? t('orders', 'confirmed', lang) :
                            order.status === 'preparing' ? t('orders', 'preparing', lang) :
@@ -1502,6 +1504,16 @@ export default function StaffOrdersPage() {
                       >
                         <Eye className="w-5 h-5" />
                         {lang === 'th' ? 'ตรวจสอบการชำระเงิน' : 'Verify Payment'}
+                      </button>
+                    )}
+                    {/* Verify & Confirm Payment Button - for verifying_payment orders */}
+                    {order.status === 'verifying_payment' && (
+                      <button
+                        onClick={() => openPaymentModal(order)}
+                        className={`flex-1 py-2 bg-purple-500 hover:bg-purple-600 rounded-lg font-semibold flex items-center justify-center gap-2`}
+                      >
+                        <Eye className="w-5 h-5" />
+                        {lang === 'th' ? 'ตรวจสอบ & ยืนยัน' : 'Verify & Confirm'}
                       </button>
                     )}
                     {/* Confirm Cashier Payment Button - for awaiting_cashier_payment orders */}

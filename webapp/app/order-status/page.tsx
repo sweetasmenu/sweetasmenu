@@ -392,14 +392,14 @@ export default function MyOrdersPage() {
                           </div>
 
                           {/* Progress indicator for active orders */}
-                          {order.status !== 'pending_payment' && (
+                          {!['pending_payment', 'awaiting_cashier_payment'].includes(order.status) && (
                             <div className="mt-3 flex gap-1">
                               <div className={`h-1 flex-1 rounded ${
-                                ['pending', 'confirmed', 'preparing', 'ready'].includes(order.status)
+                                ['verifying_payment', 'pending', 'confirmed', 'preparing', 'ready'].includes(order.status)
                                   ? 'bg-green-500' : 'bg-gray-200'
                               }`}></div>
                               <div className={`h-1 flex-1 rounded ${
-                                ['confirmed', 'preparing', 'ready'].includes(order.status)
+                                ['pending', 'confirmed', 'preparing', 'ready'].includes(order.status)
                                   ? 'bg-green-500' : 'bg-gray-200'
                               }`}></div>
                               <div className={`h-1 flex-1 rounded ${

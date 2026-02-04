@@ -44,7 +44,7 @@ interface Order {
   tax: number;
   delivery_fee: number;
   total_price: number;
-  status: 'pending' | 'preparing' | 'ready' | 'completed' | 'cancelled';
+  status: 'verifying_payment' | 'pending' | 'preparing' | 'ready' | 'completed' | 'cancelled';
   customer_name?: string;
   customer_phone?: string;
   special_instructions?: string;
@@ -230,6 +230,8 @@ export default function OrdersPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
+      case 'verifying_payment':
+        return 'bg-purple-100 text-purple-800 border-purple-300';
       case 'pending':
         return 'bg-yellow-100 text-yellow-800 border-yellow-300';
       case 'preparing':
@@ -247,6 +249,8 @@ export default function OrdersPage() {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
+      case 'verifying_payment':
+        return <Clock className="w-5 h-5" />;
       case 'pending':
         return <Clock className="w-5 h-5" />;
       case 'preparing':
@@ -302,7 +306,7 @@ export default function OrdersPage() {
         {/* Filter Tabs */}
         <div className="mb-6 border-b border-gray-200">
           <nav className="-mb-px flex space-x-4 sm:space-x-8 overflow-x-auto scrollbar-hide">
-            {['all', 'pending', 'preparing', 'ready', 'completed'].map((status) => (
+            {['all', 'verifying_payment', 'pending', 'preparing', 'ready', 'completed'].map((status) => (
               <button
                 key={status}
                 onClick={() => setFilterStatus(status)}
@@ -312,7 +316,7 @@ export default function OrdersPage() {
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
-                {status.charAt(0).toUpperCase() + status.slice(1)}
+                {status === 'verifying_payment' ? 'Verifying' : status.charAt(0).toUpperCase() + status.slice(1)}
               </button>
             ))}
           </nav>
@@ -353,7 +357,7 @@ export default function OrdersPage() {
                       </h2>
                       <span className={`px-3 py-1 rounded-full text-xs font-medium border flex items-center gap-1 ${getStatusColor(order.status)}`}>
                         {getStatusIcon(order.status)}
-                        {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                        {order.status === 'verifying_payment' ? 'Verifying Payment' : order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                       </span>
                     </div>
                   <div className="text-sm text-gray-600 space-y-1">
