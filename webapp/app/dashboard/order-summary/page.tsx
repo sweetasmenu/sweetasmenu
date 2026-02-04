@@ -818,27 +818,27 @@ export default function OrderSummaryPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 py-8">
-      <div className="container mx-auto px-4 max-w-7xl">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 py-4 sm:py-8">
+      <div className="container mx-auto px-3 sm:px-4 max-w-7xl">
         {/* Back Button */}
         <Link
           href="/dashboard"
-          className="inline-flex items-center text-gray-600 hover:text-orange-500 transition-colors mb-6"
+          className="inline-flex items-center text-gray-600 hover:text-orange-500 transition-colors mb-4 sm:mb-6 text-sm sm:text-base"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Dashboard
         </Link>
 
         {/* Header */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
+          <div className="flex items-center gap-3 sm:gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Order Summary</h1>
-              <p className="text-gray-600">View all orders and payment details (Last 45 days)</p>
+              <h1 className="text-xl sm:text-3xl font-bold text-gray-900">Order Summary</h1>
+              <p className="text-xs sm:text-base text-gray-600">View all orders and payment details (Last 45 days)</p>
             </div>
 
-            {/* Branch Dropdown */}
-            {restaurants.length > 1 && (
+            {/* Branch Dropdown - Enterprise/Admin only */}
+            {restaurants.length > 1 && ['enterprise', 'premium', 'admin'].includes(userRole) && (
               <div className="relative">
                 <button
                   onClick={() => setShowBranchDropdown(!showBranchDropdown)}
@@ -934,10 +934,10 @@ export default function OrderSummaryPage() {
         </div>
 
         {/* Filters */}
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-          <div className="flex items-center gap-2 mb-4">
+        <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-4 sm:mb-6">
+          <div className="flex items-center gap-2 mb-3 sm:mb-4">
             <Filter className="w-5 h-5 text-gray-600" />
-            <h2 className="font-semibold text-gray-900">Filters</h2>
+            <h2 className="font-semibold text-sm sm:text-base text-gray-900">Filters</h2>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -1027,19 +1027,19 @@ export default function OrderSummaryPage() {
 
         {/* Summary Cards */}
         {summary && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-4 sm:mb-6">
             {/* Total Orders */}
             <div
-              className="bg-white rounded-xl shadow-lg p-6 cursor-pointer hover:shadow-xl hover:scale-[1.02] transition-all"
+              className="bg-white rounded-xl shadow-lg p-3 sm:p-6 cursor-pointer hover:shadow-xl hover:scale-[1.02] transition-all"
               onClick={() => handleCardClick('total')}
             >
-              <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 bg-blue-100 rounded-lg">
-                  <Receipt className="w-5 h-5 text-blue-600" />
+              <div className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
+                <div className="p-1.5 sm:p-2 bg-blue-100 rounded-lg">
+                  <Receipt className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
                 </div>
-                <span className="text-sm font-medium text-gray-600">Total Orders</span>
+                <span className="text-xs sm:text-sm font-medium text-gray-600">Total Orders</span>
               </div>
-              <p className="text-3xl font-bold text-gray-900">{summary.total_orders}</p>
+              <p className="text-2xl sm:text-3xl font-bold text-gray-900">{summary.total_orders}</p>
               <div className="mt-2 text-xs text-gray-500">
                 <span className="text-green-600">{summary.payment_status.paid} paid</span>
                 {summary.payment_status.pending > 0 && (
@@ -1053,16 +1053,16 @@ export default function OrderSummaryPage() {
 
             {/* Total Revenue */}
             <div
-              className="bg-white rounded-xl shadow-lg p-6 cursor-pointer hover:shadow-xl hover:scale-[1.02] transition-all"
+              className="bg-white rounded-xl shadow-lg p-3 sm:p-6 cursor-pointer hover:shadow-xl hover:scale-[1.02] transition-all"
               onClick={() => handleCardClick('revenue')}
             >
-              <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 bg-green-100 rounded-lg">
-                  <DollarSign className="w-5 h-5 text-green-600" />
+              <div className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
+                <div className="p-1.5 sm:p-2 bg-green-100 rounded-lg">
+                  <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
                 </div>
-                <span className="text-sm font-medium text-gray-600">Total Revenue</span>
+                <span className="text-xs sm:text-sm font-medium text-gray-600">Total Revenue</span>
               </div>
-              <p className="text-3xl font-bold text-green-600">${summary.total_revenue.toFixed(2)}</p>
+              <p className="text-xl sm:text-3xl font-bold text-green-600">${summary.total_revenue.toFixed(2)}</p>
               <div className="mt-2 text-xs text-gray-500">
                 From paid orders only
               </div>
@@ -1073,14 +1073,14 @@ export default function OrderSummaryPage() {
 
             {/* By Payment Method */}
             <div
-              className="bg-white rounded-xl shadow-lg p-6 cursor-pointer hover:shadow-xl hover:scale-[1.02] transition-all"
+              className="bg-white rounded-xl shadow-lg p-3 sm:p-6 cursor-pointer hover:shadow-xl hover:scale-[1.02] transition-all"
               onClick={() => handleCardClick('payment')}
             >
-              <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 bg-purple-100 rounded-lg">
-                  <CreditCard className="w-5 h-5 text-purple-600" />
+              <div className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
+                <div className="p-1.5 sm:p-2 bg-purple-100 rounded-lg">
+                  <CreditCard className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600" />
                 </div>
-                <span className="text-sm font-medium text-gray-600">Payment Methods</span>
+                <span className="text-xs sm:text-sm font-medium text-gray-600">Payment Methods</span>
               </div>
               <div className="space-y-1">
                 <div className="flex justify-between text-sm">
@@ -1124,14 +1124,14 @@ export default function OrderSummaryPage() {
 
             {/* By Service Type */}
             <div
-              className="bg-white rounded-xl shadow-lg p-6 cursor-pointer hover:shadow-xl hover:scale-[1.02] transition-all"
+              className="bg-white rounded-xl shadow-lg p-3 sm:p-6 cursor-pointer hover:shadow-xl hover:scale-[1.02] transition-all"
               onClick={() => handleCardClick('service')}
             >
-              <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 bg-orange-100 rounded-lg">
-                  <Users className="w-5 h-5 text-orange-600" />
+              <div className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
+                <div className="p-1.5 sm:p-2 bg-orange-100 rounded-lg">
+                  <Users className="w-4 h-4 sm:w-5 sm:h-5 text-orange-600" />
                 </div>
-                <span className="text-sm font-medium text-gray-600">Service Types</span>
+                <span className="text-xs sm:text-sm font-medium text-gray-600">Service Types</span>
               </div>
               <div className="space-y-1">
                 <div className="flex justify-between text-sm">
@@ -1154,16 +1154,16 @@ export default function OrderSummaryPage() {
 
             {/* Voided Orders */}
             <div
-              className="bg-white rounded-xl shadow-lg p-6 cursor-pointer hover:shadow-xl hover:scale-[1.02] transition-all border-l-4 border-red-500"
+              className="bg-white rounded-xl shadow-lg p-3 sm:p-6 cursor-pointer hover:shadow-xl hover:scale-[1.02] transition-all border-l-4 border-red-500"
               onClick={() => handleCardClick('voided')}
             >
-              <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 bg-red-100 rounded-lg">
-                  <XCircle className="w-5 h-5 text-red-600" />
+              <div className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
+                <div className="p-1.5 sm:p-2 bg-red-100 rounded-lg">
+                  <XCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-600" />
                 </div>
-                <span className="text-sm font-medium text-gray-600">Voided Orders</span>
+                <span className="text-xs sm:text-sm font-medium text-gray-600">Voided Orders</span>
               </div>
-              <p className="text-3xl font-bold text-red-600">{voidedCount}</p>
+              <p className="text-2xl sm:text-3xl font-bold text-red-600">{voidedCount}</p>
               <div className="mt-2 text-xs text-gray-500">
                 <span className="text-red-500">${voidedAmount.toFixed(2)} total</span>
               </div>
@@ -1176,8 +1176,8 @@ export default function OrderSummaryPage() {
 
         {/* Orders Table */}
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="font-semibold text-gray-900">Orders List</h2>
+          <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
+            <h2 className="font-semibold text-sm sm:text-base text-gray-900">Orders List</h2>
           </div>
 
           {loading ? (
