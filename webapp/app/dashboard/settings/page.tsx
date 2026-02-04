@@ -177,18 +177,18 @@ function SettingsContent() {
   ];
 
   const AVAILABLE_LANGUAGES = [
-    { code: 'th', name: 'Thai', nativeName: 'ไทย', flag: '🇹🇭' },
-    { code: 'en', name: 'English', nativeName: 'English', flag: '🇬🇧' },
-    { code: 'zh', name: 'Chinese', nativeName: '中文', flag: '🇨🇳' },
-    { code: 'ja', name: 'Japanese', nativeName: '日本語', flag: '🇯🇵' },
-    { code: 'ko', name: 'Korean', nativeName: '한국어', flag: '🇰🇷' },
-    { code: 'vi', name: 'Vietnamese', nativeName: 'Tiếng Việt', flag: '🇻🇳' },
-    { code: 'hi', name: 'Hindi', nativeName: 'हिंदी', flag: '🇮🇳' },
-    { code: 'es', name: 'Spanish', nativeName: 'Español', flag: '🇪🇸' },
-    { code: 'fr', name: 'French', nativeName: 'Français', flag: '🇫🇷' },
-    { code: 'de', name: 'German', nativeName: 'Deutsch', flag: '🇩🇪' },
-    { code: 'id', name: 'Indonesian', nativeName: 'Bahasa Indonesia', flag: '🇮🇩' },
-    { code: 'ms', name: 'Malay', nativeName: 'Bahasa Melayu', flag: '🇲🇾' },
+    { code: 'th', name: 'Thai', nativeName: 'ไทย', flag: '🇹🇭', countryCode: 'th' },
+    { code: 'en', name: 'English', nativeName: 'English', flag: '🇬🇧', countryCode: 'gb' },
+    { code: 'zh', name: 'Chinese', nativeName: '中文', flag: '🇨🇳', countryCode: 'cn' },
+    { code: 'ja', name: 'Japanese', nativeName: '日本語', flag: '🇯🇵', countryCode: 'jp' },
+    { code: 'ko', name: 'Korean', nativeName: '한국어', flag: '🇰🇷', countryCode: 'kr' },
+    { code: 'vi', name: 'Vietnamese', nativeName: 'Tiếng Việt', flag: '🇻🇳', countryCode: 'vn' },
+    { code: 'hi', name: 'Hindi', nativeName: 'हिंदी', flag: '🇮🇳', countryCode: 'in' },
+    { code: 'es', name: 'Spanish', nativeName: 'Español', flag: '🇪🇸', countryCode: 'es' },
+    { code: 'fr', name: 'French', nativeName: 'Français', flag: '🇫🇷', countryCode: 'fr' },
+    { code: 'de', name: 'German', nativeName: 'Deutsch', flag: '🇩🇪', countryCode: 'de' },
+    { code: 'id', name: 'Indonesian', nativeName: 'Bahasa Indonesia', flag: '🇮🇩', countryCode: 'id' },
+    { code: 'ms', name: 'Malay', nativeName: 'Bahasa Melayu', flag: '🇲🇾', countryCode: 'my' },
   ];
 
   // Get description text based on selected primary language
@@ -2274,7 +2274,12 @@ function SettingsContent() {
                       : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                   }`}
                 >
-                  <span className="text-3xl">{lang.flag}</span>
+                  <img
+                    src={`https://flagcdn.com/w80/${lang.countryCode}.png`}
+                    srcSet={`https://flagcdn.com/w160/${lang.countryCode}.png 2x`}
+                    alt={`${lang.name} flag`}
+                    className="w-10 h-7 object-cover rounded-sm"
+                  />
                   <span className={`text-sm font-medium text-center ${
                     primaryLanguage === lang.code ? 'text-indigo-700' : 'text-gray-700'
                   }`}>
