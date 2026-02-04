@@ -782,13 +782,13 @@ export default function PaymentPage() {
             {(order.delivery_fee ?? 0) > 0 && (
               <div className="flex justify-between text-sm">
                 <span className="text-gray-800">Delivery Fee</span>
-                <span className="text-gray-900">${order.delivery_fee.toFixed(2)}</span>
+                <span className="text-gray-900">${(order.delivery_fee ?? 0).toFixed(2)}</span>
               </div>
             )}
             {(order.food_surcharge_amount ?? 0) > 0 && (
               <div className="flex justify-between text-sm">
                 <span className="text-gray-800">{order.food_surcharge_name || 'Surcharge'}</span>
-                <span className="text-gray-900">${order.food_surcharge_amount!.toFixed(2)}</span>
+                <span className="text-gray-900">${(order.food_surcharge_amount ?? 0).toFixed(2)}</span>
               </div>
             )}
             {/* Card Payment Surcharge - only show when card is selected */}
