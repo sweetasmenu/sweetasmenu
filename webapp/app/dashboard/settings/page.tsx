@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Shield, Users, Utensils, Truck, Store, Plus, Trash2, Edit2, Save, X, Loader2, Globe, ExternalLink, MapPin, Navigation, CreditCard, Building2, QrCode, Key, Eye, EyeOff, CheckCircle, AlertCircle, ArrowUpRight, BadgePercent } from 'lucide-react';
+import { Shield, Users, Utensils, Truck, Store, Plus, Trash2, Edit2, Save, X, Loader2, Globe, ExternalLink, MapPin, Navigation, CreditCard, Building2, QrCode, Key, Eye, EyeOff, CheckCircle, AlertCircle, ArrowUpRight } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 
 interface ServiceOptions {
@@ -257,21 +257,6 @@ function SettingsContent() {
     account_number: ''
   });
 
-  // Credit Card Surcharge Settings state
-  const [surchargeSettings, setSurchargeSettings] = useState({
-    credit_card_surcharge_enabled: false,
-    credit_card_surcharge_rate: 2.50
-  });
-  const [savingSurcharge, setSavingSurcharge] = useState(false);
-
-  // Holiday/Festival Food Surcharge Settings state
-  const [foodSurchargeSettings, setFoodSurchargeSettings] = useState({
-    food_surcharge_enabled: false,
-    food_surcharge_rate: 10.00,
-    food_surcharge_name: 'Holiday Surcharge'
-  });
-  const [savingFoodSurcharge, setSavingFoodSurcharge] = useState(false);
-
   // Stripe Connect state (for restaurant to receive payments)
   const [stripeConnectStatus, setStripeConnectStatus] = useState<{
     connected: boolean;
@@ -501,12 +486,6 @@ function SettingsContent() {
       // Load payment settings
       loadPaymentSettings(profile.restaurant.restaurant_id);
 
-      // Load surcharge settings
-      loadSurchargeSettings(profile.restaurant.restaurant_id);
-
-      // Load food/holiday surcharge settings
-      loadFoodSurchargeSettings(profile.restaurant.restaurant_id);
-
       // Load Stripe Connect status
       loadStripeConnectStatus(profile.restaurant.restaurant_id);
     }
@@ -714,108 +693,6 @@ function SettingsContent() {
     }
   };
 
-  // ============================================================
-  // Credit Card Surcharge Settings Functions
-  // ============================================================
-
-  const loadSurchargeSettings = async (restaurantId: string) => {
-    if (!restaurantId) return;
-    try {
-      const response = await fetch(`${BACKEND_URL}/api/restaurant/${restaurantId}/surcharge-settings`);
-      const data = await response.json();
-      if (data.success) {
-        setSurchargeSettings({
-          credit_card_surcharge_enabled: data.credit_card_surcharge_enabled || false,
-          credit_card_surcharge_rate: data.credit_card_surcharge_rate || 2.50
-        });
-      }
-    } catch (error) {
-      console.error('Failed to load surcharge settings:', error);
-    }
-  };
-
-  const saveSurchargeSettings = async () => {
-    if (!profile?.restaurant?.restaurant_id) return;
-
-    // Validate rate is between 0 and 10%
-    if (surchargeSettings.credit_card_surcharge_rate < 0 || surchargeSettings.credit_card_surcharge_rate > 10) {
-      alert('Surcharge rate must be between 0% and 10%');
-      return;
-    }
-
-    setSavingSurcharge(true);
-    try {
-      const response = await fetch(`${BACKEND_URL}/api/restaurant/${profile.restaurant.restaurant_id}/surcharge-settings`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(surchargeSettings)
-      });
-
-      const data = await response.json();
-      if (data.success) {
-        alert('Credit card surcharge settings saved successfully!');
-      } else {
-        alert(data.detail || 'Failed to save surcharge settings');
-      }
-    } catch (error) {
-      console.error('Failed to save surcharge settings:', error);
-      alert('Failed to save surcharge settings');
-    } finally {
-      setSavingSurcharge(false);
-    }
-  };
-
-  // ============================================================
-  // Food/Holiday Surcharge Settings Functions
-  // ============================================================
-
-  const loadFoodSurchargeSettings = async (restaurantId: string) => {
-    if (!restaurantId) return;
-    try {
-      const response = await fetch(`${BACKEND_URL}/api/restaurant/${restaurantId}/food-surcharge-settings`);
-      const data = await response.json();
-      if (data.success) {
-        setFoodSurchargeSettings({
-          food_surcharge_enabled: data.food_surcharge_enabled || false,
-          food_surcharge_rate: data.food_surcharge_rate || 10.00,
-          food_surcharge_name: data.food_surcharge_name || 'Holiday Surcharge'
-        });
-      }
-    } catch (error) {
-      console.error('Failed to load food surcharge settings:', error);
-    }
-  };
-
-  const saveFoodSurchargeSettings = async () => {
-    if (!profile?.restaurant?.restaurant_id) return;
-
-    // Validate rate is between 0 and 50%
-    if (foodSurchargeSettings.food_surcharge_rate < 0 || foodSurchargeSettings.food_surcharge_rate > 50) {
-      alert('Surcharge rate must be between 0% and 50%');
-      return;
-    }
-
-    setSavingFoodSurcharge(true);
-    try {
-      const response = await fetch(`${BACKEND_URL}/api/restaurant/${profile.restaurant.restaurant_id}/food-surcharge-settings`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(foodSurchargeSettings)
-      });
-
-      const data = await response.json();
-      if (data.success) {
-        alert('Food surcharge settings saved successfully!');
-      } else {
-        alert(data.detail || 'Failed to save food surcharge settings');
-      }
-    } catch (error) {
-      console.error('Failed to save food surcharge settings:', error);
-      alert('Failed to save food surcharge settings');
-    } finally {
-      setSavingFoodSurcharge(false);
-    }
-  };
 
   const addBankAccount = () => {
     if (!newBankAccount.bank_name || !newBankAccount.account_name || !newBankAccount.account_number) {
@@ -1380,7 +1257,6 @@ function SettingsContent() {
   const roleForPermissions = userRole || profile?.subscription?.role || profile?.subscription?.plan || 'free_trial';
   const canCustomizeTheme = !['free_trial', 'starter'].includes(roleForPermissions);
   const canUploadBanner = ['enterprise', 'admin'].includes(roleForPermissions);
-  const canUseFoodSurcharge = ['professional', 'enterprise', 'admin'].includes(roleForPermissions);
   const isAdmin = userRole === 'admin' || roleForPermissions === 'admin';
 
   if (loading) {
@@ -1603,73 +1479,6 @@ function SettingsContent() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
                 />
                 <p className="text-xs text-gray-500 mt-1">This address will appear on receipts and invoices</p>
-              </div>
-            </div>
-
-            {/* Tax Information Section (NZ) */}
-            <div className="mt-8 pt-8 border-t border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">Tax Information (NZ)</h2>
-              <p className="text-sm text-gray-600 mb-6">This information will be displayed on receipts and tax invoices</p>
-
-              <div className="space-y-6">
-                {/* GST Registration Toggle */}
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      GST Registered
-                    </label>
-                    <p className="text-xs text-gray-500 mt-1">Enable if your business is registered for GST (15%)</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setFormData({ ...formData, gst_registered: !formData.gst_registered })}
-                    className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                      formData.gst_registered ? 'bg-blue-600' : 'bg-gray-200'
-                    }`}
-                  >
-                    <span
-                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                        formData.gst_registered ? 'translate-x-5' : 'translate-x-0'
-                      }`}
-                    />
-                  </button>
-                </div>
-
-                {/* GST and IRD Numbers */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      IRD Number
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.ird_number}
-                      onChange={(e) => setFormData({ ...formData, ird_number: e.target.value })}
-                      placeholder="e.g., 123-456-789"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">Inland Revenue Department number</p>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      GST Number
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.gst_number}
-                      onChange={(e) => setFormData({ ...formData, gst_number: e.target.value })}
-                      placeholder="e.g., 123-456-789"
-                      disabled={!formData.gst_registered}
-                      className={`w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white ${
-                        !formData.gst_registered ? 'opacity-50 bg-gray-100 cursor-not-allowed' : ''
-                      }`}
-                    />
-                    <p className="text-xs text-gray-500 mt-1">
-                      {formData.gst_registered ? 'GST registration number for tax invoices' : 'Enable GST registration to add GST number'}
-                    </p>
-                  </div>
-                </div>
               </div>
             </div>
 
@@ -2903,215 +2712,6 @@ function SettingsContent() {
                       </button>
                     </div>
                   )}
-                </div>
-              )}
-            </div>
-
-            {/* Credit Card Surcharge */}
-            <div className="border border-gray-200 rounded-lg p-4 mb-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
-                    <CreditCard className="w-5 h-5 text-amber-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900">Credit Card Surcharge</h3>
-                    <p className="text-sm text-gray-600">
-                      Pass credit card processing fees to customer
-                    </p>
-                  </div>
-                </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={surchargeSettings.credit_card_surcharge_enabled}
-                    onChange={(e) => setSurchargeSettings({
-                      ...surchargeSettings,
-                      credit_card_surcharge_enabled: e.target.checked
-                    })}
-                    className="sr-only peer"
-                  />
-                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
-                </label>
-              </div>
-
-              {surchargeSettings.credit_card_surcharge_enabled && (
-                <div className="mt-4 ml-13 space-y-4">
-                  <div className="p-4 bg-amber-50 rounded-lg">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Surcharge Rate (%)
-                    </label>
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="number"
-                        min="0"
-                        max="10"
-                        step="0.1"
-                        value={surchargeSettings.credit_card_surcharge_rate}
-                        onChange={(e) => setSurchargeSettings({
-                          ...surchargeSettings,
-                          credit_card_surcharge_rate: parseFloat(e.target.value) || 0
-                        })}
-                        className="w-24 px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:ring-amber-500 focus:border-amber-500"
-                      />
-                      <span className="text-sm text-gray-600">%</span>
-                    </div>
-                    <p className="text-xs text-gray-500 mt-2">
-                      Common rates: 1.5% - 3.0% (check your payment processor fees)
-                    </p>
-                  </div>
-
-                  <div className="p-3 bg-gray-50 rounded-lg">
-                    <p className="text-sm text-gray-700">
-                      <strong>Example:</strong> For a $100 order with {surchargeSettings.credit_card_surcharge_rate}% surcharge:
-                    </p>
-                    <div className="mt-2 text-sm text-gray-600 space-y-1">
-                      <p>Subtotal: $100.00</p>
-                      <p>Service Fee: ${(100 * surchargeSettings.credit_card_surcharge_rate / 100).toFixed(2)}</p>
-                      <p className="font-semibold text-gray-900">Total: ${(100 + (100 * surchargeSettings.credit_card_surcharge_rate / 100)).toFixed(2)}</p>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={saveSurchargeSettings}
-                    disabled={savingSurcharge}
-                    className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                  >
-                    {savingSurcharge ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Saving...
-                      </>
-                    ) : (
-                      <>
-                        <Save className="w-4 h-4" />
-                        Save Surcharge Settings
-                      </>
-                    )}
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* Food/Holiday Surcharge */}
-            <div className={`border rounded-lg p-4 mb-4 ${canUseFoodSurcharge ? 'border-gray-200' : 'border-gray-200 bg-gray-50 opacity-75'}`}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${canUseFoodSurcharge ? 'bg-purple-100' : 'bg-gray-200'}`}>
-                    <BadgePercent className={`w-5 h-5 ${canUseFoodSurcharge ? 'text-purple-600' : 'text-gray-400'}`} />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-                      Food Surcharge
-                      {!canUseFoodSurcharge && (
-                        <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">Professional+</span>
-                      )}
-                    </h3>
-                    <p className="text-sm text-gray-600">
-                      Add surcharge for holidays, festivals, or peak seasons
-                    </p>
-                  </div>
-                </div>
-                {canUseFoodSurcharge ? (
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={foodSurchargeSettings.food_surcharge_enabled}
-                      onChange={(e) => setFoodSurchargeSettings({
-                        ...foodSurchargeSettings,
-                        food_surcharge_enabled: e.target.checked
-                      })}
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-500"></div>
-                  </label>
-                ) : (
-                  <span className="text-xs text-gray-500">Upgrade required</span>
-                )}
-              </div>
-
-              {!canUseFoodSurcharge && (
-                <div className="mt-3 p-3 bg-purple-50 border border-purple-200 rounded-lg">
-                  <p className="text-sm text-purple-700">
-                    Upgrade to <strong>Professional</strong> or <strong>Enterprise</strong> to add surcharges for holidays, festivals, or peak seasons.
-                  </p>
-                </div>
-              )}
-
-              {canUseFoodSurcharge && foodSurchargeSettings.food_surcharge_enabled && (
-                <div className="mt-4 ml-13 space-y-4">
-                  <div className="p-4 bg-purple-50 rounded-lg space-y-4">
-                    {/* Surcharge Name */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Surcharge Name
-                      </label>
-                      <input
-                        type="text"
-                        value={foodSurchargeSettings.food_surcharge_name}
-                        onChange={(e) => setFoodSurchargeSettings({
-                          ...foodSurchargeSettings,
-                          food_surcharge_name: e.target.value
-                        })}
-                        placeholder="e.g., Holiday Surcharge, Festival Fee"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:ring-purple-500 focus:border-purple-500"
-                      />
-                      <p className="text-xs text-gray-500 mt-1">This name will be shown to customers on the receipt</p>
-                    </div>
-
-                    {/* Surcharge Rate */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Surcharge Rate (%)
-                      </label>
-                      <div className="flex items-center gap-3">
-                        <input
-                          type="number"
-                          min="0"
-                          max="50"
-                          step="0.5"
-                          value={foodSurchargeSettings.food_surcharge_rate}
-                          onChange={(e) => setFoodSurchargeSettings({
-                            ...foodSurchargeSettings,
-                            food_surcharge_rate: parseFloat(e.target.value) || 0
-                          })}
-                          className="w-24 px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:ring-purple-500 focus:border-purple-500"
-                        />
-                        <span className="text-sm text-gray-600">%</span>
-                      </div>
-                      <p className="text-xs text-gray-500 mt-1">Maximum 50%</p>
-                    </div>
-                  </div>
-
-                  {/* Example calculation */}
-                  <div className="p-3 bg-gray-50 rounded-lg">
-                    <p className="text-sm text-gray-700">
-                      <strong>Example:</strong> For a $100 order with {foodSurchargeSettings.food_surcharge_rate}% {foodSurchargeSettings.food_surcharge_name}:
-                    </p>
-                    <div className="mt-2 text-sm text-gray-600 space-y-1">
-                      <p>Subtotal: $100.00</p>
-                      <p>{foodSurchargeSettings.food_surcharge_name}: ${(100 * foodSurchargeSettings.food_surcharge_rate / 100).toFixed(2)}</p>
-                      <p className="font-semibold text-gray-900">Total: ${(100 + (100 * foodSurchargeSettings.food_surcharge_rate / 100)).toFixed(2)}</p>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={saveFoodSurchargeSettings}
-                    disabled={savingFoodSurcharge}
-                    className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                  >
-                    {savingFoodSurcharge ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Saving...
-                      </>
-                    ) : (
-                      <>
-                        <Save className="w-4 h-4" />
-                        Save Surcharge Settings
-                      </>
-                    )}
-                  </button>
                 </div>
               )}
             </div>
