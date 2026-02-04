@@ -769,7 +769,7 @@ export default function PaymentPage() {
                 <span className="text-gray-800">
                   {item.quantity}x {item.name}
                 </span>
-                <span className="font-medium">${(item.price * item.quantity).toFixed(2)}</span>
+                <span className="font-medium text-gray-900">${(item.price * item.quantity).toFixed(2)}</span>
               </div>
             ))}
           </div>
@@ -777,18 +777,18 @@ export default function PaymentPage() {
           <div className="border-t border-gray-200 pt-3 space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-gray-800">Subtotal</span>
-              <span>${order.subtotal.toFixed(2)}</span>
+              <span className="text-gray-900">${order.subtotal.toFixed(2)}</span>
             </div>
-            {order.delivery_fee && order.delivery_fee > 0 && (
+            {(order.delivery_fee ?? 0) > 0 && (
               <div className="flex justify-between text-sm">
                 <span className="text-gray-800">Delivery Fee</span>
-                <span>${order.delivery_fee.toFixed(2)}</span>
+                <span className="text-gray-900">${order.delivery_fee.toFixed(2)}</span>
               </div>
             )}
-            {order.food_surcharge_amount && order.food_surcharge_amount > 0 && (
+            {(order.food_surcharge_amount ?? 0) > 0 && (
               <div className="flex justify-between text-sm">
                 <span className="text-gray-800">{order.food_surcharge_name || 'Surcharge'}</span>
-                <span>${order.food_surcharge_amount.toFixed(2)}</span>
+                <span className="text-gray-900">${order.food_surcharge_amount!.toFixed(2)}</span>
               </div>
             )}
             {/* Card Payment Surcharge - only show when card is selected */}
@@ -798,7 +798,7 @@ export default function PaymentPage() {
                 <span>+${getSurchargeAmount().toFixed(2)}</span>
               </div>
             )}
-            <div className="flex justify-between text-lg font-bold pt-2 border-t border-gray-200">
+            <div className="flex justify-between text-lg font-bold pt-2 border-t border-gray-200 text-gray-900">
               <span>Total</span>
               <span className="text-blue-600">${getFinalTotal().toFixed(2)} NZD</span>
             </div>
