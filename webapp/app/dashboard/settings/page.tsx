@@ -145,9 +145,9 @@ function SettingsContent() {
   // Delivery Settings state (per-km pricing)
   const [deliverySettings, setDeliverySettings] = useState<DeliverySettings>({
     pricing_mode: 'per_km',
-    price_per_km: 1.50,
-    base_fee: 3.00,
-    max_distance_km: 15,
+    price_per_km: 0,
+    base_fee: 0,
+    max_distance_km: 0,
     free_delivery_above: 0
   });
 
@@ -1994,9 +1994,10 @@ function SettingsContent() {
                             <span className="text-gray-500">$</span>
                             <input
                               type="number"
-                              value={deliverySettings.base_fee}
+                              value={deliverySettings.base_fee || ''}
                               onChange={(e) => setDeliverySettings({...deliverySettings, base_fee: parseFloat(e.target.value) || 0})}
-                              className="flex-1 px-3 py-2 border rounded-lg text-gray-900 bg-white"
+                              placeholder="3.00"
+                              className="w-full flex-1 px-3 py-2 border rounded-lg text-gray-900 bg-white"
                               step="0.5"
                               min="0"
                             />
@@ -2011,13 +2012,14 @@ function SettingsContent() {
                             <span className="text-gray-500">$</span>
                             <input
                               type="number"
-                              value={deliverySettings.price_per_km}
+                              value={deliverySettings.price_per_km || ''}
                               onChange={(e) => setDeliverySettings({...deliverySettings, price_per_km: parseFloat(e.target.value) || 0})}
-                              className="flex-1 px-3 py-2 border rounded-lg text-gray-900 bg-white"
+                              placeholder="1.50"
+                              className="w-full flex-1 px-3 py-2 border rounded-lg text-gray-900 bg-white"
                               step="0.1"
                               min="0"
                             />
-                            <span className="text-gray-500">/km</span>
+                            <span className="text-gray-500 whitespace-nowrap">/km</span>
                           </div>
                         </div>
                         <div>
@@ -2027,9 +2029,10 @@ function SettingsContent() {
                           <div className="flex items-center gap-2">
                             <input
                               type="number"
-                              value={deliverySettings.max_distance_km}
+                              value={deliverySettings.max_distance_km || ''}
                               onChange={(e) => setDeliverySettings({...deliverySettings, max_distance_km: parseFloat(e.target.value) || 0})}
-                              className="flex-1 px-3 py-2 border rounded-lg text-gray-900 bg-white"
+                              placeholder="15"
+                              className="w-full flex-1 px-3 py-2 border rounded-lg text-gray-900 bg-white"
                               step="1"
                               min="1"
                             />
@@ -2044,9 +2047,10 @@ function SettingsContent() {
                             <span className="text-gray-500">$</span>
                             <input
                               type="number"
-                              value={deliverySettings.free_delivery_above}
+                              value={deliverySettings.free_delivery_above || ''}
                               onChange={(e) => setDeliverySettings({...deliverySettings, free_delivery_above: parseFloat(e.target.value) || 0})}
-                              className="flex-1 px-3 py-2 border rounded-lg text-gray-900 bg-white"
+                              placeholder="0"
+                              className="w-full flex-1 px-3 py-2 border rounded-lg text-gray-900 bg-white"
                               step="5"
                               min="0"
                             />
@@ -2056,11 +2060,11 @@ function SettingsContent() {
                       </div>
 
                       {/* Preview Calculation */}
-                      <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
+                      <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200 overflow-hidden">
                         <p className="text-sm font-medium text-green-800 mb-2">Example calculation:</p>
-                        <div className="text-sm text-green-700 space-y-1">
-                          <p>• 5 km = ${(deliverySettings.base_fee + (5 * deliverySettings.price_per_km)).toFixed(2)} (${deliverySettings.base_fee} + 5 × ${deliverySettings.price_per_km})</p>
-                          <p>• 10 km = ${(deliverySettings.base_fee + (10 * deliverySettings.price_per_km)).toFixed(2)} (${deliverySettings.base_fee} + 10 × ${deliverySettings.price_per_km})</p>
+                        <div className="text-xs sm:text-sm text-green-700 space-y-1 break-words">
+                          <p>• 5 km = ${(deliverySettings.base_fee + (5 * deliverySettings.price_per_km)).toFixed(2)}</p>
+                          <p>• 10 km = ${(deliverySettings.base_fee + (10 * deliverySettings.price_per_km)).toFixed(2)}</p>
                           {deliverySettings.free_delivery_above > 0 && (
                             <p className="text-green-600 font-medium">• Free delivery above ${deliverySettings.free_delivery_above}</p>
                           )}
@@ -2080,16 +2084,17 @@ function SettingsContent() {
                       {deliveryRates.length > 0 && (
                         <div className="space-y-2 mb-4">
                           {deliveryRates.sort((a, b) => a.distance_km - b.distance_km).map((rate) => (
-                            <div key={rate.id} className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200">
+                            <div key={rate.id} className="flex flex-wrap items-center justify-between gap-2 p-3 bg-white rounded-lg border border-gray-200">
                               {editingRate?.id === rate.id ? (
                                 <>
-                                  <div className="flex items-center gap-3">
+                                  <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                                     <div className="flex items-center gap-1">
                                       <input
                                         type="number"
-                                        value={editingRate.distance_km}
+                                        value={editingRate.distance_km || ''}
                                         onChange={(e) => setEditingRate({...editingRate, distance_km: parseFloat(e.target.value) || 0})}
-                                        className="w-20 px-2 py-1 border rounded text-center text-gray-900 bg-white"
+                                        placeholder="5"
+                                        className="w-16 sm:w-20 px-2 py-1 border rounded text-center text-gray-900 bg-white"
                                         step="0.5"
                                         min="0"
                                       />
@@ -2100,9 +2105,10 @@ function SettingsContent() {
                                       <span className="text-sm text-gray-500">$</span>
                                       <input
                                         type="number"
-                                        value={editingRate.price}
+                                        value={editingRate.price || ''}
                                         onChange={(e) => setEditingRate({...editingRate, price: parseFloat(e.target.value) || 0})}
-                                        className="w-20 px-2 py-1 border rounded text-center text-gray-900 bg-white"
+                                        placeholder="3.50"
+                                        className="w-16 sm:w-20 px-2 py-1 border rounded text-center text-gray-900 bg-white"
                                         step="0.5"
                                         min="0"
                                       />
@@ -2128,7 +2134,7 @@ function SettingsContent() {
                                 </>
                               ) : (
                                 <>
-                                  <div className="flex items-center gap-3">
+                                  <div className="flex items-center gap-2 sm:gap-3">
                                     <span className="text-sm font-medium text-gray-700">
                                       Up to <span className="text-green-600 font-bold">{rate.distance_km}</span> km
                                     </span>
@@ -2160,14 +2166,14 @@ function SettingsContent() {
 
                       {/* Add New Rate Form */}
                       {showAddRate ? (
-                        <div className="flex items-center gap-3 p-3 bg-white rounded-lg border border-dashed border-green-300">
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-3 p-3 bg-white rounded-lg border border-dashed border-green-300">
                           <div className="flex items-center gap-1">
                             <input
                               type="number"
                               value={newRate.distance_km}
                               onChange={(e) => setNewRate({...newRate, distance_km: e.target.value})}
                               placeholder="5"
-                              className="w-20 px-2 py-1 border rounded text-center text-gray-900 bg-white"
+                              className="w-16 sm:w-20 px-2 py-1 border rounded text-center text-gray-900 bg-white"
                               step="0.5"
                               min="0"
                             />
@@ -2181,7 +2187,7 @@ function SettingsContent() {
                               value={newRate.price}
                               onChange={(e) => setNewRate({...newRate, price: e.target.value})}
                               placeholder="3.50"
-                              className="w-20 px-2 py-1 border rounded text-center text-gray-900 bg-white"
+                              className="w-16 sm:w-20 px-2 py-1 border rounded text-center text-gray-900 bg-white"
                               step="0.5"
                               min="0"
                             />
