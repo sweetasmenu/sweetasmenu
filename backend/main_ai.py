@@ -258,6 +258,7 @@ class BankAccount(BaseModel):
 class UpdatePaymentSettingsRequest(BaseModel):
     accept_card: Optional[bool] = None
     accept_bank_transfer: Optional[bool] = None
+    accept_qr_code: Optional[bool] = None
     bank_accounts: Optional[List[BankAccount]] = None
 
 class UpdateSurchargeSettingsRequest(BaseModel):
@@ -2371,6 +2372,8 @@ async def update_payment_settings(restaurant_id: str, request: UpdatePaymentSett
             current_settings["accept_card"] = request.accept_card
         if request.accept_bank_transfer is not None:
             current_settings["accept_bank_transfer"] = request.accept_bank_transfer
+        if request.accept_qr_code is not None:
+            current_settings["accept_qr_code"] = request.accept_qr_code
         if request.bank_accounts is not None:
             current_settings["bank_accounts"] = [acc.dict() for acc in request.bank_accounts]
 
