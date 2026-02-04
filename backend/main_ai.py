@@ -3127,16 +3127,9 @@ async def update_user_profile(request: UpdateProfileRequest):
         user_status = trial_limits_service.get_user_status(request.user_id)
         plan = user_status.get('subscription_plan', 'starter') if user_status.get('is_subscribed') else 'starter'
         
-        # Check theme color permission
-        if request.theme_color and plan == 'starter':
-            raise HTTPException(
-                status_code=403,
-                detail={
-                    "error": "Plan restriction",
-                    "message": "Theme color customization is not available in Starter plan. Please upgrade to Pro or Premium plan.",
-                    "current_plan": plan
-                }
-            )
+        # Check theme color permission - silently ignore for restricted plans instead of blocking entire save
+        if request.theme_color and plan in ('free_trial', 'starter'):
+            request.theme_color = None  # Skip theme_color update, allow other fields to save
         
         # Validate theme color if provided
         if request.theme_color:

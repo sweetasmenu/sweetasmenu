@@ -1034,7 +1034,7 @@ function SettingsContent() {
           phone: formData.phone || undefined,
           email: formData.email || undefined,
           address: formData.address || undefined,
-          theme_color: formData.theme_color || undefined,
+          theme_color: canCustomizeTheme ? (formData.theme_color || undefined) : undefined,
           menu_template: formData.menu_template || undefined,
           // Tax/Business info for NZ
           gst_registered: formData.gst_registered,
@@ -1677,42 +1677,35 @@ function SettingsContent() {
             <div className="mt-8 pt-8 border-t border-gray-200">
               <h2 className="text-xl font-semibold text-gray-900 mb-6">Branding</h2>
 
-              {/* Theme Color */}
-              <div className="mb-6">
-                <div className="flex items-center justify-between mb-2">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Theme Color
-                  </label>
-                  {!canCustomizeTheme && (
-                    <span className="text-xs text-gray-500">🔒 Upgrade to Pro or Premium</span>
-                  )}
+              {/* Theme Color - only show for Pro/Premium/Enterprise */}
+              {canCustomizeTheme && (
+                <div className="mb-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-sm font-medium text-gray-700">
+                      Theme Color
+                    </label>
+                  </div>
+                  <div className="flex items-center space-x-4">
+                    <input
+                      type="color"
+                      value={formData.theme_color}
+                      onChange={(e) => setFormData({ ...formData, theme_color: e.target.value })}
+                      className="h-10 w-20 border border-gray-300 rounded cursor-pointer"
+                    />
+                    <input
+                      type="text"
+                      value={formData.theme_color}
+                      onChange={(e) => setFormData({ ...formData, theme_color: e.target.value })}
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white"
+                    />
+                    {/* Preview */}
+                    <div
+                      className="w-16 h-10 rounded border border-gray-300"
+                      style={{ backgroundColor: formData.theme_color }}
+                    />
+                  </div>
                 </div>
-                <div className="flex items-center space-x-4">
-                  <input
-                    type="color"
-                    value={formData.theme_color}
-                    onChange={(e) => setFormData({ ...formData, theme_color: e.target.value })}
-                    disabled={!canCustomizeTheme}
-                    className={`h-10 w-20 border border-gray-300 rounded cursor-pointer ${
-                      !canCustomizeTheme ? 'opacity-50 cursor-not-allowed' : ''
-                    }`}
-                  />
-                  <input
-                    type="text"
-                    value={formData.theme_color}
-                    onChange={(e) => setFormData({ ...formData, theme_color: e.target.value })}
-                    disabled={!canCustomizeTheme}
-                    className={`flex-1 px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white ${
-                      !canCustomizeTheme ? 'opacity-50 cursor-not-allowed bg-gray-100' : ''
-                    }`}
-                  />
-                  {/* Preview */}
-                  <div
-                    className="w-16 h-10 rounded border border-gray-300"
-                    style={{ backgroundColor: formData.theme_color }}
-                  />
-                </div>
-              </div>
+              )}
 
               {/* Menu Template */}
               <div className="mb-6">
