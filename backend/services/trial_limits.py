@@ -9,6 +9,7 @@ Updated pricing structure:
 from typing import Dict, Any, Optional
 from datetime import datetime, timedelta
 from collections import defaultdict
+import math
 import json
 import os
 import re
@@ -273,7 +274,7 @@ class TrialLimitsService:
             "is_trial_active": is_trial_active,
             "trial_start_date": user_data.get('trial_start_date'),
             "trial_end_date": user_data.get('trial_end_date'),
-            "trial_days_remaining": (trial_end - now).days if trial_end and now < trial_end else 0,
+            "trial_days_remaining": math.ceil((trial_end - now).total_seconds() / 86400) if trial_end and now < trial_end else 0,
             "menu_items_count": menu_items_count,
             "image_generation_count": image_generation_count,
             "image_enhancement_count": image_enhancement_count,
