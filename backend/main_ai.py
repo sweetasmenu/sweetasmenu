@@ -2330,8 +2330,12 @@ async def get_payment_settings(restaurant_id: str):
         payment_settings = restaurant.get("payment_settings", {
             "accept_card": True,
             "accept_bank_transfer": False,
+            "accept_qr_code": True,
             "bank_accounts": []
         })
+        # Ensure accept_qr_code has a default value for existing restaurants
+        if "accept_qr_code" not in payment_settings:
+            payment_settings["accept_qr_code"] = True
 
         return {
             "success": True,
@@ -2364,8 +2368,12 @@ async def update_payment_settings(restaurant_id: str, request: UpdatePaymentSett
         current_settings = restaurant.get("payment_settings", {
             "accept_card": True,
             "accept_bank_transfer": False,
+            "accept_qr_code": True,
             "bank_accounts": []
         })
+        # Ensure accept_qr_code has a default value
+        if "accept_qr_code" not in current_settings:
+            current_settings["accept_qr_code"] = True
 
         # Update only provided fields
         if request.accept_card is not None:

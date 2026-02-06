@@ -44,6 +44,7 @@ interface BankAccount {
 interface PaymentSettings {
   accept_card: boolean;
   accept_bank_transfer: boolean;
+  accept_qr_code?: boolean;  // Show QR code for bank transfer
   accept_cash_at_counter?: boolean;  // Pay at cashier for dine-in
   bank_accounts: BankAccount[];
 }
@@ -175,10 +176,12 @@ function BankTransferPayment({
   order,
   bankAccounts,
   onSlipUpload,
+  showQrCode = true,
 }: {
   order: Order;
   bankAccounts: BankAccount[];
   onSlipUpload: (slip: File) => void;
+  showQrCode?: boolean;
 }) {
   const [selectedBank, setSelectedBank] = useState(0);
   const [copied, setCopied] = useState(false);
@@ -242,16 +245,18 @@ function BankTransferPayment({
         </div>
       )}
 
-      {/* QR Code */}
-      <div className="bg-white border border-gray-200 rounded-xl p-6 text-center">
-        <h4 className="font-semibold text-gray-900 mb-4">Scan to Pay</h4>
-        <div className="bg-white p-4 inline-block rounded-lg shadow-inner">
-          <QRCode value={qrData} size={180} />
+      {/* QR Code - Only show if enabled */}
+      {showQrCode && (
+        <div className="bg-white border border-gray-200 rounded-xl p-6 text-center">
+          <h4 className="font-semibold text-gray-900 mb-4">Scan to Pay</h4>
+          <div className="bg-white p-4 inline-block rounded-lg shadow-inner">
+            <QRCode value={qrData} size={180} />
+          </div>
+          <p className="text-sm text-gray-700 mt-2">
+            Scan with your mobile banking app
+          </p>
         </div>
-        <p className="text-sm text-gray-700 mt-2">
-          Scan with your mobile banking app
-        </p>
-      </div>
+      )}
 
       {/* Bank Details */}
       <div className="bg-gray-50 rounded-xl p-4 space-y-3">
@@ -918,6 +923,7 @@ export default function PaymentPage() {
               order={order}
               bankAccounts={paymentSettings.bank_accounts}
               onSlipUpload={handleSlipUpload}
+              showQrCode={paymentSettings.accept_qr_code !== false}
             />
           </div>
         )}
