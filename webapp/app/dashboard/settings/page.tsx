@@ -2952,37 +2952,38 @@ function SettingsContent() {
                     </div>
                   )}
 
-                  {/* QR Code Toggle */}
-                  <div className="mt-4 p-3 sm:p-4 bg-gray-50 rounded-lg border border-gray-200">
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-                        <div className="w-9 h-9 sm:w-10 sm:h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                          <QrCode className="w-5 h-5 text-purple-600" />
-                        </div>
-                        <div>
-                          <h5 className="font-semibold text-gray-900">QR Code Payments</h5>
-                          <p className="text-sm text-gray-600">Show QR code for customers to scan and pay</p>
-                        </div>
-                      </div>
-                      <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
-                        <input
-                          type="checkbox"
-                          checked={paymentSettings.accept_qr_code}
-                          onChange={(e) => setPaymentSettings({
-                            ...paymentSettings,
-                            accept_qr_code: e.target.checked
-                          })}
-                          className="sr-only peer"
-                        />
-                        <div className="w-11 h-6 bg-gray-400 border-2 border-gray-500 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600 peer-checked:border-purple-600"></div>
-                      </label>
-                    </div>
-                    <p className="text-xs text-gray-500 mt-2 sm:ml-11">
-                      Note: QR Code feature may not be available in all regions. Disable if not supported in your area.
-                    </p>
-                  </div>
                 </div>
               )}
+            </div>
+
+            {/* QR Code Payments - Separate section */}
+            <div className="border border-gray-200 rounded-lg p-3 sm:p-4 mb-4">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <QrCode className="w-5 h-5 text-purple-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900">QR Code Payments</h3>
+                    <p className="text-sm text-gray-600">Show QR code for customers to scan and pay</p>
+                  </div>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
+                  <input
+                    type="checkbox"
+                    checked={paymentSettings.accept_qr_code}
+                    onChange={(e) => setPaymentSettings({
+                      ...paymentSettings,
+                      accept_qr_code: e.target.checked
+                    })}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-400 border-2 border-gray-500 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600 peer-checked:border-purple-600"></div>
+                </label>
+              </div>
+              <p className="text-xs text-gray-500 mt-2 ml-12 sm:ml-14">
+                Note: QR Code feature may not be available in all regions. Disable if not supported in your area.
+              </p>
             </div>
 
             {/* Credit Card Surcharge */}
