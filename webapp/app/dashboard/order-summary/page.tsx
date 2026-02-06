@@ -109,6 +109,8 @@ interface Restaurant {
   id: string;
   name: string;
   slug?: string;
+  gst_number?: string;
+  ird_number?: string;
 }
 
 export default function OrderSummaryPage() {
@@ -116,6 +118,8 @@ export default function OrderSummaryPage() {
   const [loading, setLoading] = useState(true);
   const [restaurantId, setRestaurantId] = useState<string | null>(null);
   const [restaurantName, setRestaurantName] = useState<string>('');
+  const [restaurantGstNumber, setRestaurantGstNumber] = useState<string>('');
+  const [restaurantIrdNumber, setRestaurantIrdNumber] = useState<string>('');
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [showBranchDropdown, setShowBranchDropdown] = useState(false);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -219,6 +223,8 @@ export default function OrderSummaryPage() {
       if (data.success && data.restaurant?.restaurant_id) {
         setRestaurantId(data.restaurant.restaurant_id);
         setRestaurantName(data.restaurant.name || '');
+        setRestaurantGstNumber(data.restaurant.gst_number || '');
+        setRestaurantIrdNumber(data.restaurant.ird_number || '');
       }
       // Get user role for export feature check
       if (data.subscription?.role) {
@@ -241,7 +247,9 @@ export default function OrderSummaryPage() {
         setRestaurants(data.restaurants.map((r: any) => ({
           id: r.restaurant_id || r.id,
           name: r.name,
-          slug: r.slug
+          slug: r.slug,
+          gst_number: r.gst_number,
+          ird_number: r.ird_number
         })));
       }
     } catch (error) {
@@ -258,6 +266,8 @@ export default function OrderSummaryPage() {
     // Update state
     setRestaurantId(restaurant.id);
     setRestaurantName(restaurant.name);
+    setRestaurantGstNumber(restaurant.gst_number || '');
+    setRestaurantIrdNumber(restaurant.ird_number || '');
     setShowBranchDropdown(false);
 
     // Dispatch event for other pages
@@ -640,6 +650,7 @@ export default function OrderSummaryPage() {
       <body>
         <div class="header">
           <h1>${restaurantName || 'Restaurant'}</h1>
+          ${restaurantGstNumber || restaurantIrdNumber ? `<p style="font-size:10px;">${restaurantIrdNumber ? `IRD: ${restaurantIrdNumber}` : ''}${restaurantGstNumber && restaurantIrdNumber ? ' | ' : ''}${restaurantGstNumber ? `GST: ${restaurantGstNumber}` : ''}</p>` : ''}
           <p>Daily Sales Summary</p>
           <p>${startDate === endDate ? startDate : `${startDate} to ${endDate}`}</p>
         </div>
@@ -764,6 +775,7 @@ export default function OrderSummaryPage() {
       <body>
         <div class="header">
           <h1>${restaurantName || 'Restaurant'}</h1>
+          ${restaurantGstNumber || restaurantIrdNumber ? `<p style="font-size:10px;">${restaurantIrdNumber ? `IRD: ${restaurantIrdNumber}` : ''}${restaurantGstNumber && restaurantIrdNumber ? ' | ' : ''}${restaurantGstNumber ? `GST: ${restaurantGstNumber}` : ''}</p>` : ''}
           <p>ORDER RECEIPT</p>
           <p>${orderDate}</p>
         </div>

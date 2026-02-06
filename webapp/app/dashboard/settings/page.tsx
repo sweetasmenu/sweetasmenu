@@ -1579,6 +1579,37 @@ function SettingsContent() {
                 />
                 <p className="text-xs text-gray-500 mt-1">This address will appear on receipts and invoices</p>
               </div>
+
+              {/* Tax/Business Numbers Section */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    IRD Number
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.ird_number}
+                    onChange={(e) => setFormData({ ...formData, ird_number: e.target.value })}
+                    placeholder="123-456-789"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Inland Revenue Department number</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    GST Number
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.gst_number}
+                    onChange={(e) => setFormData({ ...formData, gst_number: e.target.value })}
+                    placeholder="123-456-789"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Goods and Services Tax number</p>
+                </div>
+              </div>
             </div>
 
             {/* Branding Section */}
