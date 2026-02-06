@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Shield, Users, Utensils, Truck, Store, Plus, Trash2, Edit2, Save, X, Loader2, Globe, ExternalLink, MapPin, Navigation, CreditCard, Building2, QrCode, Key, Eye, EyeOff, CheckCircle, AlertCircle, ArrowUpRight } from 'lucide-react';
+import { Shield, Users, Utensils, Truck, Store, Plus, Trash2, Edit2, Save, X, Loader2, Globe, ExternalLink, MapPin, Navigation, CreditCard, Building2, QrCode, Key, Eye, EyeOff, CheckCircle, AlertCircle, ArrowUpRight, Printer } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 
 interface ServiceOptions {
@@ -975,6 +975,96 @@ function SettingsContent() {
     return roleNames[role] || role;
   };
 
+  // Preview Print Receipt Header
+  const previewPrintHeader = () => {
+    const printWindow = window.open('', '', 'width=400,height=500');
+    if (!printWindow) {
+      alert('Please allow popups to preview');
+      return;
+    }
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Receipt Header Preview</title>
+        <style>
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          body {
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+            max-width: 300px;
+            margin: 0 auto;
+          }
+          .receipt {
+            border: 2px dashed #ccc;
+            padding: 20px;
+            background: #fff;
+          }
+          .header { text-align: center; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px dashed #000; }
+          h1 { font-size: 18px; margin-bottom: 5px; }
+          .info { font-size: 11px; color: #333; margin: 3px 0; }
+          .tax-info { font-size: 10px; color: #666; margin-top: 8px; }
+          .preview-note {
+            margin-top: 20px;
+            padding: 10px;
+            background: #fff3cd;
+            border-radius: 5px;
+            font-size: 11px;
+            text-align: center;
+            font-family: Arial, sans-serif;
+          }
+          .close-btn {
+            display: block;
+            margin: 20px auto 0;
+            padding: 10px 30px;
+            background: #f97316;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+          }
+          .close-btn:hover { background: #ea580c; }
+          @media print {
+            .preview-note, .close-btn { display: none; }
+            body { padding: 0; }
+            .receipt { border: none; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="receipt">
+          <div class="header">
+            <h1>${formData.name || 'Restaurant Name'}</h1>
+            ${formData.address ? `<p class="info">${formData.address}</p>` : ''}
+            ${formData.phone ? `<p class="info">Tel: ${formData.phone}</p>` : ''}
+            ${formData.ird_number || formData.gst_number ? `
+              <p class="tax-info">
+                ${formData.ird_number ? `IRD: ${formData.ird_number}` : ''}
+                ${formData.ird_number && formData.gst_number ? ' | ' : ''}
+                ${formData.gst_number ? `GST: ${formData.gst_number}` : ''}
+              </p>
+            ` : ''}
+          </div>
+          <p style="text-align:center;font-size:12px;">ORDER RECEIPT</p>
+          <p style="text-align:center;font-size:10px;color:#666;">${new Date().toLocaleString('en-NZ')}</p>
+        </div>
+
+        <div class="preview-note">
+          ⚠️ This is a preview of your receipt header.<br/>
+          Remember to <strong>Save Changes</strong> after editing.
+        </div>
+
+        <button class="close-btn" onclick="window.close()">Close Preview</button>
+      </body>
+      </html>
+    `;
+
+    printWindow.document.write(html);
+    printWindow.document.close();
+  };
+
   const handleSaveProfile = async () => {
     try {
       setSaving(true);
@@ -1524,7 +1614,17 @@ function SettingsContent() {
         {/* Tab Content */}
         {activeTab === 'profile' && (
           <div className="bg-white shadow rounded-lg p-4 sm:p-6">
-            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-6">Restaurant Information</h2>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Restaurant Information</h2>
+              <button
+                type="button"
+                onClick={previewPrintHeader}
+                className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+              >
+                <Printer className="w-4 h-4" />
+                <span className="hidden sm:inline">Preview Receipt</span>
+              </button>
+            </div>
 
             {/* Basic Info Form */}
             <div className="space-y-6">
@@ -1577,7 +1677,6 @@ function SettingsContent() {
                   placeholder="123 Main Street, Auckland 1010"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
                 />
-                <p className="text-xs text-gray-500 mt-1">This address will appear on receipts and invoices</p>
               </div>
 
               {/* Tax/Business Numbers Section */}
