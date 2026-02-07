@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import RestaurantSelector from '@/components/RestaurantSelector';
 import ImageGallery from '@/components/ImageGallery';
+import ProtectedImage from '@/components/ProtectedImage';
 import { generateFoodImage, enhanceImage, applyLogoOnly } from '@/lib/api-client';
 import { createClient } from '@/lib/supabase/client';
 
@@ -773,10 +774,11 @@ export default function MenusPage() {
                 {/* Photo */}
                 {(menu.photo_url || menu.image_url) ? (
                   <div className="aspect-video overflow-hidden bg-gray-100 relative">
-                    <img
-                      src={menu.photo_url || menu.image_url}
+                    <ProtectedImage
+                      src={menu.photo_url || menu.image_url || ''}
                       alt={menu.nameEn || menu.name}
                       className={`w-full h-full object-contain ${menu.is_active === false ? 'opacity-50 grayscale' : ''}`}
+                      containerClassName="w-full h-full"
                     />
                     {/* Best Seller Badge */}
                     {menu.is_best_seller && (
@@ -970,10 +972,11 @@ export default function MenusPage() {
               {/* Image Preview */}
               {editForm.photo_url && (
                 <div className="aspect-video overflow-hidden bg-gray-100 rounded-lg mb-4">
-                  <img
+                  <ProtectedImage
                     src={editForm.photo_url}
                     alt="Menu item"
                     className="w-full h-full object-contain"
+                    containerClassName="w-full h-full"
                   />
                 </div>
               )}

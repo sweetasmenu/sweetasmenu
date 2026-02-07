@@ -13,7 +13,7 @@ import {
   ChevronDown,
   Building2
 } from 'lucide-react';
-import OptimizedImage from './OptimizedImage';
+import ProtectedImage from './ProtectedImage';
 
 interface ImageItem {
   image_id: string;
@@ -334,10 +334,11 @@ export default function ImageGallery({
                 >
                   {/* Image */}
                   <div className="aspect-square bg-gray-100">
-                    <OptimizedImage
+                    <ProtectedImage
                       src={image.image_url}
                       alt={image.menu_name}
                       className="w-full h-full object-cover"
+                      containerClassName="w-full h-full"
                       priority={false}
                     />
                   </div>
