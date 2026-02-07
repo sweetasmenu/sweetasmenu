@@ -2151,6 +2151,15 @@ function ItemModal({
   const [notes, setNotes] = useState('');
   const [quantity, setQuantity] = useState(1);
 
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    const originalStyle = window.getComputedStyle(document.body).overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = originalStyle;
+    };
+  }, []);
+
   const calculatePrice = () => {
     let total = (parseFloat(menu.price) || 0) * quantity;
 
@@ -2179,10 +2188,15 @@ function ItemModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 md:flex md:items-center md:justify-center md:p-4" onClick={onClose}>
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 z-50 md:flex md:items-center md:justify-center md:p-4"
+      onClick={onClose}
+      style={{ touchAction: 'none' }}
+    >
       <div
         className="bg-white md:rounded-2xl w-full md:max-w-2xl overflow-y-auto mobile-modal-height md:relative md:h-auto md:max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
+        style={{ overscrollBehavior: 'contain', touchAction: 'pan-y' }}
       >
         <div className="p-4 md:p-6 pt-6">
           {/* Header */}
@@ -2198,7 +2212,10 @@ function ItemModal({
           {/* Photo - Clickable for Preview (Protected from right-click save) */}
           {menu.photo_url && (
             <div className="mb-4">
-              <div className="w-full h-64 rounded-xl overflow-hidden bg-gray-100 hover:opacity-90 transition-opacity">
+              <div
+                className="w-full h-64 rounded-xl overflow-hidden bg-gray-100 hover:opacity-90 transition-opacity cursor-pointer"
+                onClick={() => onImageClick?.(menu.photo_url!)}
+              >
                 <ProtectedImage
                   src={menu.photo_url}
                   alt={menu.name}
