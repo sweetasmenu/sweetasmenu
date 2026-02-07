@@ -44,17 +44,30 @@ export default function TabBar() {
   const router = useRouter();
 
   const handleSignOut = async () => {
-    // Clear user-specific localStorage to prevent data leaking
-    const keys = Object.keys(localStorage);
-    keys.forEach(key => {
-      if (key.startsWith('selected_restaurant_')) {
-        localStorage.removeItem(key);
-      }
-    });
-    localStorage.removeItem('selected_restaurant_id');
+    try {
+      // Clear user-specific localStorage to prevent data leaking
+      const keys = Object.keys(localStorage);
+      keys.forEach(key => {
+        if (key.startsWith('selected_restaurant_')) {
+          localStorage.removeItem(key);
+        }
+      });
+      localStorage.removeItem('selected_restaurant_id');
 
-    await signOut();
-    router.push('/login');
+      const result = await signOut();
+
+      if (result.error) {
+        console.error('Sign out error:', result.error);
+        // Still try to redirect even if there's an error
+      }
+
+      // Force a hard redirect to clear all cached state
+      window.location.href = '/login';
+    } catch (error) {
+      console.error('Sign out error:', error);
+      // Force redirect even on error
+      window.location.href = '/login';
+    }
   };
 
   // Don't show tab bar on login or public pages
