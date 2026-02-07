@@ -2380,25 +2380,6 @@ function ItemModal({
         </div>
       </div>
 
-      {/* Footer - Powered by Smart Menu (hide for Enterprise plan) */}
-      {!branding.hide_powered_by && (
-        <div className="container mx-auto px-4 max-w-6xl mt-12 pb-8">
-          <div className="text-center py-6 border-t border-gray-200">
-            <p className="text-sm text-gray-500">
-              Powered by{' '}
-              <a
-                href="https://smartmenu.co.nz"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-semibold hover:text-orange-500 transition-colors"
-                style={{ color: themeColor }}
-              >
-                Smart Menu
-              </a>
-            </p>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
