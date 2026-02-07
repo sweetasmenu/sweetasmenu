@@ -24,14 +24,25 @@ function LoginContent() {
   const [confirmPassword, setConfirmPassword] = useState('');
 
   useEffect(() => {
-    // Check if user is already logged in
-    const checkUser = async () => {
+    const initPage = async () => {
+      // Check if coming from logout - if so, ensure session is cleared
+      const isLogout = searchParams.get('logout') === 'true';
+
+      if (isLogout) {
+        // Force sign out to clear any cached session
+        await supabase.auth.signOut();
+        // Remove the logout param from URL without reload
+        window.history.replaceState({}, '', '/login');
+        return; // Don't check session, just show login page
+      }
+
+      // Check if user is already logged in (only if not coming from logout)
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         router.push('/dashboard');
       }
     };
-    checkUser();
+    initPage();
 
     // Check URL params for tab
     const tab = searchParams.get('tab');

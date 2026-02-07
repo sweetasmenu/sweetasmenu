@@ -62,11 +62,12 @@ export default function TabBar() {
       }
 
       // Force a hard redirect to clear all cached state
-      window.location.href = '/login';
+      // Add ?logout=true to skip auto-redirect in login page
+      window.location.href = '/login?logout=true';
     } catch (error) {
       console.error('Sign out error:', error);
       // Force redirect even on error
-      window.location.href = '/login';
+      window.location.href = '/login?logout=true';
     }
   };
 
