@@ -1,4 +1,5 @@
 import { Plus, Star, Flame } from 'lucide-react';
+import ProtectedImage from '@/components/ProtectedImage';
 
 interface MenuItem {
   menu_id: string;
@@ -100,10 +101,11 @@ export default function MagazineStyle({ menus, groupedMenus, themeColor, onItemC
                       {/* Large Photo for Best Sellers */}
                       {menu.photo_url && (
                         <div className="relative w-full h-48 sm:h-64 bg-gray-200">
-                          <img
+                          <ProtectedImage
                             src={menu.photo_url}
                             alt={menu.name}
                             className="w-full h-full object-cover"
+                            containerClassName="w-full h-full"
                           />
                           {/* Best Seller Badge */}
                           <div className="absolute top-4 left-4">
@@ -164,10 +166,11 @@ export default function MagazineStyle({ menus, groupedMenus, themeColor, onItemC
                     {/* Photo */}
                     {menu.photo_url && (
                       <div className="w-full h-32 bg-gray-200">
-                        <img
+                        <ProtectedImage
                           src={menu.photo_url}
                           alt={menu.name}
                           className="w-full h-full object-cover"
+                          containerClassName="w-full h-full"
                         />
                       </div>
                     )}

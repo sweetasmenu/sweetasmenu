@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { ChevronLeft, ChevronRight, List, LayoutGrid, X, Star, Plus } from 'lucide-react';
+import ProtectedImage from '@/components/ProtectedImage';
 
 interface MenuItem {
   menu_id: string;
@@ -160,11 +161,11 @@ export default function MobileMenuSection({
                       {/* Image */}
                       <div className="relative aspect-[4/3] bg-gray-100">
                         {item.photo_url ? (
-                          <img
+                          <ProtectedImage
                             src={item.photo_url}
                             alt={getItemName(item)}
                             className="w-full h-full object-cover"
-                            loading="lazy"
+                            containerClassName="w-full h-full"
                           />
                         ) : (
                           <div
@@ -296,11 +297,11 @@ export default function MobileMenuSection({
                       {/* Image */}
                       <div className="relative aspect-[4/3] bg-gray-100">
                         {item.photo_url ? (
-                          <img
+                          <ProtectedImage
                             src={item.photo_url}
                             alt={getItemName(item)}
                             className="w-full h-full object-cover"
-                            loading="lazy"
+                            containerClassName="w-full h-full"
                           />
                         ) : (
                           <div
@@ -357,11 +358,11 @@ export default function MobileMenuSection({
                       {/* Image */}
                       <div className="relative w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
                         {item.photo_url ? (
-                          <img
+                          <ProtectedImage
                             src={item.photo_url}
                             alt={getItemName(item)}
                             className="w-full h-full object-cover"
-                            loading="lazy"
+                            containerClassName="w-full h-full"
                           />
                         ) : (
                           <div

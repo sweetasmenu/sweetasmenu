@@ -181,6 +181,7 @@ class SaveMenuItemRequest(BaseModel):
     primaryLanguage: Optional[str] = "original"
     restaurant_id: Optional[str] = "default"
     is_best_seller: Optional[bool] = False  # Best Seller flag
+    is_active: Optional[bool] = True  # Visible on menu flag
 
 class CreateCheckoutSessionRequest(BaseModel):
     price_id: str
@@ -1115,9 +1116,10 @@ async def update_menu_item(menu_id: str, menu_item: SaveMenuItemRequest):
     try:
         menu_data = menu_item.dict()
 
-        # Debug logging for is_best_seller
+        # Debug logging for is_best_seller and is_active
         print(f"📝 PUT /api/menu/{menu_id}")
         print(f"   is_best_seller in request: {menu_data.get('is_best_seller')}")
+        print(f"   is_active in request: {menu_data.get('is_active')}")
 
         # Try Supabase first (preferred)
         updated_item = None

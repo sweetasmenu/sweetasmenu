@@ -9,6 +9,7 @@ import MagazineStyle from './templates/MagazineStyle';
 import Elegant from './templates/Elegant';
 import Casual from './templates/Casual';
 import MobileMenuSection from './templates/MobileMenuSection';
+import ProtectedImage from '@/components/ProtectedImage';
 import { dt, DashboardLanguage, dashboardTranslations } from '@/lib/dashboard-translations';
 
 interface MenuItem {
@@ -1174,10 +1175,11 @@ export default function RestaurantMenuPage() {
             {/* Restaurant Logo */}
             {branding.logo_url && (
               <div className="mb-6">
-                <img
+                <ProtectedImage
                   src={branding.logo_url}
                   alt={branding.name || 'Restaurant Logo'}
                   className="w-32 h-32 md:w-40 md:h-40 mx-auto rounded-full border-4 border-white shadow-2xl object-cover"
+                  containerClassName="w-32 h-32 md:w-40 md:h-40 mx-auto"
                 />
               </div>
             )}
@@ -2055,12 +2057,15 @@ export default function RestaurantMenuPage() {
           >
             <X className="w-8 h-8" />
           </button>
-          <img
-            src={previewImage}
-            alt="Food preview"
-            className="max-w-full max-h-full object-contain rounded-lg"
-            onClick={(e) => e.stopPropagation()}
-          />
+          <div onClick={(e) => e.stopPropagation()}>
+            <ProtectedImage
+              src={previewImage}
+              alt="Food preview"
+              className="max-w-full max-h-full object-contain rounded-lg"
+              containerClassName="max-w-full max-h-[90vh]"
+              priority={true}
+            />
+          </div>
         </div>
       )}
 

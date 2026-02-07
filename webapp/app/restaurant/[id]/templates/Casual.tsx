@@ -1,4 +1,5 @@
 import { Plus, Star, Heart, Utensils, Flame } from 'lucide-react';
+import ProtectedImage from '@/components/ProtectedImage';
 
 interface MenuItem {
   menu_id: string;
@@ -90,10 +91,11 @@ export default function Casual({ menus, groupedMenus, themeColor, onItemClick, s
                 {/* Photo with Fun Overlay */}
                 {menu.photo_url ? (
                   <div className="relative w-full h-48 bg-gray-200">
-                    <img
+                    <ProtectedImage
                       src={menu.photo_url}
                       alt={menu.name}
                       className="w-full h-full object-cover"
+                      containerClassName="w-full h-full"
                     />
                     {/* Best Seller Starburst */}
                     {menu.is_best_seller && (

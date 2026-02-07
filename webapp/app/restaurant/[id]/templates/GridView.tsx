@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { Plus, Star, Flame, ChevronLeft, ChevronRight } from 'lucide-react';
+import ProtectedImage from '@/components/ProtectedImage';
 
 interface MenuItem {
   menu_id: string;
@@ -210,10 +211,11 @@ export default function GridView({ menus, groupedMenus, themeColor, onItemClick,
                       {/* Photo - Fixed aspect ratio */}
                       <div className="relative w-full aspect-[4/3] bg-gray-200">
                         {menu.photo_url ? (
-                          <img
+                          <ProtectedImage
                             src={menu.photo_url}
                             alt={menu.nameEn || menu.name}
                             className="w-full h-full object-cover"
+                            containerClassName="w-full h-full"
                           />
                         ) : (
                           <div
@@ -286,10 +288,11 @@ export default function GridView({ menus, groupedMenus, themeColor, onItemClick,
                     {/* Photo - Fixed aspect ratio */}
                     <div className="relative w-full aspect-[4/3] bg-gray-200">
                       {menu.photo_url ? (
-                        <img
+                        <ProtectedImage
                           src={menu.photo_url}
                           alt={menu.nameEn || menu.name}
                           className="w-full h-full object-cover"
+                          containerClassName="w-full h-full"
                         />
                       ) : (
                         <div

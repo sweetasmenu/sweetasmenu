@@ -1,4 +1,5 @@
 import { Plus, Star, Sparkles, Flame } from 'lucide-react';
+import ProtectedImage from '@/components/ProtectedImage';
 
 interface MenuItem {
   menu_id: string;
@@ -101,10 +102,11 @@ export default function Elegant({ menus, groupedMenus, themeColor, onItemClick, 
                       menu.is_best_seller ? 'w-full lg:w-1/2' : 'w-full lg:w-1/3'
                     }`}>
                       <div className={menu.is_best_seller ? 'h-56 sm:h-80' : 'h-48 sm:h-64'}>
-                        <img
+                        <ProtectedImage
                           src={menu.photo_url}
                           alt={menu.name}
                           className="w-full h-full object-cover"
+                          containerClassName="w-full h-full"
                         />
                       </div>
                       {/* Best Seller Ribbon */}
