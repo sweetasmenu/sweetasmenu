@@ -231,25 +231,40 @@ export default function RestaurantQRCodePage() {
       {/* Print styles - only show sticker when printing */}
       <style jsx global>{`
         @media print {
+          /* Hide everything by default */
+          body {
+            margin: 0 !important;
+            padding: 0 !important;
+            background: white !important;
+          }
           body * {
             visibility: hidden;
           }
+          /* Show only QR sticker */
           #qr-sticker-print,
           #qr-sticker-print * {
             visibility: visible;
           }
           #qr-sticker-print {
-            position: fixed;
+            position: absolute;
             left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
+            top: 0;
+            transform: translateX(-50%);
+            margin: 0 !important;
             box-shadow: none !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
+            color-adjust: exact !important;
           }
+          /* Minimal page margins */
           @page {
             size: auto;
-            margin: 10mm;
+            margin: 5mm;
+          }
+          /* Hide browser header/footer */
+          html {
+            margin: 0 !important;
+            padding: 0 !important;
           }
         }
       `}</style>
