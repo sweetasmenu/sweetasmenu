@@ -397,6 +397,7 @@ function SettingsContent() {
       const data = await response.json();
 
       console.log('✅ Settings: Profile loaded:', data);
+      console.log('📅 Settings: Operating hours from API:', data?.restaurant?.operating_hours);
 
       if (data.success) {
         setProfile(data);
