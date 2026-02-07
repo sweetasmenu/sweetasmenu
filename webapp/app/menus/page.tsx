@@ -95,6 +95,9 @@ export default function MenusPage() {
   const [logoSize, setLogoSize] = useState<'small' | 'medium' | 'large'>('medium');
   const [originalImageUrl, setOriginalImageUrl] = useState<string | null>(null); // Store original image before logo
 
+  // Image Preview Modal
+  const [previewImage, setPreviewImage] = useState<{url: string; name: string} | null>(null);
+
   // Auto-translate states
   const [translatingMeatIdx, setTranslatingMeatIdx] = useState<number | null>(null);
   const [translatingAddOnIdx, setTranslatingAddOnIdx] = useState<number | null>(null);
@@ -773,23 +776,35 @@ export default function MenusPage() {
               >
                 {/* Photo */}
                 {(menu.photo_url || menu.image_url) ? (
-                  <div className="aspect-video overflow-hidden bg-gray-100 relative">
+                  <div
+                    className="aspect-video overflow-hidden bg-gray-100 relative cursor-pointer group"
+                    onClick={() => setPreviewImage({
+                      url: menu.photo_url || menu.image_url || '',
+                      name: menu.nameEn || menu.name
+                    })}
+                  >
                     <ProtectedImage
                       src={menu.photo_url || menu.image_url || ''}
                       alt={menu.nameEn || menu.name}
                       className={`w-full h-full object-contain ${menu.is_active === false ? 'opacity-50 grayscale' : ''}`}
                       containerClassName="w-full h-full"
                     />
+                    {/* Hover overlay with zoom icon */}
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center">
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 rounded-full p-2 shadow-lg">
+                        <Eye className="w-5 h-5 text-gray-700" />
+                      </div>
+                    </div>
                     {/* Best Seller Badge */}
                     {menu.is_best_seller && (
-                      <div className="absolute top-2 right-2 bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg">
+                      <div className="absolute top-2 right-2 bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg z-10">
                         <Star className="w-3 h-3 fill-current" />
                         Best Seller
                       </div>
                     )}
                     {/* Hidden Badge */}
                     {menu.is_active === false && (
-                      <div className="absolute top-2 left-2 bg-gray-800 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg">
+                      <div className="absolute top-2 left-2 bg-gray-800 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg z-10">
                         <EyeOff className="w-3 h-3" />
                         Hidden
                       </div>
@@ -971,13 +986,25 @@ export default function MenusPage() {
             <div className="p-4 sm:p-6 space-y-4">
               {/* Image Preview */}
               {editForm.photo_url && (
-                <div className="aspect-video overflow-hidden bg-gray-100 rounded-lg mb-4">
+                <div
+                  className="aspect-video overflow-hidden bg-gray-100 rounded-lg mb-4 cursor-pointer group relative"
+                  onClick={() => setPreviewImage({
+                    url: editForm.photo_url,
+                    name: editForm.nameEn || editForm.name || 'Menu item'
+                  })}
+                >
                   <ProtectedImage
                     src={editForm.photo_url}
                     alt="Menu item"
                     className="w-full h-full object-contain"
                     containerClassName="w-full h-full"
                   />
+                  {/* Hover overlay with zoom icon */}
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center">
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 rounded-full p-2 shadow-lg">
+                      <Eye className="w-5 h-5 text-gray-700" />
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -1717,6 +1744,49 @@ export default function MenusPage() {
           }}
           onClose={() => setShowEditImageGallery(false)}
         />
+      )}
+
+      {/* Image Preview Modal */}
+      {previewImage && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4"
+          onClick={() => setPreviewImage(null)}
+        >
+          <div className="relative max-w-4xl max-h-[90vh] w-full">
+            {/* Close button */}
+            <button
+              onClick={() => setPreviewImage(null)}
+              className="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors flex items-center gap-2"
+            >
+              <span className="text-sm">Close</span>
+              <X className="w-6 h-6" />
+            </button>
+
+            {/* Image container */}
+            <div
+              className="bg-white rounded-xl overflow-hidden shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Image name header */}
+              <div className="bg-gradient-to-r from-orange-500 to-red-500 px-4 py-3">
+                <h3 className="text-white font-semibold text-lg truncate">
+                  {previewImage.name}
+                </h3>
+              </div>
+
+              {/* Image */}
+              <div className="bg-gray-100 flex items-center justify-center p-4">
+                <ProtectedImage
+                  src={previewImage.url}
+                  alt={previewImage.name}
+                  className="max-w-full max-h-[70vh] object-contain rounded-lg"
+                  containerClassName="flex items-center justify-center"
+                  priority={true}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
