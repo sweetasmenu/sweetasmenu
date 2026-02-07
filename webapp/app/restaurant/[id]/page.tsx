@@ -245,39 +245,69 @@ export default function RestaurantMenuPage() {
       }
     }
 
+    // Helper function to check if current time is within any time slot
+    const isWithinTimeSlots = (slots: any[]): { isOpen: boolean; hoursText: string } => {
+      if (!slots || slots.length === 0) {
+        return { isOpen: false, hoursText: 'Closed' };
+      }
+
+      // Check if current time falls within any slot
+      for (const slot of slots) {
+        const openTime = slot.open || '00:00';
+        const closeTime = slot.close || '23:59';
+        if (currentTime >= openTime && currentTime < closeTime) {
+          return { isOpen: true, hoursText: '' };
+        }
+      }
+
+      // Not within any slot - build hours text
+      const hoursText = slots.map((s: any) => `${s.open} - ${s.close}`).join(', ');
+      return { isOpen: false, hoursText };
+    };
+
+    // Helper function to get time slots (handles both old and new format)
+    const getTimeSlots = (dayHours: any): any[] => {
+      if (Array.isArray(dayHours)) {
+        return dayHours;
+      }
+      // Old format with enabled, open, close
+      if (dayHours?.enabled !== false && dayHours?.open) {
+        return [{ open: dayHours.open, close: dayHours.close }];
+      }
+      return [];
+    };
+
     // Check if it's a weekend (Saturday = 6, Sunday = 0)
     const isWeekend = currentDay === 0 || currentDay === 6;
 
     if (isWeekend) {
       // Weekend hours
-      if (!operatingHours.weekend?.enabled) {
+      const weekendSlots = getTimeSlots(operatingHours.weekend);
+      if (weekendSlots.length === 0) {
         setIsStoreClosed(true);
         setClosedMessage('We are closed on weekends. Please visit us on weekdays.');
         return;
       }
 
-      const openTime = operatingHours.weekend.open || '10:00';
-      const closeTime = operatingHours.weekend.close || '22:00';
-
-      if (currentTime < openTime || currentTime >= closeTime) {
+      const { isOpen, hoursText } = isWithinTimeSlots(weekendSlots);
+      if (!isOpen) {
         setIsStoreClosed(true);
-        setClosedMessage(`We are currently closed. Weekend hours: ${openTime} - ${closeTime}`);
+        setClosedMessage(`We are currently closed. Weekend hours: ${hoursText}`);
         return;
       }
     } else {
       // Weekday hours (Monday-Friday)
-      if (!operatingHours.weekday?.enabled) {
+      const weekdaySlots = getTimeSlots(operatingHours.weekday);
+      if (weekdaySlots.length === 0) {
         setIsStoreClosed(true);
         setClosedMessage('We are closed on weekdays. Please visit us on weekends.');
         return;
       }
 
-      const openTime = operatingHours.weekday.open || '10:00';
-      const closeTime = operatingHours.weekday.close || '22:00';
-
-      if (currentTime < openTime || currentTime >= closeTime) {
+      const { isOpen, hoursText } = isWithinTimeSlots(weekdaySlots);
+      if (!isOpen) {
         setIsStoreClosed(true);
-        setClosedMessage(`We are currently closed. Weekday hours: ${openTime} - ${closeTime}`);
+        setClosedMessage(`We are currently closed. Weekday hours: ${hoursText}`);
         return;
       }
     }
