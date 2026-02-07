@@ -49,23 +49,6 @@ interface Staff {
   created_at?: string;
 }
 
-interface TimeSlot {
-  open: string;
-  close: string;
-}
-
-interface OperatingHours {
-  weekday: TimeSlot[];  // Array of time slots for Mon-Fri
-  weekend: TimeSlot[];  // Array of time slots for Sat-Sun
-  holiday: {
-    enabled: boolean;
-    name: string;
-    start_date: string | null;
-    end_date: string | null;
-    reopen_date: string | null;
-  };
-}
-
 interface Restaurant {
   restaurant_id: string;
   id?: string; // Alternative field name from some API responses
@@ -84,8 +67,6 @@ interface Restaurant {
   gst_registered?: boolean;
   gst_number?: string;
   ird_number?: string;
-  // Operating hours
-  operating_hours?: OperatingHours;
 }
 
 interface PaymentMethodInfo {
@@ -185,12 +166,6 @@ function SettingsContent() {
   // POS Theme Color
   const [posThemeColor, setPosThemeColor] = useState<string>('orange');
 
-  // Operating Hours state
-  const [operatingHours, setOperatingHours] = useState<OperatingHours>({
-    weekday: [],  // Empty by default - restaurant fills in their own hours
-    weekend: [],  // Empty by default - restaurant fills in their own hours
-    holiday: { enabled: false, name: '', start_date: null, end_date: null, reopen_date: null }
-  });
 
   const POS_THEME_OPTIONS = [
     { code: 'orange', name: 'Orange (Default)', colors: { primary: '#f97316', secondary: '#ea580c', bg: 'from-orange-500 to-red-500' } },
@@ -397,7 +372,6 @@ function SettingsContent() {
       const data = await response.json();
 
       console.log('✅ Settings: Profile loaded:', data);
-      console.log('📅 Settings: Operating hours from API:', data?.restaurant?.operating_hours);
 
       if (data.success) {
         setProfile(data);
@@ -514,35 +488,6 @@ function SettingsContent() {
       // Load POS theme color
       if ((profile.restaurant as any).pos_theme_color) {
         setPosThemeColor((profile.restaurant as any).pos_theme_color);
-      }
-
-      // Load operating hours (handle both old and new format, or null/undefined)
-      const hours = (profile.restaurant as any).operating_hours;
-      if (hours) {
-        // Convert old format (with enabled, open, close) to new format (array of time slots)
-        const convertedHours: OperatingHours = {
-          weekday: Array.isArray(hours.weekday)
-            ? hours.weekday
-            : hours.weekday?.enabled !== false && hours.weekday?.open
-              ? [{ open: hours.weekday.open, close: hours.weekday.close }]
-              : [],
-          weekend: Array.isArray(hours.weekend)
-            ? hours.weekend
-            : hours.weekend?.enabled !== false && hours.weekend?.open
-              ? [{ open: hours.weekend.open, close: hours.weekend.close }]
-              : [],
-          holiday: hours.holiday || { enabled: false, name: '', start_date: null, end_date: null, reopen_date: null }
-        };
-        console.log('📅 Loaded operating hours from API:', convertedHours);
-        setOperatingHours(convertedHours);
-      } else {
-        // No operating hours saved yet - set empty defaults
-        console.log('📅 No operating hours in API response, using empty defaults');
-        setOperatingHours({
-          weekday: [],
-          weekend: [],
-          holiday: { enabled: false, name: '', start_date: null, end_date: null, reopen_date: null }
-        });
       }
 
       // Load restaurant location
@@ -1144,10 +1089,9 @@ function SettingsContent() {
       console.log('💾 Saving profile:', {
         restaurant_id: restaurantId,
         user_id: userId,
-        formData: formData,
-        operatingHours: operatingHours
+        formData: formData
       });
-      
+
       const response = await fetch(`${BACKEND_URL}/api/user/profile`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -1164,8 +1108,6 @@ function SettingsContent() {
           gst_registered: formData.gst_registered,
           gst_number: formData.gst_number || undefined,
           ird_number: formData.ird_number || undefined,
-          // Operating hours
-          operating_hours: operatingHours,
         }),
       });
 
@@ -1768,263 +1710,6 @@ function SettingsContent() {
                   />
                   <p className="text-xs text-gray-500 mt-1">Goods and Services Tax number</p>
                 </div>
-              </div>
-            </div>
-
-            {/* Operating Hours Section */}
-            <div className="mt-8 pt-8 border-t border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900 mb-6">Operating Hours</h2>
-              <p className="text-sm text-gray-600 mb-6">
-                Set your restaurant&apos;s operating hours. When closed, customers will see a message and cannot place orders.
-              </p>
-
-              {/* Weekday Hours (Mon-Fri) */}
-              <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <Store className="w-5 h-5 text-blue-500" />
-                    <h3 className="font-medium text-gray-900">Weekdays (Mon - Fri)</h3>
-                  </div>
-                  <span className="text-sm text-blue-600 font-medium">
-                    {operatingHours.weekday.length === 0 ? 'Closed all day' : `${operatingHours.weekday.length} time slot${operatingHours.weekday.length > 1 ? 's' : ''}`}
-                  </span>
-                </div>
-
-                {/* Time Slots */}
-                <div className="space-y-3">
-                  {operatingHours.weekday.map((slot, index) => (
-                    <div key={index} className="flex items-center gap-3 bg-white p-3 rounded-lg border border-blue-100">
-                      <div className="flex-1 grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="block text-xs text-gray-500 mb-1">Open</label>
-                          <input
-                            type="time"
-                            value={slot.open}
-                            onChange={(e) => {
-                              const newSlots = [...operatingHours.weekday];
-                              newSlots[index] = { ...slot, open: e.target.value };
-                              setOperatingHours({ ...operatingHours, weekday: newSlots });
-                            }}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white text-sm"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs text-gray-500 mb-1">Close</label>
-                          <input
-                            type="time"
-                            value={slot.close}
-                            onChange={(e) => {
-                              const newSlots = [...operatingHours.weekday];
-                              newSlots[index] = { ...slot, close: e.target.value };
-                              setOperatingHours({ ...operatingHours, weekday: newSlots });
-                            }}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white text-sm"
-                          />
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const newSlots = operatingHours.weekday.filter((_, i) => i !== index);
-                          setOperatingHours({ ...operatingHours, weekday: newSlots });
-                        }}
-                        className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                        title="Remove time slot"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ))}
-
-                  {/* Add Time Slot Button */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setOperatingHours({
-                        ...operatingHours,
-                        weekday: [...operatingHours.weekday, { open: '', close: '' }]
-                      });
-                    }}
-                    className="w-full py-2 px-4 border-2 border-dashed border-blue-300 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 text-sm font-medium"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Add Time Slot
-                  </button>
-                </div>
-
-                {operatingHours.weekday.length === 0 && (
-                  <p className="text-sm text-blue-600 mt-2">
-                    No time slots = Closed on weekdays. Add a time slot to set opening hours.
-                  </p>
-                )}
-              </div>
-
-              {/* Weekend Hours (Sat-Sun) */}
-              <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <Store className="w-5 h-5 text-green-500" />
-                    <h3 className="font-medium text-gray-900">Weekends (Sat - Sun)</h3>
-                  </div>
-                  <span className="text-sm text-green-600 font-medium">
-                    {operatingHours.weekend.length === 0 ? 'Closed all day' : `${operatingHours.weekend.length} time slot${operatingHours.weekend.length > 1 ? 's' : ''}`}
-                  </span>
-                </div>
-
-                {/* Time Slots */}
-                <div className="space-y-3">
-                  {operatingHours.weekend.map((slot, index) => (
-                    <div key={index} className="flex items-center gap-3 bg-white p-3 rounded-lg border border-green-100">
-                      <div className="flex-1 grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="block text-xs text-gray-500 mb-1">Open</label>
-                          <input
-                            type="time"
-                            value={slot.open}
-                            onChange={(e) => {
-                              const newSlots = [...operatingHours.weekend];
-                              newSlots[index] = { ...slot, open: e.target.value };
-                              setOperatingHours({ ...operatingHours, weekend: newSlots });
-                            }}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white text-sm"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs text-gray-500 mb-1">Close</label>
-                          <input
-                            type="time"
-                            value={slot.close}
-                            onChange={(e) => {
-                              const newSlots = [...operatingHours.weekend];
-                              newSlots[index] = { ...slot, close: e.target.value };
-                              setOperatingHours({ ...operatingHours, weekend: newSlots });
-                            }}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white text-sm"
-                          />
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const newSlots = operatingHours.weekend.filter((_, i) => i !== index);
-                          setOperatingHours({ ...operatingHours, weekend: newSlots });
-                        }}
-                        className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                        title="Remove time slot"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ))}
-
-                  {/* Add Time Slot Button */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setOperatingHours({
-                        ...operatingHours,
-                        weekend: [...operatingHours.weekend, { open: '', close: '' }]
-                      });
-                    }}
-                    className="w-full py-2 px-4 border-2 border-dashed border-green-300 text-green-600 rounded-lg hover:bg-green-50 transition-colors flex items-center justify-center gap-2 text-sm font-medium"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Add Time Slot
-                  </button>
-                </div>
-
-                {operatingHours.weekend.length === 0 && (
-                  <p className="text-sm text-green-600 mt-2">
-                    No time slots = Closed on weekends. Add a time slot to set opening hours.
-                  </p>
-                )}
-              </div>
-
-              {/* Holiday Closure */}
-              <div className={`mb-6 p-4 rounded-lg border-2 ${operatingHours.holiday.enabled ? 'bg-red-50 border-red-300' : 'bg-gray-50 border-gray-200'}`}>
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <Store className={`w-5 h-5 ${operatingHours.holiday.enabled ? 'text-red-500' : 'text-gray-400'}`} />
-                    <h3 className="font-medium text-gray-900">Holiday Closure</h3>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setOperatingHours({
-                      ...operatingHours,
-                      holiday: { ...operatingHours.holiday, enabled: !operatingHours.holiday.enabled }
-                    })}
-                    className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
-                      operatingHours.holiday.enabled
-                        ? 'bg-red-500 text-white hover:bg-red-600'
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    }`}
-                  >
-                    {operatingHours.holiday.enabled ? '🔴 On Holiday' : '⚪ Not on Holiday'}
-                  </button>
-                </div>
-                {operatingHours.holiday.enabled && (
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm text-gray-600 mb-1">Holiday Name</label>
-                      <input
-                        type="text"
-                        value={operatingHours.holiday.name}
-                        onChange={(e) => setOperatingHours({
-                          ...operatingHours,
-                          holiday: { ...operatingHours.holiday, name: e.target.value }
-                        })}
-                        placeholder="e.g., Christmas Break, Chinese New Year"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white"
-                      />
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <label className="block text-sm text-gray-600 mb-1">Closed From</label>
-                        <input
-                          type="date"
-                          value={operatingHours.holiday.start_date || ''}
-                          onChange={(e) => setOperatingHours({
-                            ...operatingHours,
-                            holiday: { ...operatingHours.holiday, start_date: e.target.value || null }
-                          })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm text-gray-600 mb-1">Closed Until</label>
-                        <input
-                          type="date"
-                          value={operatingHours.holiday.end_date || ''}
-                          onChange={(e) => setOperatingHours({
-                            ...operatingHours,
-                            holiday: { ...operatingHours.holiday, end_date: e.target.value || null }
-                          })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm text-gray-600 mb-1">Reopen Date</label>
-                        <input
-                          type="date"
-                          value={operatingHours.holiday.reopen_date || ''}
-                          onChange={(e) => setOperatingHours({
-                            ...operatingHours,
-                            holiday: { ...operatingHours.holiday, reopen_date: e.target.value || null }
-                          })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white"
-                        />
-                      </div>
-                    </div>
-                    <p className="text-xs text-red-600">
-                      ⚠️ When holiday closure is enabled, customers will see a message that the restaurant is closed and cannot place orders.
-                    </p>
-                  </div>
-                )}
-                {!operatingHours.holiday.enabled && (
-                  <p className="text-sm text-gray-500">
-                    Click the button above to enable holiday closure mode when you need to temporarily close for holidays.
-                  </p>
-                )}
               </div>
             </div>
 
