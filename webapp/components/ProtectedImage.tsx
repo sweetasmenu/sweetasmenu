@@ -14,6 +14,7 @@ interface ProtectedImageProps {
   fallback?: string;
   onLoad?: () => void;
   onError?: () => void;
+  onClick?: () => void;
   /** Enable protection features (default: true) */
   protected?: boolean;
 }
@@ -40,6 +41,7 @@ export default function ProtectedImage({
   fallback,
   onLoad,
   onError,
+  onClick,
   protected: isProtected = true
 }: ProtectedImageProps) {
   const [imageSrc, setImageSrc] = useState<string>(priority ? src : '');
@@ -217,11 +219,12 @@ export default function ProtectedImage({
           className="absolute inset-0"
           style={{
             background: 'rgba(0,0,0,0)',
-            cursor: 'pointer',
+            cursor: onClick ? 'pointer' : 'default',
             zIndex: 50,
             WebkitTapHighlightColor: 'transparent',
             touchAction: 'manipulation',
           }}
+          onClick={onClick}
           onContextMenu={(e) => {
             e.preventDefault();
             e.stopPropagation();

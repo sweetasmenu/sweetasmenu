@@ -2195,14 +2195,16 @@ function ItemModal({
             </button>
           </div>
 
-          {/* Photo - Clickable for Preview */}
+          {/* Photo - Clickable for Preview (Protected from right-click save) */}
           {menu.photo_url && (
             <div className="mb-4">
-              <img
+              <ProtectedImage
                 src={menu.photo_url}
                 alt={menu.name}
-                className="w-full h-64 object-cover rounded-xl cursor-pointer hover:opacity-90 transition-opacity"
+                className="w-full h-64 object-cover rounded-xl"
+                containerClassName="w-full h-64 rounded-xl overflow-hidden hover:opacity-90 transition-opacity"
                 onClick={() => onImageClick?.(menu.photo_url!)}
+                priority
               />
               <p className="text-xs text-gray-400 text-center mt-1">Tap image to view full size</p>
             </div>
