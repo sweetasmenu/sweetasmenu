@@ -3028,6 +3028,8 @@ async def get_user_profile(
                 "gst_registered": restaurant.get("gst_registered", True),
                 "gst_number": restaurant.get("gst_number", ""),
                 "ird_number": restaurant.get("ird_number", ""),
+                # Operating hours
+                "operating_hours": restaurant.get("operating_hours"),
             }
         else:
             # Fallback if creation failed
