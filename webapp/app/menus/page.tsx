@@ -1951,38 +1951,35 @@ export default function MenusPage() {
       {/* Image Preview Modal */}
       {previewImage && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-2 sm:p-4"
           onClick={() => setPreviewImage(null)}
         >
-          <div className="relative max-w-4xl max-h-[90vh] w-full">
-            {/* Close button */}
-            <button
-              onClick={() => setPreviewImage(null)}
-              className="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors flex items-center gap-2"
-            >
-              <span className="text-sm">Close</span>
-              <X className="w-6 h-6" />
-            </button>
-
+          <div className="relative w-full max-w-4xl max-h-[95vh] sm:max-h-[90vh] flex flex-col">
             {/* Image container */}
             <div
-              className="bg-white rounded-xl overflow-hidden shadow-2xl"
+              className="bg-white rounded-lg sm:rounded-xl overflow-hidden shadow-2xl flex flex-col max-h-[95vh] sm:max-h-[90vh]"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Image name header */}
-              <div className="bg-gradient-to-r from-orange-500 to-red-500 px-4 py-3">
-                <h3 className="text-white font-semibold text-lg truncate">
+              {/* Image name header with close button */}
+              <div className="bg-gradient-to-r from-orange-500 to-red-500 px-3 sm:px-4 py-2 sm:py-3 flex items-center justify-between shrink-0">
+                <h3 className="text-white font-semibold text-base sm:text-lg truncate flex-1 mr-2">
                   {previewImage.name}
                 </h3>
+                <button
+                  onClick={() => setPreviewImage(null)}
+                  className="text-white/80 hover:text-white transition-colors p-1 -mr-1"
+                >
+                  <X className="w-5 h-5 sm:w-6 sm:h-6" />
+                </button>
               </div>
 
               {/* Image */}
-              <div className="bg-gray-100 flex items-center justify-center p-4">
+              <div className="bg-gray-100 flex items-center justify-center p-2 sm:p-4 flex-1 min-h-0 overflow-hidden">
                 <ProtectedImage
                   src={previewImage.url}
                   alt={previewImage.name}
-                  className="max-w-full max-h-[70vh] object-contain rounded-lg"
-                  containerClassName="flex items-center justify-center"
+                  className="max-w-full max-h-full object-contain rounded-lg"
+                  containerClassName="flex items-center justify-center w-full h-full max-h-[calc(95vh-60px)] sm:max-h-[calc(90vh-70px)]"
                   priority={true}
                 />
               </div>
