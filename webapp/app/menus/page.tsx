@@ -433,7 +433,10 @@ export default function MenusPage() {
 
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-      const newActiveStatus = !menu.is_active;
+      // Fix: is_active can be undefined (default visible), true, or false
+      // If visible (true or undefined) → hide (false)
+      // If hidden (false) → show (true)
+      const newActiveStatus = menu.is_active === false;
 
       const response = await fetch(`${API_URL}/api/menu/${menu.menu_id}`, {
         method: 'PUT',
@@ -882,16 +885,16 @@ export default function MenusPage() {
                 {(menu.photo_url || menu.image_url) ? (
                   <div
                     className="aspect-video overflow-hidden bg-gray-100 relative cursor-pointer group"
-                    onClick={() => setPreviewImage({
-                      url: menu.photo_url || menu.image_url || '',
-                      name: menu.nameEn || menu.name
-                    })}
                   >
                     <ProtectedImage
                       src={menu.photo_url || menu.image_url || ''}
                       alt={menu.nameEn || menu.name}
                       className={`w-full h-full object-contain ${menu.is_active === false ? 'opacity-50 grayscale' : ''}`}
                       containerClassName="w-full h-full"
+                      onClick={() => setPreviewImage({
+                        url: menu.photo_url || menu.image_url || '',
+                        name: menu.nameEn || menu.name
+                      })}
                     />
                     {/* Hover overlay with zoom icon */}
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center">
@@ -1092,16 +1095,16 @@ export default function MenusPage() {
               {editForm.photo_url && (
                 <div
                   className="aspect-video overflow-hidden bg-gray-100 rounded-lg mb-4 cursor-pointer group relative"
-                  onClick={() => setPreviewImage({
-                    url: editForm.photo_url,
-                    name: editForm.nameEn || editForm.name || 'Menu item'
-                  })}
                 >
                   <ProtectedImage
                     src={editForm.photo_url}
                     alt="Menu item"
                     className="w-full h-full object-contain"
                     containerClassName="w-full h-full"
+                    onClick={() => setPreviewImage({
+                      url: editForm.photo_url,
+                      name: editForm.nameEn || editForm.name || 'Menu item'
+                    })}
                   />
                   {/* Hover overlay with zoom icon */}
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center">

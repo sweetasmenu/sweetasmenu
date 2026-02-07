@@ -170,25 +170,32 @@ class MenuService:
             traceback.print_exc()
             raise Exception(f"Database error: {str(e)}")
     
-    def get_menu_items(self, restaurant_id: str) -> List[Dict[str, Any]]:
+    def get_menu_items(self, restaurant_id: str, include_hidden: bool = False) -> List[Dict[str, Any]]:
         """
         ดึง menu items ทั้งหมดของร้าน
-        
+
         Args:
             restaurant_id: Restaurant ID
-            
+            include_hidden: If True, include hidden items (is_active=false). For owner view.
+
         Returns:
             List of menu items
         """
         if not self.supabase_client:
             return []
-        
+
         if not self._is_valid_uuid(restaurant_id):
             print(f"⚠️ Menu Service: Invalid restaurant_id format '{restaurant_id}'")
             return []
-        
+
         try:
-            result = self.supabase_client.table('menus').select('*').eq('restaurant_id', restaurant_id).eq('is_active', True).order('sort_order', desc=False).execute()
+            query = self.supabase_client.table('menus').select('*').eq('restaurant_id', restaurant_id)
+
+            # Only filter by is_active for public view (not owner view)
+            if not include_hidden:
+                query = query.eq('is_active', True)
+
+            result = query.order('sort_order', desc=False).execute()
             
             if result.data:
                 return [self._format_menu_item(item) for item in result.data]

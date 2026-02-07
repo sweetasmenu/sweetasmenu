@@ -1053,7 +1053,7 @@ async def save_menu_item(menu_item: SaveMenuItemRequest):
 @app.get("/api/menus", summary="Get All Menu Items")
 async def get_menu_items(restaurant_id: str = "default"):
     """
-    ดึง menu items ทั้งหมดของร้าน
+    ดึง menu items ทั้งหมดของร้าน (สำหรับ owner view - รวม hidden items)
     IMPORTANT: ดึงจาก Supabase Database เท่านั้น (ไม่ใช้ mock data)
     """
     try:
@@ -1066,7 +1066,8 @@ async def get_menu_items(restaurant_id: str = "default"):
         else:
             # Validate UUID format
             if menu_service._is_valid_uuid(restaurant_id):
-                items = menu_service.get_menu_items(restaurant_id)
+                # Owner view: include hidden items (is_active=false)
+                items = menu_service.get_menu_items(restaurant_id, include_hidden=True)
             else:
                 # Fallback to menu_storage for backward compatibility (will be removed)
                 items = menu_storage.get_menu_items(restaurant_id)
