@@ -208,8 +208,6 @@ export default function ProtectedImage({
         className={`${className} ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
         style={{
           ...protectionStyles,
-          maxWidth: '100%',
-          height: 'auto'
         }}
       />
 
