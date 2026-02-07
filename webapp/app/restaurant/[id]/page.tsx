@@ -143,6 +143,10 @@ export default function RestaurantMenuPage() {
     food_surcharge_name: 'Holiday Surcharge'
   });
 
+  // Store closed state
+  const [isStoreClosed, setIsStoreClosed] = useState(false);
+  const [closedMessage, setClosedMessage] = useState('');
+
   // Language selection for customers
   const [selectedLanguage, setSelectedLanguage] = useState<string>('original'); // 'original', 'en', 'th', 'zh', 'ja', 'ko'
   const [translatingMenu, setTranslatingMenu] = useState(false);
@@ -210,6 +214,78 @@ export default function RestaurantMenuPage() {
     }
   }, [cart, restaurant_id]);
 
+  // Check if store is currently closed based on operating hours
+  const checkOperatingHours = (operatingHours: any) => {
+    if (!operatingHours) {
+      setIsStoreClosed(false);
+      setClosedMessage('');
+      return;
+    }
+
+    const now = new Date();
+    const currentDay = now.getDay(); // 0 = Sunday, 1-5 = Mon-Fri, 6 = Saturday
+    const currentTime = now.toTimeString().slice(0, 5); // "HH:MM" format
+    const currentDate = now.toISOString().split('T')[0]; // "YYYY-MM-DD" format
+
+    // Check holiday closure first
+    if (operatingHours.holiday?.enabled) {
+      const startDate = operatingHours.holiday.start_date;
+      const endDate = operatingHours.holiday.end_date;
+      const reopenDate = operatingHours.holiday.reopen_date;
+
+      // Check if current date is within holiday period
+      if (startDate && endDate) {
+        if (currentDate >= startDate && currentDate <= endDate) {
+          const holidayName = operatingHours.holiday.name || 'Holiday';
+          const reopenText = reopenDate ? ` We will reopen on ${new Date(reopenDate).toLocaleDateString('en-NZ', { weekday: 'long', day: 'numeric', month: 'long' })}.` : '';
+          setIsStoreClosed(true);
+          setClosedMessage(`We are closed for ${holidayName}.${reopenText}`);
+          return;
+        }
+      }
+    }
+
+    // Check if it's a weekend (Saturday = 6, Sunday = 0)
+    const isWeekend = currentDay === 0 || currentDay === 6;
+
+    if (isWeekend) {
+      // Weekend hours
+      if (!operatingHours.weekend?.enabled) {
+        setIsStoreClosed(true);
+        setClosedMessage('We are closed on weekends. Please visit us on weekdays.');
+        return;
+      }
+
+      const openTime = operatingHours.weekend.open || '10:00';
+      const closeTime = operatingHours.weekend.close || '22:00';
+
+      if (currentTime < openTime || currentTime >= closeTime) {
+        setIsStoreClosed(true);
+        setClosedMessage(`We are currently closed. Weekend hours: ${openTime} - ${closeTime}`);
+        return;
+      }
+    } else {
+      // Weekday hours (Monday-Friday)
+      if (!operatingHours.weekday?.enabled) {
+        setIsStoreClosed(true);
+        setClosedMessage('We are closed on weekdays. Please visit us on weekends.');
+        return;
+      }
+
+      const openTime = operatingHours.weekday.open || '10:00';
+      const closeTime = operatingHours.weekday.close || '22:00';
+
+      if (currentTime < openTime || currentTime >= closeTime) {
+        setIsStoreClosed(true);
+        setClosedMessage(`We are currently closed. Weekday hours: ${openTime} - ${closeTime}`);
+        return;
+      }
+    }
+
+    // Store is open
+    setIsStoreClosed(false);
+    setClosedMessage('');
+  };
 
   const fetchMenus = async () => {
     try {
@@ -226,6 +302,9 @@ export default function RestaurantMenuPage() {
         // Set template from branding settings (default: grid)
         setMenuTemplate(data.branding?.menu_template || 'grid');
         setBranding(data.branding || {});
+
+        // Check operating hours to determine if store is closed
+        checkOperatingHours(data.branding?.operating_hours);
 
         // Set service options from restaurant settings
         if (data.service_options) {
@@ -751,6 +830,12 @@ export default function RestaurantMenuPage() {
   };
 
   const addToCart = (menu: MenuItem, selectedMeat?: string, selectedAddOns?: string[], notes?: string, quantity: number = 1) => {
+    // Check if store is closed
+    if (isStoreClosed) {
+      alert('Sorry, the restaurant is currently closed. Please check our operating hours.');
+      return;
+    }
+
     // Safely parse price - handle undefined, empty string, or invalid values
     const basePrice = parseFloat(menu.price) || 0;
     let totalPrice = basePrice;
@@ -887,6 +972,12 @@ export default function RestaurantMenuPage() {
   };
 
   const handlePlaceOrder = async () => {
+    // Check if store is closed
+    if (isStoreClosed) {
+      alert('Sorry, the restaurant is currently closed. Please check our operating hours.');
+      return;
+    }
+
     // Validation based on service type
     if (serviceType === 'dine_in' && !customerDetails.table_no.trim()) {
       alert('Please enter table number');
@@ -1246,6 +1337,21 @@ export default function RestaurantMenuPage() {
           </svg>
         </div>
       </div>
+
+      {/* Store Closed Banner */}
+      {isStoreClosed && (
+        <div className="bg-red-500 text-white py-4 px-4 shadow-lg">
+          <div className="container mx-auto max-w-6xl">
+            <div className="flex items-center justify-center gap-3 text-center">
+              <Store className="w-6 h-6 flex-shrink-0" />
+              <div>
+                <p className="font-semibold text-lg">Restaurant is Currently Closed</p>
+                <p className="text-sm text-white/90">{closedMessage}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Language Selector & My Orders */}
       <div className="container mx-auto px-3 sm:px-4 max-w-6xl mt-3 sm:mt-4">
@@ -2017,14 +2123,15 @@ export default function RestaurantMenuPage() {
                     <button
                       onClick={handlePlaceOrder}
                       disabled={
-                        serviceType === 'delivery' &&
+                        isStoreClosed ||
+                        (serviceType === 'delivery' &&
                         restaurantLocation.latitude !== null &&
                         restaurantLocation.longitude !== null &&
                         deliveryRates.length > 0 &&
-                        (!deliveryCalculation || !deliveryCalculation.is_within_range)
+                        (!deliveryCalculation || !deliveryCalculation.is_within_range))
                       }
                       className="w-full text-white py-4 rounded-lg font-bold text-lg transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-                      style={{ backgroundColor: themeColor }}
+                      style={{ backgroundColor: isStoreClosed ? '#9ca3af' : themeColor }}
                       onMouseEnter={(e) => {
                         if (!e.currentTarget.disabled) {
                           e.currentTarget.style.opacity = '0.9';
@@ -2036,11 +2143,13 @@ export default function RestaurantMenuPage() {
                         }
                       }}
                     >
-                      {serviceType === 'delivery' &&
-                      restaurantLocation.latitude !== null &&
-                      restaurantLocation.longitude !== null &&
-                      deliveryRates.length > 0 &&
-                      !deliveryCalculation
+                      {isStoreClosed
+                        ? 'Restaurant is Closed'
+                        : serviceType === 'delivery' &&
+                          restaurantLocation.latitude !== null &&
+                          restaurantLocation.longitude !== null &&
+                          deliveryRates.length > 0 &&
+                          !deliveryCalculation
                         ? 'Calculate Delivery Fee First'
                         : serviceType === 'delivery' &&
                           deliveryCalculation &&

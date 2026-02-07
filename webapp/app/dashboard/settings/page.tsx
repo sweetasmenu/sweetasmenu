@@ -49,6 +49,26 @@ interface Staff {
   created_at?: string;
 }
 
+interface OperatingHours {
+  weekday: {
+    enabled: boolean;
+    open: string;
+    close: string;
+  };
+  weekend: {
+    enabled: boolean;
+    open: string;
+    close: string;
+  };
+  holiday: {
+    enabled: boolean;
+    name: string;
+    start_date: string | null;
+    end_date: string | null;
+    reopen_date: string | null;
+  };
+}
+
 interface Restaurant {
   restaurant_id: string;
   id?: string; // Alternative field name from some API responses
@@ -67,6 +87,8 @@ interface Restaurant {
   gst_registered?: boolean;
   gst_number?: string;
   ird_number?: string;
+  // Operating hours
+  operating_hours?: OperatingHours;
 }
 
 interface PaymentMethodInfo {
@@ -165,6 +187,14 @@ function SettingsContent() {
 
   // POS Theme Color
   const [posThemeColor, setPosThemeColor] = useState<string>('orange');
+
+  // Operating Hours state
+  const [operatingHours, setOperatingHours] = useState<OperatingHours>({
+    weekday: { enabled: true, open: '10:00', close: '22:00' },
+    weekend: { enabled: true, open: '10:00', close: '22:00' },
+    holiday: { enabled: false, name: '', start_date: null, end_date: null, reopen_date: null }
+  });
+
   const POS_THEME_OPTIONS = [
     { code: 'orange', name: 'Orange (Default)', colors: { primary: '#f97316', secondary: '#ea580c', bg: 'from-orange-500 to-red-500' } },
     { code: 'blue', name: 'Blue Ocean', colors: { primary: '#3b82f6', secondary: '#2563eb', bg: 'from-blue-500 to-cyan-500' } },
@@ -486,6 +516,11 @@ function SettingsContent() {
       // Load POS theme color
       if ((profile.restaurant as any).pos_theme_color) {
         setPosThemeColor((profile.restaurant as any).pos_theme_color);
+      }
+
+      // Load operating hours
+      if ((profile.restaurant as any).operating_hours) {
+        setOperatingHours((profile.restaurant as any).operating_hours);
       }
 
       // Load restaurant location
@@ -1106,6 +1141,8 @@ function SettingsContent() {
           gst_registered: formData.gst_registered,
           gst_number: formData.gst_number || undefined,
           ird_number: formData.ird_number || undefined,
+          // Operating hours
+          operating_hours: operatingHours,
         }),
       });
 
@@ -1708,6 +1745,197 @@ function SettingsContent() {
                   />
                   <p className="text-xs text-gray-500 mt-1">Goods and Services Tax number</p>
                 </div>
+              </div>
+            </div>
+
+            {/* Operating Hours Section */}
+            <div className="mt-8 pt-8 border-t border-gray-200">
+              <h2 className="text-xl font-semibold text-gray-900 mb-6">Operating Hours</h2>
+              <p className="text-sm text-gray-600 mb-6">
+                Set your restaurant&apos;s operating hours. When closed, customers will see a message and cannot place orders.
+              </p>
+
+              {/* Weekday Hours (Mon-Fri) */}
+              <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <Store className="w-5 h-5 text-blue-500" />
+                    <h3 className="font-medium text-gray-900">Weekdays (Mon - Fri)</h3>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={operatingHours.weekday.enabled}
+                      onChange={(e) => setOperatingHours({
+                        ...operatingHours,
+                        weekday: { ...operatingHours.weekday, enabled: e.target.checked }
+                      })}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+                    <span className="ml-2 text-sm text-gray-700">{operatingHours.weekday.enabled ? 'Open' : 'Closed'}</span>
+                  </label>
+                </div>
+                {operatingHours.weekday.enabled && (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm text-gray-600 mb-1">Open Time</label>
+                      <input
+                        type="time"
+                        value={operatingHours.weekday.open}
+                        onChange={(e) => setOperatingHours({
+                          ...operatingHours,
+                          weekday: { ...operatingHours.weekday, open: e.target.value }
+                        })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-600 mb-1">Close Time</label>
+                      <input
+                        type="time"
+                        value={operatingHours.weekday.close}
+                        onChange={(e) => setOperatingHours({
+                          ...operatingHours,
+                          weekday: { ...operatingHours.weekday, close: e.target.value }
+                        })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Weekend Hours (Sat-Sun) */}
+              <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <Store className="w-5 h-5 text-green-500" />
+                    <h3 className="font-medium text-gray-900">Weekends (Sat - Sun)</h3>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={operatingHours.weekend.enabled}
+                      onChange={(e) => setOperatingHours({
+                        ...operatingHours,
+                        weekend: { ...operatingHours.weekend, enabled: e.target.checked }
+                      })}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                    <span className="ml-2 text-sm text-gray-700">{operatingHours.weekend.enabled ? 'Open' : 'Closed'}</span>
+                  </label>
+                </div>
+                {operatingHours.weekend.enabled && (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm text-gray-600 mb-1">Open Time</label>
+                      <input
+                        type="time"
+                        value={operatingHours.weekend.open}
+                        onChange={(e) => setOperatingHours({
+                          ...operatingHours,
+                          weekend: { ...operatingHours.weekend, open: e.target.value }
+                        })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-600 mb-1">Close Time</label>
+                      <input
+                        type="time"
+                        value={operatingHours.weekend.close}
+                        onChange={(e) => setOperatingHours({
+                          ...operatingHours,
+                          weekend: { ...operatingHours.weekend, close: e.target.value }
+                        })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Holiday Closure */}
+              <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <Store className="w-5 h-5 text-amber-500" />
+                    <h3 className="font-medium text-gray-900">Holiday Closure</h3>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={operatingHours.holiday.enabled}
+                      onChange={(e) => setOperatingHours({
+                        ...operatingHours,
+                        holiday: { ...operatingHours.holiday, enabled: e.target.checked }
+                      })}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                    <span className="ml-2 text-sm text-gray-700">{operatingHours.holiday.enabled ? 'On Holiday' : 'Not on Holiday'}</span>
+                  </label>
+                </div>
+                {operatingHours.holiday.enabled && (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm text-gray-600 mb-1">Holiday Name</label>
+                      <input
+                        type="text"
+                        value={operatingHours.holiday.name}
+                        onChange={(e) => setOperatingHours({
+                          ...operatingHours,
+                          holiday: { ...operatingHours.holiday, name: e.target.value }
+                        })}
+                        placeholder="e.g., Christmas Break, Chinese New Year"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white"
+                      />
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-sm text-gray-600 mb-1">Closed From</label>
+                        <input
+                          type="date"
+                          value={operatingHours.holiday.start_date || ''}
+                          onChange={(e) => setOperatingHours({
+                            ...operatingHours,
+                            holiday: { ...operatingHours.holiday, start_date: e.target.value || null }
+                          })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm text-gray-600 mb-1">Closed Until</label>
+                        <input
+                          type="date"
+                          value={operatingHours.holiday.end_date || ''}
+                          onChange={(e) => setOperatingHours({
+                            ...operatingHours,
+                            holiday: { ...operatingHours.holiday, end_date: e.target.value || null }
+                          })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm text-gray-600 mb-1">Reopen Date</label>
+                        <input
+                          type="date"
+                          value={operatingHours.holiday.reopen_date || ''}
+                          onChange={(e) => setOperatingHours({
+                            ...operatingHours,
+                            holiday: { ...operatingHours.holiday, reopen_date: e.target.value || null }
+                          })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white"
+                        />
+                      </div>
+                    </div>
+                    <p className="text-xs text-amber-700">
+                      When holiday closure is enabled, customers will see a message that the restaurant is closed for the holiday.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
 

@@ -227,6 +227,8 @@ class UpdateProfileRequest(BaseModel):
     gst_registered: Optional[bool] = None
     gst_number: Optional[str] = None
     ird_number: Optional[str] = None
+    # Operating hours
+    operating_hours: Optional[dict] = None  # {weekday: {enabled, open, close}, weekend: {enabled, open, close}, holiday: {enabled, name, start_date, end_date, reopen_date}}
 
 class CreatePortalSessionRequest(BaseModel):
     user_id: str
@@ -3185,6 +3187,10 @@ async def update_user_profile(request: UpdateProfileRequest):
         if request.ird_number is not None:
             update_data['ird_number'] = request.ird_number
 
+        # Operating hours
+        if request.operating_hours is not None:
+            update_data['operating_hours'] = request.operating_hours
+
         # Update in database using restaurant_service
         if not update_data:
             raise HTTPException(
@@ -3621,6 +3627,7 @@ async def get_public_menu(restaurant_id: str):
             "hide_powered_by": is_enterprise,  # Only Enterprise can hide "Powered by Smart Menu"
             "primary_language": restaurant.get("primary_language", "en"),  # Default to English for NZ
             "category_order": restaurant.get("category_order") or [],  # Category display order
+            "operating_hours": restaurant.get("operating_hours"),  # Operating hours for store open/close status
         }
 
         # Get service options (default all enabled)
