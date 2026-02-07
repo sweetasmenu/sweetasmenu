@@ -417,7 +417,7 @@ class RestaurantService:
 
             # Check if optional columns exist
             # If they don't exist, remove them from update_data before updating
-            optional_columns = ['theme_color', 'cover_image_url', 'delivery_settings', 'pos_theme_color']
+            optional_columns = ['theme_color', 'cover_image_url', 'delivery_settings', 'pos_theme_color', 'operating_hours']
             columns_to_check = [col for col in optional_columns if col in update_data]
 
             if columns_to_check:

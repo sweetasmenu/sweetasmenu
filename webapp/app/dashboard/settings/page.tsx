@@ -1134,7 +1134,8 @@ function SettingsContent() {
       console.log('💾 Saving profile:', {
         restaurant_id: restaurantId,
         user_id: userId,
-        formData: formData
+        formData: formData,
+        operatingHours: operatingHours
       });
       
       const response = await fetch(`${BACKEND_URL}/api/user/profile`, {

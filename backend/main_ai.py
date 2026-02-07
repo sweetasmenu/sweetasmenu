@@ -3190,6 +3190,7 @@ async def update_user_profile(request: UpdateProfileRequest):
         # Operating hours
         if request.operating_hours is not None:
             update_data['operating_hours'] = request.operating_hours
+            print(f"📅 Operating hours to save: {request.operating_hours}")
 
         # Update in database using restaurant_service
         if not update_data:
