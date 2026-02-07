@@ -55,7 +55,21 @@ export async function signIn({ email, password }: SignInData) {
  */
 export async function signOut() {
   try {
-    const { error } = await supabase.auth.signOut();
+    // Sign out with global scope to clear session from all tabs
+    const { error } = await supabase.auth.signOut({ scope: 'global' });
+
+    // Also manually clear any Supabase-related localStorage items
+    if (typeof window !== 'undefined') {
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && (key.startsWith('sb-') || key.includes('supabase'))) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach(key => localStorage.removeItem(key));
+    }
+
     if (error) throw error;
     return { error: null };
   } catch (error: any) {
