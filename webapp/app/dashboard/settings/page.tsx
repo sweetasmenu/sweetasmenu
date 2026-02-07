@@ -187,8 +187,8 @@ function SettingsContent() {
 
   // Operating Hours state
   const [operatingHours, setOperatingHours] = useState<OperatingHours>({
-    weekday: [{ open: '10:00', close: '22:00' }],  // Default single slot
-    weekend: [{ open: '10:00', close: '22:00' }],  // Default single slot
+    weekday: [],  // Empty by default - restaurant fills in their own hours
+    weekend: [],  // Empty by default - restaurant fills in their own hours
     holiday: { enabled: false, name: '', start_date: null, end_date: null, reopen_date: null }
   });
 
@@ -515,9 +515,9 @@ function SettingsContent() {
         setPosThemeColor((profile.restaurant as any).pos_theme_color);
       }
 
-      // Load operating hours (handle both old and new format)
-      if ((profile.restaurant as any).operating_hours) {
-        const hours = (profile.restaurant as any).operating_hours;
+      // Load operating hours (handle both old and new format, or null/undefined)
+      const hours = (profile.restaurant as any).operating_hours;
+      if (hours) {
         // Convert old format (with enabled, open, close) to new format (array of time slots)
         const convertedHours: OperatingHours = {
           weekday: Array.isArray(hours.weekday)
@@ -532,7 +532,16 @@ function SettingsContent() {
               : [],
           holiday: hours.holiday || { enabled: false, name: '', start_date: null, end_date: null, reopen_date: null }
         };
+        console.log('📅 Loaded operating hours from API:', convertedHours);
         setOperatingHours(convertedHours);
+      } else {
+        // No operating hours saved yet - set empty defaults
+        console.log('📅 No operating hours in API response, using empty defaults');
+        setOperatingHours({
+          weekday: [],
+          weekend: [],
+          holiday: { enabled: false, name: '', start_date: null, end_date: null, reopen_date: null }
+        });
       }
 
       // Load restaurant location
@@ -1832,7 +1841,7 @@ function SettingsContent() {
                     onClick={() => {
                       setOperatingHours({
                         ...operatingHours,
-                        weekday: [...operatingHours.weekday, { open: '09:00', close: '17:00' }]
+                        weekday: [...operatingHours.weekday, { open: '', close: '' }]
                       });
                     }}
                     className="w-full py-2 px-4 border-2 border-dashed border-blue-300 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 text-sm font-medium"
@@ -1913,7 +1922,7 @@ function SettingsContent() {
                     onClick={() => {
                       setOperatingHours({
                         ...operatingHours,
-                        weekend: [...operatingHours.weekend, { open: '09:00', close: '17:00' }]
+                        weekend: [...operatingHours.weekend, { open: '', close: '' }]
                       });
                     }}
                     className="w-full py-2 px-4 border-2 border-dashed border-green-300 text-green-600 rounded-lg hover:bg-green-50 transition-colors flex items-center justify-center gap-2 text-sm font-medium"
