@@ -2048,21 +2048,24 @@ export default function RestaurantMenuPage() {
       {/* Image Preview Modal */}
       {previewImage && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-90 z-[60] flex items-center justify-center p-4"
+          className="fixed inset-0 bg-black bg-opacity-90 z-[60] flex items-center justify-center p-4 sm:p-8"
           onClick={() => setPreviewImage(null)}
         >
           <button
             onClick={() => setPreviewImage(null)}
-            className="absolute top-4 left-4 text-white bg-black bg-opacity-50 rounded-full p-2 hover:bg-opacity-70 transition-colors z-10"
+            className="absolute top-4 right-4 text-white bg-black bg-opacity-50 rounded-full p-2 hover:bg-opacity-70 transition-colors z-10"
           >
-            <X className="w-8 h-8" />
+            <X className="w-6 h-6 sm:w-8 sm:h-8" />
           </button>
-          <div onClick={(e) => e.stopPropagation()}>
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative w-full h-full max-w-4xl max-h-[85vh] flex items-center justify-center"
+          >
             <ProtectedImage
               src={previewImage}
               alt="Food preview"
-              className="max-w-full max-h-full object-contain rounded-lg"
-              containerClassName="max-w-full max-h-[90vh]"
+              className="w-auto h-auto max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+              containerClassName="flex items-center justify-center w-full h-full"
               priority={true}
             />
           </div>
