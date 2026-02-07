@@ -147,6 +147,8 @@ export default function ProtectedImage({
     WebkitUserSelect: 'none',
     MozUserSelect: 'none',
     msUserSelect: 'none',
+    WebkitTouchCallout: 'none',
+    touchAction: 'manipulation',
   } : {};
 
   // Show loading skeleton
@@ -175,7 +177,7 @@ export default function ProtectedImage({
   return (
     <div
       ref={containerRef}
-      className={`relative overflow-hidden ${containerClassName}`}
+      className={`relative overflow-hidden ${isProtected ? 'protected-image-wrapper' : ''} ${containerClassName}`}
       style={{ ...containerProtectionStyles, width, height }}
       onContextMenu={handleContextMenu}
       onDragStart={handleDragStart}
@@ -209,16 +211,33 @@ export default function ProtectedImage({
         }}
       />
 
-      {/* Transparent overlay to block interactions */}
+      {/* Transparent overlay to block right-click/save interactions */}
       {isProtected && (
         <div
-          className="absolute inset-0 z-20"
+          className="absolute inset-0"
           style={{
-            background: 'transparent',
-            cursor: 'default',
+            background: 'rgba(0,0,0,0)',
+            cursor: 'pointer',
+            zIndex: 50,
+            WebkitTapHighlightColor: 'transparent',
+            touchAction: 'manipulation',
           }}
-          onContextMenu={handleContextMenu}
-          onDragStart={handleDragStart}
+          onContextMenu={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+          }}
+          onDragStart={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+          }}
+          onMouseDown={(e) => {
+            // Block middle click
+            if (e.button === 1) {
+              e.preventDefault();
+            }
+          }}
         />
       )}
     </div>

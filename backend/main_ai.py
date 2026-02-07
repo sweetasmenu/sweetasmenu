@@ -3620,6 +3620,7 @@ async def get_public_menu(restaurant_id: str):
             "menu_template": restaurant.get("menu_template", "grid"),
             "hide_powered_by": is_enterprise,  # Only Enterprise can hide "Powered by Smart Menu"
             "primary_language": restaurant.get("primary_language", "en"),  # Default to English for NZ
+            "category_order": restaurant.get("category_order") or [],  # Category display order
         }
 
         # Get service options (default all enabled)
@@ -5170,6 +5171,72 @@ async def update_restaurant(restaurant_id: str, request: Dict[str, Any]):
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.put("/api/restaurant/{restaurant_id}/category-order", summary="Update Category Order")
+async def update_category_order(restaurant_id: str, request: Dict[str, Any]):
+    """
+    อัปเดตลำดับหมวดหมู่เมนู
+
+    Args:
+        restaurant_id: Restaurant ID
+        category_order: Array of category names in display order
+
+    Returns:
+        Success status
+    """
+    try:
+        category_order = request.get("category_order", [])
+
+        # Update in database
+        result = supabase.table("restaurants").update({
+            "category_order": category_order
+        }).eq("id", restaurant_id).execute()
+
+        if result.data:
+            return {
+                "success": True,
+                "message": "Category order updated successfully",
+                "category_order": category_order
+            }
+        else:
+            raise HTTPException(status_code=404, detail="Restaurant not found")
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Update category order error: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/restaurant/{restaurant_id}/category-order", summary="Get Category Order")
+async def get_category_order(restaurant_id: str):
+    """
+    ดึงลำดับหมวดหมู่เมนู
+
+    Args:
+        restaurant_id: Restaurant ID
+
+    Returns:
+        Category order array
+    """
+    try:
+        result = supabase.table("restaurants").select("category_order").eq("id", restaurant_id).execute()
+
+        if result.data and len(result.data) > 0:
+            return {
+                "success": True,
+                "category_order": result.data[0].get("category_order", [])
+            }
+        else:
+            raise HTTPException(status_code=404, detail="Restaurant not found")
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Get category order error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.delete("/api/restaurant/{restaurant_id}", summary="Delete Restaurant")
 async def delete_restaurant(restaurant_id: str, user_id: str):

@@ -22,7 +22,11 @@ import {
   Upload,
   ToggleLeft,
   ToggleRight,
-  EyeOff
+  EyeOff,
+  ArrowUpDown,
+  GripVertical,
+  ChevronUp,
+  ChevronDown
 } from 'lucide-react';
 import RestaurantSelector from '@/components/RestaurantSelector';
 import ImageGallery from '@/components/ImageGallery';
@@ -97,6 +101,11 @@ export default function MenusPage() {
 
   // Image Preview Modal
   const [previewImage, setPreviewImage] = useState<{url: string; name: string} | null>(null);
+
+  // Category Sorting Modal
+  const [showCategorySortModal, setShowCategorySortModal] = useState(false);
+  const [categoryOrder, setCategoryOrder] = useState<string[]>([]);
+  const [savingCategoryOrder, setSavingCategoryOrder] = useState(false);
 
   // Auto-translate states
   const [translatingMeatIdx, setTranslatingMeatIdx] = useState<number | null>(null);
@@ -278,18 +287,102 @@ export default function MenusPage() {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
       const restaurant_id = restId || restaurantId || 'default';
       const response = await fetch(`${API_URL}/api/menus?restaurant_id=${restaurant_id}`);
-      
+
       if (!response.ok) {
         throw new Error('Failed to fetch menus');
       }
-      
+
       const data = await response.json();
       setMenus(data.items || []);
+
+      // Also fetch category order
+      fetchCategoryOrder(restaurant_id);
     } catch (err: any) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
+  };
+
+  // Fetch category order from backend
+  const fetchCategoryOrder = async (restId: string) => {
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${API_URL}/api/restaurant/${restId}/category-order`);
+      if (response.ok) {
+        const data = await response.json();
+        setCategoryOrder(data.category_order || []);
+      }
+    } catch (err) {
+      console.error('Failed to fetch category order:', err);
+    }
+  };
+
+  // Save category order to backend
+  const saveCategoryOrder = async () => {
+    if (!restaurantId) return;
+
+    setSavingCategoryOrder(true);
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${API_URL}/api/restaurant/${restaurantId}/category-order`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ category_order: categoryOrder })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save category order');
+      }
+
+      setShowCategorySortModal(false);
+    } catch (err: any) {
+      alert('Failed to save category order: ' + err.message);
+    } finally {
+      setSavingCategoryOrder(false);
+    }
+  };
+
+  // Get unique categories from menus
+  const getUniqueCategories = () => {
+    const categories = new Set<string>();
+    menus.forEach(menu => {
+      if (menu.category) {
+        categories.add(menu.category);
+      }
+    });
+    return Array.from(categories);
+  };
+
+  // Initialize category order with all existing categories
+  const initializeCategoryOrder = () => {
+    const existingCategories = getUniqueCategories();
+    // Keep existing order, add any new categories at the end
+    const newOrder = [...categoryOrder];
+    existingCategories.forEach(cat => {
+      if (!newOrder.includes(cat)) {
+        newOrder.push(cat);
+      }
+    });
+    // Remove categories that no longer exist
+    const finalOrder = newOrder.filter(cat => existingCategories.includes(cat));
+    setCategoryOrder(finalOrder);
+  };
+
+  // Move category up
+  const moveCategoryUp = (index: number) => {
+    if (index === 0) return;
+    const newOrder = [...categoryOrder];
+    [newOrder[index - 1], newOrder[index]] = [newOrder[index], newOrder[index - 1]];
+    setCategoryOrder(newOrder);
+  };
+
+  // Move category down
+  const moveCategoryDown = (index: number) => {
+    if (index === categoryOrder.length - 1) return;
+    const newOrder = [...categoryOrder];
+    [newOrder[index], newOrder[index + 1]] = [newOrder[index + 1], newOrder[index]];
+    setCategoryOrder(newOrder);
   };
 
   const handleDelete = async (menuId: string) => {
@@ -710,6 +803,17 @@ export default function MenusPage() {
           </div>
 
           <div className="flex gap-2 sm:gap-3">
+            <button
+              onClick={() => {
+                initializeCategoryOrder();
+                setShowCategorySortModal(true);
+              }}
+              className="inline-flex items-center px-3 sm:px-6 py-2 sm:py-3 bg-purple-500 hover:bg-purple-600 text-white rounded-lg font-semibold transition-colors text-sm sm:text-base"
+            >
+              <ArrowUpDown className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Sort Categories</span>
+              <span className="sm:hidden">Sort</span>
+            </button>
             <Link
               href="/qr"
               className="inline-flex items-center px-3 sm:px-6 py-2 sm:py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition-colors text-sm sm:text-base"
@@ -1744,6 +1848,101 @@ export default function MenusPage() {
           }}
           onClose={() => setShowEditImageGallery(false)}
         />
+      )}
+
+      {/* Category Sort Modal */}
+      {showCategorySortModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[80vh] flex flex-col">
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">Sort Categories</h2>
+                <p className="text-sm text-gray-500">Drag to reorder how categories appear on menu</p>
+              </div>
+              <button
+                onClick={() => setShowCategorySortModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+
+            {/* Category List */}
+            <div className="flex-1 overflow-y-auto p-4">
+              {categoryOrder.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <ArrowUpDown className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                  <p>No categories found</p>
+                  <p className="text-sm">Add menu items to create categories</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {categoryOrder.map((category, index) => (
+                    <div
+                      key={category}
+                      className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors"
+                    >
+                      <GripVertical className="w-5 h-5 text-gray-400" />
+                      <span className="flex-1 font-medium text-gray-900">{category}</span>
+                      <span className="text-sm text-gray-400">
+                        {menus.filter(m => m.category === category).length} items
+                      </span>
+                      <div className="flex gap-1">
+                        <button
+                          onClick={() => moveCategoryUp(index)}
+                          disabled={index === 0}
+                          className={`p-1.5 rounded-lg transition-colors ${
+                            index === 0
+                              ? 'text-gray-300 cursor-not-allowed'
+                              : 'text-gray-500 hover:bg-purple-100 hover:text-purple-600'
+                          }`}
+                        >
+                          <ChevronUp className="w-5 h-5" />
+                        </button>
+                        <button
+                          onClick={() => moveCategoryDown(index)}
+                          disabled={index === categoryOrder.length - 1}
+                          className={`p-1.5 rounded-lg transition-colors ${
+                            index === categoryOrder.length - 1
+                              ? 'text-gray-300 cursor-not-allowed'
+                              : 'text-gray-500 hover:bg-purple-100 hover:text-purple-600'
+                          }`}
+                        >
+                          <ChevronDown className="w-5 h-5" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="flex gap-3 p-4 border-t border-gray-200">
+              <button
+                onClick={() => setShowCategorySortModal(false)}
+                className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={saveCategoryOrder}
+                disabled={savingCategoryOrder || categoryOrder.length === 0}
+                className="flex-1 px-4 py-2.5 bg-purple-500 hover:bg-purple-600 text-white rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {savingCategoryOrder ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  'Save Order'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Image Preview Modal */}

@@ -12,8 +12,8 @@ interface MenuItem {
   categoryEn?: string;
   photo_url?: string;
   is_best_seller?: boolean;
-  meats?: Array<{name: string; nameEn?: string; price: string}>;
-  addOns?: Array<{name: string; nameEn?: string; price: string}>;
+  meats?: Array<{name: string; nameEn?: string; price: string; is_available?: boolean}>;
+  addOns?: Array<{name: string; nameEn?: string; price: string; is_available?: boolean}>;
 }
 
 interface ClassicListProps {

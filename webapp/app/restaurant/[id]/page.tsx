@@ -23,8 +23,8 @@ interface MenuItem {
   categoryEn?: string;
   photo_url?: string;
   is_best_seller?: boolean;
-  meats?: Array<{name: string; nameEn?: string; price: string}>;
-  addOns?: Array<{name: string; nameEn?: string; price: string}>;
+  meats?: Array<{name: string; nameEn?: string; price: string; is_available?: boolean}>;
+  addOns?: Array<{name: string; nameEn?: string; price: string; is_available?: boolean}>;
 }
 
 interface CartItem {
@@ -1095,6 +1095,7 @@ export default function RestaurantMenuPage() {
 
   // Group menus by category - use menu.category which contains translated value
   // Add "Bestseller" category at the top with bestseller items
+  // Sort categories based on category_order from branding
   const groupedMenus = (() => {
     const groups: Record<string, MenuItem[]> = {};
 
@@ -1125,6 +1126,33 @@ export default function RestaurantMenuPage() {
       }
       groups[category].push(menu);
     });
+
+    // Sort categories based on category_order from branding
+    const categoryOrder: string[] = branding.category_order || [];
+    if (categoryOrder.length > 0) {
+      const sortedGroups: Record<string, MenuItem[]> = {};
+
+      // Always keep Bestseller at the top if it exists
+      if (groups['Bestseller']) {
+        sortedGroups['Bestseller'] = groups['Bestseller'];
+      }
+
+      // Add categories in the specified order
+      categoryOrder.forEach(cat => {
+        if (groups[cat] && cat !== 'Bestseller') {
+          sortedGroups[cat] = groups[cat];
+        }
+      });
+
+      // Add any remaining categories that aren't in the order
+      Object.keys(groups).forEach(cat => {
+        if (!sortedGroups[cat]) {
+          sortedGroups[cat] = groups[cat];
+        }
+      });
+
+      return sortedGroups;
+    }
 
     return groups;
   })();
@@ -2187,13 +2215,13 @@ function ItemModal({
           )}
 
           {/* Meats Selection - Required when meats exist */}
-          {menu.meats && menu.meats.length > 0 && (
+          {menu.meats && menu.meats.filter(m => m.is_available !== false).length > 0 && (
             <div className="mb-6">
               <h3 className="font-semibold text-gray-900 mb-3">
                 Choose Meat: <span className="text-red-500">*</span>
               </h3>
               <div className="space-y-2">
-                {menu.meats.map((meat, idx) => {
+                {menu.meats.filter(m => m.is_available !== false).map((meat, idx) => {
                   const displayName = meat.nameEn || meat.name;
                   return (
                     <label
@@ -2233,11 +2261,11 @@ function ItemModal({
           )}
 
           {/* Add-ons Selection */}
-          {menu.addOns && menu.addOns.length > 0 && (
+          {menu.addOns && menu.addOns.filter(a => a.is_available !== false).length > 0 && (
             <div className="mb-6">
               <h3 className="font-semibold text-gray-900 mb-3">Add-ons (Optional):</h3>
               <div className="space-y-2">
-                {menu.addOns.map((addon, idx) => {
+                {menu.addOns.filter(a => a.is_available !== false).map((addon, idx) => {
                   const displayName = addon.nameEn || addon.name;
                   return (
                     <label
@@ -2319,25 +2347,28 @@ function ItemModal({
             </div>
             <button
               onClick={() => {
-                // Validate meat selection if meats exist
-                if (menu.meats && menu.meats.length > 0 && !selectedMeat) {
+                // Validate meat selection if available meats exist
+                const availableMeats = menu.meats?.filter(m => m.is_available !== false) || [];
+                if (availableMeats.length > 0 && !selectedMeat) {
                   alert('Please select a meat option before adding to cart');
                   return;
                 }
                 handleAddToCart();
               }}
-              disabled={menu.meats && menu.meats.length > 0 && !selectedMeat}
+              disabled={menu.meats && menu.meats.filter(m => m.is_available !== false).length > 0 && !selectedMeat}
               className={`px-8 py-3 text-white rounded-lg font-bold text-lg transition-opacity flex items-center gap-2 ${
-                menu.meats && menu.meats.length > 0 && !selectedMeat ? 'opacity-50 cursor-not-allowed' : ''
+                menu.meats && menu.meats.filter(m => m.is_available !== false).length > 0 && !selectedMeat ? 'opacity-50 cursor-not-allowed' : ''
               }`}
               style={{ backgroundColor: themeColor }}
               onMouseEnter={(e) => {
-                if (!(menu.meats && menu.meats.length > 0 && !selectedMeat)) {
+                const availableMeats = menu.meats?.filter(m => m.is_available !== false) || [];
+                if (!(availableMeats.length > 0 && !selectedMeat)) {
                   e.currentTarget.style.opacity = '0.9';
                 }
               }}
               onMouseLeave={(e) => {
-                if (!(menu.meats && menu.meats.length > 0 && !selectedMeat)) {
+                const availableMeats = menu.meats?.filter(m => m.is_available !== false) || [];
+                if (!(availableMeats.length > 0 && !selectedMeat)) {
                   e.currentTarget.style.opacity = '1';
                 }
               }}
@@ -2451,13 +2482,13 @@ function EditCartItemModal({
           </div>
 
           {/* Meats Selection */}
-          {menu?.meats && menu.meats.length > 0 && (
+          {menu?.meats && menu.meats.filter(m => m.is_available !== false).length > 0 && (
             <div className="mb-6">
               <h3 className="font-semibold text-gray-900 mb-3">
                 Choose Meat: <span className="text-red-500">*</span>
               </h3>
               <div className="space-y-2">
-                {menu.meats.map((meat, idx) => {
+                {menu.meats.filter(m => m.is_available !== false).map((meat, idx) => {
                   const displayName = meat.nameEn || meat.name;
                   return (
                     <label
@@ -2491,11 +2522,11 @@ function EditCartItemModal({
           )}
 
           {/* Add-ons Selection */}
-          {menu?.addOns && menu.addOns.length > 0 && (
+          {menu?.addOns && menu.addOns.filter(a => a.is_available !== false).length > 0 && (
             <div className="mb-6">
               <h3 className="font-semibold text-gray-900 mb-3">Add-ons (Optional):</h3>
               <div className="space-y-2">
-                {menu.addOns.map((addon, idx) => {
+                {menu.addOns.filter(a => a.is_available !== false).map((addon, idx) => {
                   const displayName = addon.nameEn || addon.name;
                   return (
                     <label
@@ -2574,15 +2605,16 @@ function EditCartItemModal({
             </div>
             <button
               onClick={() => {
-                if (menu?.meats && menu.meats.length > 0 && !selectedMeat) {
+                const availableMeats = menu?.meats?.filter(m => m.is_available !== false) || [];
+                if (availableMeats.length > 0 && !selectedMeat) {
                   alert('Please select a meat option');
                   return;
                 }
                 handleUpdate();
               }}
-              disabled={menu?.meats && menu.meats.length > 0 && !selectedMeat}
+              disabled={menu?.meats && menu.meats.filter(m => m.is_available !== false).length > 0 && !selectedMeat}
               className={`px-6 py-3 text-white rounded-lg font-bold text-lg transition-opacity flex items-center gap-2 ${
-                menu?.meats && menu.meats.length > 0 && !selectedMeat ? 'opacity-50 cursor-not-allowed' : ''
+                menu?.meats && menu.meats.filter(m => m.is_available !== false).length > 0 && !selectedMeat ? 'opacity-50 cursor-not-allowed' : ''
               }`}
               style={{ backgroundColor: themeColor }}
             >
