@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Shield, Users, Utensils, Truck, Store, Plus, Trash2, Edit2, Save, X, Loader2, Globe, ExternalLink, MapPin, Navigation, CreditCard, Building2, QrCode, Key, Eye, EyeOff, CheckCircle, AlertCircle, ArrowUpRight, Printer } from 'lucide-react';
+import { Shield, Users, Utensils, Truck, Store, Plus, Trash2, Edit2, Save, X, Loader2, Globe, ExternalLink, MapPin, Navigation, CreditCard, Building2, QrCode, Key, Eye, EyeOff, CheckCircle, AlertCircle, ArrowUpRight, Printer, Clock, Calendar } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 
 interface ServiceOptions {
@@ -300,6 +300,41 @@ function SettingsContent() {
   const [changingPassword, setChangingPassword] = useState(false);
   const [passwordMessage, setPasswordMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
+  // Operating Hours state
+  interface DayHours {
+    enabled: boolean;
+    open: string;
+    close: string;
+  }
+  interface HolidayClosure {
+    enabled: boolean;
+    start_date: string;
+    end_date: string;
+    reason: string;
+  }
+  interface OperatingHours {
+    monday: DayHours;
+    tuesday: DayHours;
+    wednesday: DayHours;
+    thursday: DayHours;
+    friday: DayHours;
+    saturday: DayHours;
+    sunday: DayHours;
+    holiday: HolidayClosure;
+  }
+  const defaultOperatingHours: OperatingHours = {
+    monday: { enabled: true, open: '09:00', close: '21:00' },
+    tuesday: { enabled: true, open: '09:00', close: '21:00' },
+    wednesday: { enabled: true, open: '09:00', close: '21:00' },
+    thursday: { enabled: true, open: '09:00', close: '21:00' },
+    friday: { enabled: true, open: '09:00', close: '21:00' },
+    saturday: { enabled: true, open: '09:00', close: '21:00' },
+    sunday: { enabled: true, open: '09:00', close: '21:00' },
+    holiday: { enabled: false, start_date: '', end_date: '', reason: '' }
+  };
+  const [operatingHours, setOperatingHours] = useState<OperatingHours>(defaultOperatingHours);
+  const [savingHours, setSavingHours] = useState(false);
+
   // Image optimization helper
   const optimizeImage = async (file: File, maxSize: number = 512): Promise<Blob> => {
     return new Promise((resolve, reject) => {
@@ -488,6 +523,14 @@ function SettingsContent() {
       // Load POS theme color
       if ((profile.restaurant as any).pos_theme_color) {
         setPosThemeColor((profile.restaurant as any).pos_theme_color);
+      }
+
+      // Load operating hours
+      if ((profile.restaurant as any).operating_hours) {
+        setOperatingHours({
+          ...defaultOperatingHours,
+          ...(profile.restaurant as any).operating_hours
+        });
       }
 
       // Load restaurant location
@@ -1108,6 +1151,8 @@ function SettingsContent() {
           gst_registered: formData.gst_registered,
           gst_number: formData.gst_number || undefined,
           ird_number: formData.ird_number || undefined,
+          // Operating hours
+          operating_hours: operatingHours,
         }),
       });
 
@@ -1927,6 +1972,172 @@ function SettingsContent() {
                     <a href="/pricing" className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm inline-block">
                       Upgrade to Enterprise
                     </a>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Operating Hours Section */}
+            <div className="mt-8 pt-8 border-t border-gray-200">
+              <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+                <Clock className="w-6 h-6 mr-2 text-green-500" />
+                Operating Hours
+              </h2>
+              <p className="text-gray-600 mb-6 text-sm">
+                Set your restaurant's opening and closing times. Customers will see a message if they try to order outside these hours.
+              </p>
+
+              {/* Daily Schedule */}
+              <div className="space-y-3">
+                {(['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const).map((day) => {
+                  const dayLabels: Record<string, string> = {
+                    monday: 'Monday',
+                    tuesday: 'Tuesday',
+                    wednesday: 'Wednesday',
+                    thursday: 'Thursday',
+                    friday: 'Friday',
+                    saturday: 'Saturday',
+                    sunday: 'Sunday'
+                  };
+                  return (
+                    <div key={day} className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                      <div className="flex items-center justify-between sm:w-32">
+                        <span className="font-medium text-gray-800">{dayLabels[day]}</span>
+                        <label className="relative inline-flex items-center cursor-pointer sm:hidden">
+                          <input
+                            type="checkbox"
+                            checked={operatingHours[day].enabled}
+                            onChange={(e) => setOperatingHours({
+                              ...operatingHours,
+                              [day]: { ...operatingHours[day], enabled: e.target.checked }
+                            })}
+                            className="sr-only peer"
+                          />
+                          <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-100 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                        </label>
+                      </div>
+
+                      <div className="flex items-center gap-2 flex-1">
+                        <label className="hidden sm:block relative inline-flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={operatingHours[day].enabled}
+                            onChange={(e) => setOperatingHours({
+                              ...operatingHours,
+                              [day]: { ...operatingHours[day], enabled: e.target.checked }
+                            })}
+                            className="sr-only peer"
+                          />
+                          <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-100 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                        </label>
+
+                        {operatingHours[day].enabled ? (
+                          <div className="flex items-center gap-2 flex-1">
+                            <input
+                              type="time"
+                              value={operatingHours[day].open}
+                              onChange={(e) => setOperatingHours({
+                                ...operatingHours,
+                                [day]: { ...operatingHours[day], open: e.target.value }
+                              })}
+                              className="px-2 py-1.5 border border-gray-300 rounded-md text-gray-900 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                            />
+                            <span className="text-gray-500">to</span>
+                            <input
+                              type="time"
+                              value={operatingHours[day].close}
+                              onChange={(e) => setOperatingHours({
+                                ...operatingHours,
+                                [day]: { ...operatingHours[day], close: e.target.value }
+                              })}
+                              className="px-2 py-1.5 border border-gray-300 rounded-md text-gray-900 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                            />
+                          </div>
+                        ) : (
+                          <span className="text-gray-500 italic text-sm">Closed</span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Holiday Closure Section */}
+              <div className="mt-6 p-4 bg-orange-50 rounded-lg border border-orange-200">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+                    <Calendar className="w-5 h-5 text-orange-500" />
+                    Holiday / Temporary Closure
+                  </h3>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={operatingHours.holiday.enabled}
+                      onChange={(e) => setOperatingHours({
+                        ...operatingHours,
+                        holiday: { ...operatingHours.holiday, enabled: e.target.checked }
+                      })}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-100 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
+                  </label>
+                </div>
+
+                {operatingHours.holiday.enabled && (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Closure Start Date
+                        </label>
+                        <input
+                          type="date"
+                          value={operatingHours.holiday.start_date}
+                          onChange={(e) => setOperatingHours({
+                            ...operatingHours,
+                            holiday: { ...operatingHours.holiday, start_date: e.target.value }
+                          })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Reopening Date
+                        </label>
+                        <input
+                          type="date"
+                          value={operatingHours.holiday.end_date}
+                          onChange={(e) => setOperatingHours({
+                            ...operatingHours,
+                            holiday: { ...operatingHours.holiday, end_date: e.target.value }
+                          })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Closure Reason
+                      </label>
+                      <input
+                        type="text"
+                        value={operatingHours.holiday.reason}
+                        onChange={(e) => setOperatingHours({
+                          ...operatingHours,
+                          holiday: { ...operatingHours.holiday, reason: e.target.value }
+                        })}
+                        placeholder="e.g., Annual holiday, Renovation, etc."
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      />
+                    </div>
+                    <div className="bg-orange-100 p-3 rounded-lg">
+                      <p className="text-sm text-orange-800">
+                        When enabled, customers will see a message that the restaurant is closed from{' '}
+                        <strong>{operatingHours.holiday.start_date || '(start date)'}</strong> and will reopen on{' '}
+                        <strong>{operatingHours.holiday.end_date || '(end date)'}</strong>
+                        {operatingHours.holiday.reason && <> due to: <strong>{operatingHours.holiday.reason}</strong></>}.
+                      </p>
+                    </div>
                   </div>
                 )}
               </div>

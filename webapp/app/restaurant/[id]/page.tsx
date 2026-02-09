@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Loader2, Utensils, ShoppingCart, Plus, Minus, X, CheckCircle, MapPin, Clock, Store, Globe, Languages, MessageCircle, Bell, UtensilsCrossed, Droplets, Receipt, HelpCircle, Send, Check, Pencil, ClipboardList } from 'lucide-react';
+import { Loader2, Utensils, ShoppingCart, Plus, Minus, X, CheckCircle, MapPin, Clock, Store, Globe, Languages, MessageCircle, Bell, UtensilsCrossed, Droplets, Receipt, HelpCircle, Send, Check, Pencil, ClipboardList, Calendar } from 'lucide-react';
 import ClassicList from './templates/ClassicList';
 import GridView from './templates/GridView';
 import MagazineStyle from './templates/MagazineStyle';
@@ -151,6 +151,37 @@ export default function RestaurantMenuPage() {
   const [previewImage, setPreviewImage] = useState<string | null>(null); // Image preview modal
   const [editingCartItem, setEditingCartItem] = useState<{index: number, item: CartItem} | null>(null); // Edit cart item modal
 
+  // Operating hours and closed store modal
+  interface DayHours {
+    enabled: boolean;
+    open: string;
+    close: string;
+  }
+  interface HolidayClosure {
+    enabled: boolean;
+    start_date: string;
+    end_date: string;
+    reason: string;
+  }
+  interface OperatingHours {
+    monday: DayHours;
+    tuesday: DayHours;
+    wednesday: DayHours;
+    thursday: DayHours;
+    friday: DayHours;
+    saturday: DayHours;
+    sunday: DayHours;
+    holiday: HolidayClosure;
+  }
+  const [operatingHours, setOperatingHours] = useState<OperatingHours | null>(null);
+  const [showClosedModal, setShowClosedModal] = useState(false);
+  const [closedMessage, setClosedMessage] = useState<{
+    type: 'closed' | 'holiday';
+    message: string;
+    operatingHoursToday?: string;
+    holidayDetails?: { start: string; end: string; reason: string };
+  } | null>(null);
+
   // All available languages (Enterprise gets all, others get only Original + English)
   const ALL_LANGUAGES = [
     { code: 'original', name: 'Original', flag: '📝' },
@@ -225,6 +256,12 @@ export default function RestaurantMenuPage() {
         // Set template from branding settings (default: grid)
         setMenuTemplate(data.branding?.menu_template || 'grid');
         setBranding(data.branding || {});
+
+        // Check operating hours and show closed modal if necessary
+        if (data.branding?.operating_hours) {
+          setOperatingHours(data.branding.operating_hours);
+          checkOperatingHours(data.branding.operating_hours);
+        }
 
         // Set service options from restaurant settings
         if (data.service_options) {
@@ -368,6 +405,70 @@ export default function RestaurantMenuPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Check if restaurant is currently open based on operating hours
+  const checkOperatingHours = (hours: OperatingHours) => {
+    if (!hours) return; // No operating hours set, assume always open
+
+    const now = new Date();
+    const nzTime = new Date(now.toLocaleString('en-US', { timeZone: 'Pacific/Auckland' }));
+    const currentDay = nzTime.toLocaleDateString('en-US', { weekday: 'long', timeZone: 'Pacific/Auckland' }).toLowerCase() as keyof Omit<OperatingHours, 'holiday'>;
+    const currentTime = nzTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Pacific/Auckland' });
+    const currentDateStr = nzTime.toISOString().split('T')[0]; // YYYY-MM-DD
+
+    // Check if in holiday period first
+    if (hours.holiday?.enabled && hours.holiday.start_date && hours.holiday.end_date) {
+      const startDate = hours.holiday.start_date;
+      const endDate = hours.holiday.end_date;
+
+      if (currentDateStr >= startDate && currentDateStr < endDate) {
+        // Currently in holiday period
+        setClosedMessage({
+          type: 'holiday',
+          message: hours.holiday.reason || 'Holiday closure',
+          holidayDetails: {
+            start: new Date(startDate).toLocaleDateString('en-NZ', { dateStyle: 'long' }),
+            end: new Date(endDate).toLocaleDateString('en-NZ', { dateStyle: 'long' }),
+            reason: hours.holiday.reason
+          }
+        });
+        setShowClosedModal(true);
+        return;
+      }
+    }
+
+    // Check daily hours
+    const todayHours = hours[currentDay];
+    if (!todayHours || !todayHours.enabled) {
+      // Restaurant is closed today
+      setClosedMessage({
+        type: 'closed',
+        message: `We are closed on ${currentDay.charAt(0).toUpperCase() + currentDay.slice(1)}s.`,
+        operatingHoursToday: 'Closed'
+      });
+      setShowClosedModal(true);
+      return;
+    }
+
+    // Check if current time is within operating hours
+    const openTime = todayHours.open; // e.g., "09:00"
+    const closeTime = todayHours.close; // e.g., "21:00"
+
+    if (currentTime < openTime || currentTime >= closeTime) {
+      // Outside operating hours
+      setClosedMessage({
+        type: 'closed',
+        message: `We are currently closed.`,
+        operatingHoursToday: `${openTime} - ${closeTime}`
+      });
+      setShowClosedModal(true);
+      return;
+    }
+
+    // Store is open - don't show modal
+    setShowClosedModal(false);
+    setClosedMessage(null);
   };
 
   // Calculate delivery fee based on customer address
@@ -2053,6 +2154,60 @@ export default function RestaurantMenuPage() {
                 </>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Closed Store Modal */}
+      {showClosedModal && closedMessage && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-[70] flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-6 sm:p-8 text-center max-w-md w-full mx-4 shadow-2xl">
+            {closedMessage.type === 'holiday' ? (
+              <>
+                <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Calendar className="w-8 h-8 text-orange-600" />
+                </div>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3">Restaurant Temporarily Closed</h2>
+                <div className="bg-orange-50 rounded-lg p-4 mb-4 text-left">
+                  <p className="text-gray-700 mb-2">
+                    <strong>Reason:</strong> {closedMessage.holidayDetails?.reason || 'Holiday closure'}
+                  </p>
+                  <p className="text-gray-600 text-sm">
+                    <strong>Closed from:</strong> {closedMessage.holidayDetails?.start}
+                  </p>
+                  <p className="text-gray-600 text-sm">
+                    <strong>Reopening:</strong> {closedMessage.holidayDetails?.end}
+                  </p>
+                </div>
+                <p className="text-gray-500 text-sm mb-4">
+                  We apologize for any inconvenience. Please come back when we reopen!
+                </p>
+              </>
+            ) : (
+              <>
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Clock className="w-8 h-8 text-gray-600" />
+                </div>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3">We're Currently Closed</h2>
+                <p className="text-gray-600 mb-4">{closedMessage.message}</p>
+                {closedMessage.operatingHoursToday && closedMessage.operatingHoursToday !== 'Closed' && (
+                  <div className="bg-blue-50 rounded-lg p-4 mb-4">
+                    <p className="text-blue-800 font-medium">
+                      Today's Hours: {closedMessage.operatingHoursToday}
+                    </p>
+                  </div>
+                )}
+                <p className="text-gray-500 text-sm mb-4">
+                  Please come back during our operating hours to place an order.
+                </p>
+              </>
+            )}
+            <button
+              onClick={() => setShowClosedModal(false)}
+              className="w-full py-3 px-6 bg-gray-800 text-white rounded-xl font-semibold hover:bg-gray-700 transition-colors"
+            >
+              Close
+            </button>
           </div>
         </div>
       )}
