@@ -2203,7 +2203,21 @@ export default function RestaurantMenuPage() {
               </>
             )}
             <button
-              onClick={() => setShowClosedModal(false)}
+              onClick={() => {
+                // Try to close the browser tab
+                window.close();
+                // If window.close() doesn't work (most browsers block it for user-opened tabs),
+                // redirect to a blank page or go back
+                setTimeout(() => {
+                  // If still here after 100ms, window.close() didn't work
+                  // Try going back in history or redirect to home
+                  if (window.history.length > 1) {
+                    window.history.back();
+                  } else {
+                    window.location.href = 'about:blank';
+                  }
+                }, 100);
+              }}
               className="w-full py-3 px-6 bg-gray-800 text-white rounded-xl font-semibold hover:bg-gray-700 transition-colors"
             >
               Close
