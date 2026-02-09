@@ -57,6 +57,9 @@ export default function DashboardPage() {
   };
 
   useEffect(() => {
+    // Scroll to top on page load
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
     let pollInterval: NodeJS.Timeout | null = null;
     let subscription: { unsubscribe: () => void } | null = null;
 

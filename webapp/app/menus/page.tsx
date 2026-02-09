@@ -336,6 +336,8 @@ export default function MenusPage() {
       }
 
       setShowCategorySortModal(false);
+      // Scroll to top after save
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err: any) {
       alert('Failed to save category order: ' + err.message);
     } finally {
@@ -715,6 +717,8 @@ export default function MenusPage() {
       await fetchMenus();
       setEditing(null);
       setEditImageFile(null);
+      // Scroll to top after save
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       alert('Menu item updated successfully!');
     } catch (err: any) {
       alert('Failed to update menu item: ' + err.message);
@@ -767,6 +771,8 @@ export default function MenusPage() {
       alert('Menu copied successfully to the selected restaurant!');
       setCopyingMenu(null);
       setSelectedTargetRestaurant('');
+      // Scroll to top after copy
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err: any) {
       alert('Failed to copy menu: ' + err.message);
       console.error('Copy error:', err);
@@ -842,6 +848,8 @@ export default function MenusPage() {
               setRestaurantSlug(slug);
             }
             fetchMenus(id);
+            // Scroll to top when changing restaurant
+            window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
           currentRestaurantId={restaurantId || undefined}
         />

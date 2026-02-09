@@ -80,6 +80,8 @@ function LoginContent() {
       if (data && data.session) {
         setSuccess('Login successful! Redirecting...');
         setLoading(false);
+        // Scroll to top before redirect
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         setTimeout(() => {
           router.push('/dashboard');
         }, 1000);
