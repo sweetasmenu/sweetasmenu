@@ -412,10 +412,12 @@ export default function RestaurantMenuPage() {
     if (!hours) return; // No operating hours set, assume always open
 
     const now = new Date();
-    const nzTime = new Date(now.toLocaleString('en-US', { timeZone: 'Pacific/Auckland' }));
-    const currentDay = nzTime.toLocaleDateString('en-US', { weekday: 'long', timeZone: 'Pacific/Auckland' }).toLowerCase() as keyof Omit<OperatingHours, 'holiday'>;
-    const currentTime = nzTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Pacific/Auckland' });
-    const currentDateStr = nzTime.toISOString().split('T')[0]; // YYYY-MM-DD
+    // Use Intl API directly on 'now' to get NZ time — avoid double timezone conversion
+    const currentDay = now.toLocaleDateString('en-US', { weekday: 'long', timeZone: 'Pacific/Auckland' }).toLowerCase() as keyof Omit<OperatingHours, 'holiday'>;
+    const currentTime = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Pacific/Auckland' });
+    const currentDateStr = now.toLocaleDateString('en-CA', { timeZone: 'Pacific/Auckland' }); // en-CA gives YYYY-MM-DD
+
+    console.log(`🕐 Operating hours check — NZ day: ${currentDay}, time: ${currentTime}, date: ${currentDateStr}`);
 
     // Check if in holiday period first
     if (hours.holiday?.enabled && hours.holiday.start_date && hours.holiday.end_date) {
