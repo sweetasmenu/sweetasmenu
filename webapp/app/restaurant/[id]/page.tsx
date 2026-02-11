@@ -455,14 +455,24 @@ export default function RestaurantMenuPage() {
 
     // Check if current time is within operating hours
     const openTime = todayHours.open; // e.g., "09:00"
-    const closeTime = todayHours.close; // e.g., "21:00"
+    const closeTime = todayHours.close; // e.g., "21:00" or "01:00" (overnight)
 
-    if (currentTime < openTime || currentTime >= closeTime) {
+    let isClosed = false;
+    if (closeTime > openTime) {
+      // Normal hours (e.g., 09:00 - 21:00)
+      isClosed = currentTime < openTime || currentTime >= closeTime;
+    } else {
+      // Overnight hours (e.g., 09:00 - 01:00 next day)
+      // Closed only between closeTime and openTime (e.g., 01:00 - 09:00)
+      isClosed = currentTime >= closeTime && currentTime < openTime;
+    }
+
+    if (isClosed) {
       // Outside operating hours
       setClosedMessage({
         type: 'closed',
         message: `We are currently closed.`,
-        operatingHoursToday: `${openTime} - ${closeTime}`
+        operatingHoursToday: `${openTime} - ${closeTime}${closeTime < openTime ? ' (next day)' : ''}`
       });
       setShowClosedModal(true);
       return;
