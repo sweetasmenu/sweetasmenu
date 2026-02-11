@@ -1988,85 +1988,74 @@ function SettingsContent() {
               </p>
 
               {/* Daily Schedule */}
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 {(['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const).map((day) => {
                   const dayLabels: Record<string, string> = {
-                    monday: 'Monday',
-                    tuesday: 'Tuesday',
-                    wednesday: 'Wednesday',
-                    thursday: 'Thursday',
-                    friday: 'Friday',
-                    saturday: 'Saturday',
-                    sunday: 'Sunday'
+                    monday: 'Mon', tuesday: 'Tue', wednesday: 'Wed',
+                    thursday: 'Thu', friday: 'Fri', saturday: 'Sat', sunday: 'Sun'
+                  };
+                  const dayLabelsFull: Record<string, string> = {
+                    monday: 'Monday', tuesday: 'Tuesday', wednesday: 'Wednesday',
+                    thursday: 'Thursday', friday: 'Friday', saturday: 'Saturday', sunday: 'Sunday'
                   };
                   return (
-                    <div key={day} className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                      <div className="flex items-center justify-between sm:w-32">
-                        <span className="font-medium text-gray-800">{dayLabels[day]}</span>
-                        <label className="relative inline-flex items-center cursor-pointer sm:hidden">
+                    <div key={day} className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-gray-50 rounded-lg border border-gray-200">
+                      {/* Day name */}
+                      <span className="font-medium text-gray-800 text-sm sm:text-base w-10 sm:w-28 flex-shrink-0">
+                        <span className="sm:hidden">{dayLabels[day]}</span>
+                        <span className="hidden sm:inline">{dayLabelsFull[day]}</span>
+                      </span>
+
+                      {/* Toggle */}
+                      <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
+                        <input
+                          type="checkbox"
+                          checked={operatingHours[day].enabled}
+                          onChange={(e) => setOperatingHours({
+                            ...operatingHours,
+                            [day]: { ...operatingHours[day], enabled: e.target.checked }
+                          })}
+                          className="sr-only peer"
+                        />
+                        <div className="w-9 h-5 sm:w-11 sm:h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 sm:after:h-5 sm:after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                      </label>
+
+                      {/* Time inputs or Closed label */}
+                      {operatingHours[day].enabled ? (
+                        <div className="flex items-center gap-1 sm:gap-2 flex-1 min-w-0">
                           <input
-                            type="checkbox"
-                            checked={operatingHours[day].enabled}
+                            type="time"
+                            value={operatingHours[day].open}
                             onChange={(e) => setOperatingHours({
                               ...operatingHours,
-                              [day]: { ...operatingHours[day], enabled: e.target.checked }
+                              [day]: { ...operatingHours[day], open: e.target.value }
                             })}
-                            className="sr-only peer"
+                            className="flex-1 min-w-0 px-1 sm:px-2 py-1 sm:py-1.5 border border-gray-300 rounded-md text-gray-900 bg-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
                           />
-                          <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-100 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
-                        </label>
-                      </div>
-
-                      <div className="flex items-center gap-2 flex-1">
-                        <label className="hidden sm:block relative inline-flex items-center cursor-pointer">
+                          <span className="text-gray-400 text-xs sm:text-sm flex-shrink-0">-</span>
                           <input
-                            type="checkbox"
-                            checked={operatingHours[day].enabled}
+                            type="time"
+                            value={operatingHours[day].close}
                             onChange={(e) => setOperatingHours({
                               ...operatingHours,
-                              [day]: { ...operatingHours[day], enabled: e.target.checked }
+                              [day]: { ...operatingHours[day], close: e.target.value }
                             })}
-                            className="sr-only peer"
+                            className="flex-1 min-w-0 px-1 sm:px-2 py-1 sm:py-1.5 border border-gray-300 rounded-md text-gray-900 bg-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
                           />
-                          <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-100 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
-                        </label>
-
-                        {operatingHours[day].enabled ? (
-                          <div className="flex items-center gap-2 flex-1">
-                            <input
-                              type="time"
-                              value={operatingHours[day].open}
-                              onChange={(e) => setOperatingHours({
-                                ...operatingHours,
-                                [day]: { ...operatingHours[day], open: e.target.value }
-                              })}
-                              className="px-2 py-1.5 border border-gray-300 rounded-md text-gray-900 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                            />
-                            <span className="text-gray-500">to</span>
-                            <input
-                              type="time"
-                              value={operatingHours[day].close}
-                              onChange={(e) => setOperatingHours({
-                                ...operatingHours,
-                                [day]: { ...operatingHours[day], close: e.target.value }
-                              })}
-                              className="px-2 py-1.5 border border-gray-300 rounded-md text-gray-900 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                            />
-                          </div>
-                        ) : (
-                          <span className="text-gray-500 italic text-sm">Closed</span>
-                        )}
-                      </div>
+                        </div>
+                      ) : (
+                        <span className="text-gray-400 italic text-xs sm:text-sm">Closed</span>
+                      )}
                     </div>
                   );
                 })}
               </div>
 
               {/* Holiday Closure Section */}
-              <div className="mt-6 p-4 bg-orange-50 rounded-lg border border-orange-200">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-                    <Calendar className="w-5 h-5 text-orange-500" />
+              <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-orange-50 rounded-lg border border-orange-200">
+                <div className="flex items-center justify-between mb-3 sm:mb-4">
+                  <h3 className="font-semibold text-gray-900 flex items-center gap-2 text-sm sm:text-base">
+                    <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500 flex-shrink-0" />
                     Holiday / Temporary Closure
                   </h3>
                   <label className="relative inline-flex items-center cursor-pointer">
@@ -2084,8 +2073,8 @@ function SettingsContent() {
                 </div>
 
                 {operatingHours.holiday.enabled && (
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-3 sm:space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Closure Start Date
