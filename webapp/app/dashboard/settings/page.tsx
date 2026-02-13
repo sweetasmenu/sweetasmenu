@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Shield, Users, Utensils, Truck, Store, Plus, Trash2, Edit2, Save, X, Loader2, Globe, ExternalLink, MapPin, Navigation, CreditCard, Building2, QrCode, Key, Eye, EyeOff, CheckCircle, AlertCircle, ArrowUpRight, Printer, Clock, Calendar } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
+import { printViaIframe } from '@/lib/utils/printHelper';
 
 interface ServiceOptions {
   dine_in: boolean;
@@ -1022,12 +1023,6 @@ function SettingsContent() {
 
   // Preview Print Receipt Header
   const previewPrintHeader = () => {
-    const printWindow = window.open('', '', 'width=400,height=500');
-    if (!printWindow) {
-      alert('Please allow popups to preview');
-      return;
-    }
-
     const html = `
       <!DOCTYPE html>
       <html>
@@ -1106,8 +1101,7 @@ function SettingsContent() {
       </html>
     `;
 
-    printWindow.document.write(html);
-    printWindow.document.close();
+    printViaIframe(html);
   };
 
   const handleSaveProfile = async () => {

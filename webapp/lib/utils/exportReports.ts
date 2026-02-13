@@ -1,6 +1,7 @@
 /**
  * Export Analytics Reports to PDF/Excel
  */
+import { printViaIframe } from './printHelper';
 
 interface ReportData {
   title: string;
@@ -171,13 +172,6 @@ export async function exportToPDF(data: ReportData): Promise<void> {
  * Print report
  */
 export function printReport(data: ReportData): void {
-  const printWindow = window.open('', '', 'width=800,height=600');
-  
-  if (!printWindow) {
-    alert('Please allow popups to print the report');
-    return;
-  }
-  
   const html = `
     <!DOCTYPE html>
     <html>
@@ -302,8 +296,7 @@ export function printReport(data: ReportData): void {
     </html>
   `;
   
-  printWindow.document.write(html);
-  printWindow.document.close();
+  printViaIframe(html);
 }
 
 /**

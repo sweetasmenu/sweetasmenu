@@ -8,6 +8,7 @@ import {
   Utensils, Coffee, Hand, Droplets, Receipt,
   MessageSquare, Store, MapPin, X, Printer, XCircle, Eye
 } from 'lucide-react';
+import { printViaIframe } from '@/lib/utils/printHelper';
 import { supabase } from '@/lib/supabase/client';
 import { t, tBilingual, mapToPOSLanguage, POSLanguage } from '@/lib/pos-translations';
 import { getThemeClasses, POSTheme } from '@/lib/pos-theme';
@@ -692,11 +693,6 @@ export default function StaffOrdersPage() {
   // Print order receipt (optimized for 80mm thermal printers)
   // isCopy: true = reprint with "COPY" watermark
   const printOrder = (order: Order, isCopy: boolean = false) => {
-    const printWindow = window.open('', '', 'width=320,height=600');
-    if (!printWindow) {
-      alert('Please allow popups to print');
-      return;
-    }
 
     // Calculate subtotal from items
     const subtotal = order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -1097,17 +1093,11 @@ export default function StaffOrdersPage() {
       </html>
     `;
 
-    printWindow.document.write(html);
-    printWindow.document.close();
+    printViaIframe(html);
   };
 
   // Print kitchen ticket (for kitchen display)
   const printKitchenTicket = (order: Order) => {
-    const printWindow = window.open('', '', 'width=320,height=600');
-    if (!printWindow) {
-      alert('Please allow popups to print');
-      return;
-    }
 
     const html = `
       <!DOCTYPE html>
@@ -1226,8 +1216,7 @@ export default function StaffOrdersPage() {
       </html>
     `;
 
-    printWindow.document.write(html);
-    printWindow.document.close();
+    printViaIframe(html);
   };
 
   // Update service request status

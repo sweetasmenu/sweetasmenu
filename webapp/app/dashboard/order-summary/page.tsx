@@ -31,6 +31,7 @@ import {
   Printer,
   Coins
 } from 'lucide-react';
+import { printViaIframe } from '@/lib/utils/printHelper';
 import { supabase } from '@/lib/supabase/client';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -370,11 +371,7 @@ export default function OrderSummaryPage() {
     setExporting('pdf');
 
     try {
-      const printWindow = window.open('', '', 'width=800,height=600');
-      if (!printWindow) {
-        alert('Please allow popups to export PDF');
-        return;
-      }
+      // Using iframe for mobile-friendly printing
 
       const html = `
         <!DOCTYPE html>
@@ -442,8 +439,7 @@ export default function OrderSummaryPage() {
         </html>
       `;
 
-      printWindow.document.write(html);
-      printWindow.document.close();
+      printViaIframe(html);
     } finally {
       setExporting(null);
     }
@@ -606,12 +602,6 @@ export default function OrderSummaryPage() {
 
   // Print Daily Sales Summary
   const printDailySummary = () => {
-    const printWindow = window.open('', '', 'width=400,height=600');
-    if (!printWindow) {
-      alert('Please allow popups to print');
-      return;
-    }
-
     // Calculate totals for paid orders only
     const paidOrders = orders.filter(o => o.payment_status === 'paid' && !o.is_voided && o.status !== 'voided');
     const totalRevenue = summary?.total_revenue || 0;
@@ -704,17 +694,11 @@ export default function OrderSummaryPage() {
       </html>
     `;
 
-    printWindow.document.write(html);
-    printWindow.document.close();
+    printViaIframe(html);
   };
 
   // Print Order Receipt
   const printOrderReceipt = (order: Order) => {
-    const printWindow = window.open('', '', 'width=400,height=600');
-    if (!printWindow) {
-      alert('Please allow popups to print');
-      return;
-    }
 
     const orderDate = new Date(order.created_at).toLocaleString('en-NZ', {
       day: '2-digit',
@@ -825,8 +809,7 @@ export default function OrderSummaryPage() {
       </html>
     `;
 
-    printWindow.document.write(html);
-    printWindow.document.close();
+    printViaIframe(html);
   };
 
   return (

@@ -7,6 +7,7 @@ import {
   AlertTriangle, LogOut, RefreshCw, Loader2, Timer,
   Utensils, Coffee, Users, XCircle, X, Printer
 } from 'lucide-react';
+import { printViaIframe } from '@/lib/utils/printHelper';
 import { supabase } from '@/lib/supabase/client';
 import { t, tBilingual, mapToPOSLanguage, POSLanguage } from '@/lib/pos-translations';
 import { getThemeClasses, POSTheme } from '@/lib/pos-theme';
@@ -530,11 +531,6 @@ export default function KitchenDisplayPage() {
 
   // Print kitchen ticket (optimized for 80mm thermal printers)
   const printKitchenTicket = (order: Order) => {
-    const printWindow = window.open('', '', 'width=320,height=600');
-    if (!printWindow) {
-      alert('Please allow popups to print');
-      return;
-    }
 
     const html = `
       <!DOCTYPE html>
@@ -653,8 +649,7 @@ export default function KitchenDisplayPage() {
       </html>
     `;
 
-    printWindow.document.write(html);
-    printWindow.document.close();
+    printViaIframe(html);
   };
 
   // Logout

@@ -9,6 +9,7 @@ import {
   Eye, X
 } from 'lucide-react';
 import { createClient } from '@supabase/supabase-js';
+import { printViaIframe } from '@/lib/utils/printHelper';
 import POSNavbar from '@/components/POSNavbar';
 import { t, tBilingual, mapToPOSLanguage, POSLanguage } from '@/lib/pos-translations';
 import { getThemeClasses, POSTheme } from '@/lib/pos-theme';
@@ -316,11 +317,7 @@ export default function CashierDashboardPage() {
   const printReport = () => {
     if (!summary) return;
 
-    const printWindow = window.open('', '', 'width=400,height=600');
-    if (!printWindow) {
-      alert('Please allow popups to print');
-      return;
-    }
+    // Using iframe for mobile-friendly printing
 
     const html = `
       <!DOCTYPE html>
@@ -403,8 +400,7 @@ export default function CashierDashboardPage() {
       </html>
     `;
 
-    printWindow.document.write(html);
-    printWindow.document.close();
+    printViaIframe(html);
   };
 
   if (loading) {
