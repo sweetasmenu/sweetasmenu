@@ -560,9 +560,6 @@ export default function KitchenDisplayPage() {
             font-size: 14px;
             font-weight: bold;
             text-align: center;
-            text-transform: uppercase;
-            border: 2px solid black;
-            padding: 2mm;
             margin-bottom: 3mm;
           }
           .info { font-size: 11px; margin-bottom: 3mm; }
@@ -605,7 +602,7 @@ export default function KitchenDisplayPage() {
         </div>
 
         <div class="order-type">
-          ${order.service_type === 'dine_in' ? 'DINE IN' : order.service_type === 'pickup' ? 'PICKUP' : 'DELIVERY'}
+          ${order.service_type === 'dine_in' ? 'Dine In' : order.service_type === 'pickup' ? 'Pick Up' : 'Delivery'}
         </div>
 
         <div class="info">

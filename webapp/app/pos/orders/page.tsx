@@ -824,12 +824,8 @@ export default function StaffOrdersPage() {
           }
 
           .order-type {
-            display: inline-block;
-            border: 2px solid #000;
-            padding: 1mm 3mm;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: bold;
-            text-transform: uppercase;
             margin-top: 2mm;
           }
 
@@ -1010,7 +1006,7 @@ export default function StaffOrdersPage() {
               </p>
             ` : ''}
             <p class="subtitle">TAX INVOICE</p>
-            <span class="order-type">${order.service_type === 'dine_in' ? 'DINE IN' : order.service_type === 'pickup' ? 'PICKUP' : 'DELIVERY'}</span>
+            <span class="order-type">${order.service_type === 'dine_in' ? 'Dine In' : order.service_type === 'pickup' ? 'Pick Up' : 'Delivery'}</span>
           </div>
 
           <div class="info">
@@ -1125,9 +1121,6 @@ export default function StaffOrdersPage() {
             font-size: 14px;
             font-weight: bold;
             text-align: center;
-            text-transform: uppercase;
-            border: 2px solid black;
-            padding: 2mm;
             margin-bottom: 3mm;
           }
           .info { font-size: 11px; margin-bottom: 3mm; }
@@ -1170,7 +1163,7 @@ export default function StaffOrdersPage() {
         </div>
 
         <div class="order-type">
-          ${order.service_type === 'dine_in' ? 'DINE IN' : order.service_type === 'pickup' ? 'PICKUP' : 'DELIVERY'}
+          ${order.service_type === 'dine_in' ? 'Dine In' : order.service_type === 'pickup' ? 'Pick Up' : 'Delivery'}
         </div>
 
         <div class="info">
