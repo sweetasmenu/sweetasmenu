@@ -1,6 +1,11 @@
 /**
  * Mobile-friendly print utility using hidden iframe instead of popup windows.
  * Popup windows are blocked by most mobile browsers, while iframes work reliably.
+ *
+ * Key design decisions:
+ * - Uses `srcdoc` instead of `document.write()` so `onload` fires reliably on mobile
+ * - Iframe has 302px width (~80mm at 96dpi) so thermal-printer content renders correctly
+ * - Strips all <script> tags from the HTML to prevent auto-print/close conflicts
  */
 
 const PRINT_IFRAME_ID = 'print-helper-iframe';
@@ -8,7 +13,7 @@ const PRINT_IFRAME_ID = 'print-helper-iframe';
 /**
  * Prints HTML content via a hidden iframe — works on mobile, tablet, and desktop.
  *
- * @param htmlContent - Full HTML document string to print (without window.print/close scripts)
+ * @param htmlContent - Full HTML document string to print
  * @returns Promise that resolves after print dialog is triggered
  */
 export function printViaIframe(htmlContent: string): Promise<void> {
@@ -17,47 +22,33 @@ export function printViaIframe(htmlContent: string): Promise<void> {
     const existing = document.getElementById(PRINT_IFRAME_ID);
     if (existing) existing.remove();
 
-    // Create hidden iframe
+    // Strip all <script> tags from the HTML since we handle printing from the parent.
+    // Using [\s\S]*? to match across newlines (nested braces, setTimeout, etc.)
+    const cleanHtml = htmlContent.replace(/<script[\s\S]*?<\/script>/gi, '');
+
+    // Create iframe positioned off-screen but with proper width for content rendering.
+    // Width of 302px ≈ 80mm at 96 DPI — matches thermal printer paper width.
     const iframe = document.createElement('iframe');
     iframe.id = PRINT_IFRAME_ID;
     iframe.style.position = 'fixed';
-    iframe.style.right = '0';
-    iframe.style.bottom = '0';
-    iframe.style.width = '0';
-    iframe.style.height = '0';
+    iframe.style.left = '-9999px';
+    iframe.style.top = '0';
+    iframe.style.width = '302px';
+    iframe.style.height = '900px';
     iframe.style.border = 'none';
-    iframe.style.opacity = '0';
+    iframe.style.visibility = 'hidden';
     document.body.appendChild(iframe);
 
-    const iframeDoc = iframe.contentWindow?.document;
-    if (!iframeDoc) {
-      console.error('Could not access iframe document');
-      iframe.remove();
-      resolve();
-      return;
-    }
-
-    // Strip any window.print() / window.close() / window.onload scripts from the HTML
-    // since we handle printing from the parent
-    const cleanHtml = htmlContent
-      .replace(/window\.onload\s*=\s*function\s*\(\)\s*\{[^}]*\}/g, '')
-      .replace(/window\.print\(\)/g, '')
-      .replace(/window\.close\(\)/g, '')
-      .replace(/window\.onafterprint\s*=\s*function\s*\(\)\s*\{[^}]*\}/g, '');
-
-    iframeDoc.open();
-    iframeDoc.write(cleanHtml);
-    iframeDoc.close();
-
-    // Wait for content to render, then trigger print
+    // Set onload BEFORE setting srcdoc so the event is captured reliably.
     iframe.onload = () => {
+      // Wait for content to fully render before triggering print
       setTimeout(() => {
         try {
           iframe.contentWindow?.focus();
           iframe.contentWindow?.print();
         } catch (e) {
-          console.error('Print failed:', e);
-          // Fallback: try opening in new tab (for browsers that block iframe printing)
+          console.error('Iframe print failed:', e);
+          // Fallback: open in new tab (for browsers that block iframe printing)
           const blob = new Blob([cleanHtml], { type: 'text/html' });
           const url = URL.createObjectURL(blob);
           window.open(url, '_blank');
@@ -68,19 +59,11 @@ export function printViaIframe(htmlContent: string): Promise<void> {
           iframe.remove();
           resolve();
         }, 1000);
-      }, 300);
+      }, 500);
     };
-  });
-}
 
-/**
- * Helper to strip auto-print scripts from existing HTML templates.
- * Use this when adapting existing popup-based print HTML.
- */
-export function stripPrintScripts(html: string): string {
-  return html
-    .replace(/window\.onload\s*=\s*function\s*\(\)\s*\{[^}]*\}/g, '')
-    .replace(/window\.print\(\)/g, '')
-    .replace(/window\.close\(\)/g, '')
-    .replace(/window\.onafterprint\s*=\s*function\s*\(\)\s*\{[^}]*\}/g, '');
+    // Use srcdoc to load content — this reliably triggers onload on all browsers
+    // including mobile, unlike document.write() which may not trigger onload.
+    iframe.srcdoc = cleanHtml;
+  });
 }
