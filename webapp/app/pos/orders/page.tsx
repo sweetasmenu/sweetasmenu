@@ -780,8 +780,7 @@ export default function StaffOrdersPage() {
 
           .copy-badge {
             text-align: center;
-            background: #000;
-            color: #fff;
+            border: 3px solid #000;
             padding: 2mm;
             margin-bottom: 2mm;
             font-size: 14px;
@@ -826,8 +825,7 @@ export default function StaffOrdersPage() {
 
           .order-type {
             display: inline-block;
-            background: #000;
-            color: #fff;
+            border: 2px solid #000;
             padding: 1mm 3mm;
             font-size: 11px;
             font-weight: bold;
@@ -1128,8 +1126,7 @@ export default function StaffOrdersPage() {
             font-weight: bold;
             text-align: center;
             text-transform: uppercase;
-            background: black;
-            color: white;
+            border: 2px solid black;
             padding: 2mm;
             margin-bottom: 3mm;
           }

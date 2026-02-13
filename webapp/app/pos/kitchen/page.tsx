@@ -561,8 +561,7 @@ export default function KitchenDisplayPage() {
             font-weight: bold;
             text-align: center;
             text-transform: uppercase;
-            background: black;
-            color: white;
+            border: 2px solid black;
             padding: 2mm;
             margin-bottom: 3mm;
           }
