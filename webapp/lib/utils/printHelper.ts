@@ -1,121 +1,84 @@
 /**
- * Mobile-friendly print utility for thermal receipt printers (80mm).
+ * Print utility for thermal receipt printers (80mm).
  *
- * Strategy: inject print content into the parent page as an iframe,
- * then call window.print() with @media print CSS that hides everything
- * except the receipt. This works reliably on Android/iOS/Desktop because
- * window.print() is universally supported, unlike iframe.contentWindow.print()
- * which fails on many mobile browsers.
+ * Two strategies based on device:
+ *
+ * Desktop: Hidden iframe + iframe.contentWindow.print()
+ *   - The iframe has its own document with @page { size: 80mm auto }
+ *   - Print is scoped to the iframe content only
+ *   - Thermal printer receives correctly-sized 80mm content
+ *
+ * Mobile/Tablet: Opens receipt in new tab via blob URL + <a> click
+ *   - Bypasses popup blockers (programmatic <a> click from user gesture)
+ *   - Receipt HTML contains auto-print script that triggers window.print()
+ *   - New tab has its own @page rules → prints correctly on thermal printer
  */
 
 const PRINT_IFRAME_ID = 'print-helper-iframe';
-const PRINT_STYLE_ID = 'print-helper-style';
 
 /**
  * Prints HTML content for thermal printers — works on mobile, tablet, and desktop.
- *
- * How it works:
- * 1. Creates a hidden iframe with the receipt HTML (srcdoc)
- * 2. Injects @media print CSS into parent to hide all page content except the iframe
- * 3. Calls window.print() on the parent (reliable on all browsers)
- * 4. Cleans up after the print dialog closes
- *
- * @param htmlContent - Full HTML document string to print
- * @returns Promise that resolves after print dialog is triggered
  */
 export function printViaIframe(htmlContent: string): Promise<void> {
   return new Promise((resolve) => {
-    // Clean up any existing print elements
+    // Clean up any previous print iframe
     document.getElementById(PRINT_IFRAME_ID)?.remove();
-    document.getElementById(PRINT_STYLE_ID)?.remove();
 
-    // Strip all <script> tags (handles nested braces, setTimeout, etc.)
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+                     ('ontouchstart' in window && window.innerWidth < 1024);
+
+    if (isMobile) {
+      // === MOBILE: Open receipt in new tab ===
+      // Keep the original HTML with <script> tags so it auto-prints
+      const blob = new Blob([htmlContent], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+
+      // Use <a> click instead of window.open() to avoid popup blockers
+      const a = document.createElement('a');
+      a.href = url;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      // Revoke blob URL after a delay (receipt page needs time to load)
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+      resolve();
+      return;
+    }
+
+    // === DESKTOP: Hidden iframe + iframe.contentWindow.print() ===
+    // Strip <script> tags since we manually trigger print from parent
     const cleanHtml = htmlContent.replace(/<script[\s\S]*?<\/script>/gi, '');
 
-    // Inject @media print CSS into parent page:
-    // - Hides ALL page content when printing
-    // - Shows ONLY the receipt iframe
-    // - Sets @page size to 80mm for thermal printers
-    const style = document.createElement('style');
-    style.id = PRINT_STYLE_ID;
-    style.textContent = `
-      @media print {
-        @page {
-          size: 80mm auto;
-          margin: 0;
-        }
-        /* Hide everything on the page */
-        body > *:not(#${PRINT_IFRAME_ID}) {
-          display: none !important;
-        }
-        /* Force body to 80mm — prevents iframe inheriting full viewport width */
-        html, body {
-          width: 80mm !important;
-          max-width: 80mm !important;
-          margin: 0 !important;
-          padding: 0 !important;
-          background: white !important;
-          overflow: visible !important;
-        }
-        /* Show the receipt iframe at exactly 80mm */
-        #${PRINT_IFRAME_ID} {
-          display: block !important;
-          position: static !important;
-          visibility: visible !important;
-          width: 80mm !important;
-          max-width: 80mm !important;
-          border: none !important;
-          opacity: 1 !important;
-        }
-      }
-    `;
-    document.head.appendChild(style);
-
-    // Create iframe off-screen (invisible on screen, visible only during print)
-    // Width 302px ≈ 80mm at 96 DPI for correct content layout
     const iframe = document.createElement('iframe');
     iframe.id = PRINT_IFRAME_ID;
     iframe.style.position = 'fixed';
     iframe.style.left = '-9999px';
     iframe.style.top = '0';
-    iframe.style.width = '302px';
+    iframe.style.width = '302px'; // ~80mm at 96 DPI
     iframe.style.height = '900px';
     iframe.style.border = 'none';
     iframe.style.opacity = '0';
     document.body.appendChild(iframe);
 
-    const cleanup = () => {
-      iframe.remove();
-      style.remove();
-      resolve();
-    };
-
-    // Set onload BEFORE srcdoc so the event is captured
     iframe.onload = () => {
-      // Wait for content to fully render
       setTimeout(() => {
-        // Listen for print dialog close to clean up
-        const afterPrint = () => {
-          window.removeEventListener('afterprint', afterPrint);
-          cleanup();
-        };
-        window.addEventListener('afterprint', afterPrint);
-
-        // Trigger print on the parent page
-        // @media print CSS ensures only the iframe is visible
-        window.print();
-
-        // Safety timeout: clean up even if afterprint doesn't fire
+        try {
+          iframe.contentWindow?.focus();
+          iframe.contentWindow?.print();
+        } catch (e) {
+          console.error('Print failed:', e);
+        }
+        // Clean up after print dialog closes
         setTimeout(() => {
-          window.removeEventListener('afterprint', afterPrint);
-          if (document.getElementById(PRINT_IFRAME_ID)) {
-            cleanup();
-          }
-        }, 30000);
+          iframe.remove();
+          resolve();
+        }, 1000);
       }, 500);
     };
 
-    // Use srcdoc to load content — reliably triggers onload on all browsers
     iframe.srcdoc = cleanHtml;
   });
 }
