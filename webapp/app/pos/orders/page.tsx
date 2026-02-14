@@ -727,6 +727,8 @@ export default function StaffOrdersPage() {
           html, body {
             font-family: 'Courier New', Courier, monospace;
             width: 80mm;
+            height: auto;
+            overflow: visible;
             margin: 0;
             padding: 0 2mm;
             font-size: 12px;
@@ -734,7 +736,7 @@ export default function StaffOrdersPage() {
             color: #000;
             background: #fff;
           }
-          .receipt { width: 100%; }
+          .receipt { width: 100%; padding-bottom: 15mm; /* Extra feed for auto-cutter */ }
 
           .copy-watermark {
             position: absolute;
@@ -908,11 +910,8 @@ export default function StaffOrdersPage() {
             color: #999;
           }
 
-          /* Ensure text doesn't overflow */
-          .item-name {
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-          }
+          /* Prevent content from being split across pages */
+          .item, .totals, .footer { page-break-inside: avoid; }
         </style>
       </head>
       <body>
@@ -1001,12 +1000,10 @@ export default function StaffOrdersPage() {
         </div>
 
         <script>
+          window.onafterprint = function() { window.close(); };
           window.onload = function() {
-            setTimeout(function() {
-              window.print();
-              window.close();
-            }, 250);
-          }
+            setTimeout(function() { window.print(); }, 400);
+          };
         </script>
       </body>
       </html>
@@ -1029,12 +1026,15 @@ export default function StaffOrdersPage() {
           html, body {
             font-family: 'Courier New', Courier, monospace;
             width: 80mm;
+            height: auto;
+            overflow: visible;
             margin: 0;
             padding: 0 2mm;
             font-size: 12px;
             color: #000;
             background: #fff;
           }
+          .ticket { padding-bottom: 15mm; /* Extra feed for auto-cutter */ }
           .order-number {
             font-size: 24px;
             font-weight: bold;
@@ -1058,6 +1058,7 @@ export default function StaffOrdersPage() {
             margin: 3mm 0;
             padding-bottom: 2mm;
             border-bottom: 1px dashed #ccc;
+            page-break-inside: avoid;
           }
           .item-qty { font-size: 16px; }
           .modifier {
@@ -1073,6 +1074,7 @@ export default function StaffOrdersPage() {
             margin: 3mm 0;
             font-size: 14px;
             font-weight: bold;
+            page-break-inside: avoid;
           }
           .time {
             text-align: center;
@@ -1084,6 +1086,7 @@ export default function StaffOrdersPage() {
         </style>
       </head>
       <body>
+      <div class="ticket">
         <div class="order-number">
           #${order.id.slice(0, 8).toUpperCase()}
         </div>
@@ -1119,14 +1122,13 @@ export default function StaffOrdersPage() {
             hour: '2-digit', minute: '2-digit', second: '2-digit'
           })}
         </div>
+      </div>
 
         <script>
+          window.onafterprint = function() { window.close(); };
           window.onload = function() {
-            setTimeout(function() {
-              window.print();
-              window.close();
-            }, 250);
-          }
+            setTimeout(function() { window.print(); }, 400);
+          };
         </script>
       </body>
       </html>

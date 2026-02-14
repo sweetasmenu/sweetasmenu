@@ -326,18 +326,20 @@ export default function CashierDashboardPage() {
         <title>Daily Cashier Report</title>
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
-          body { font-family: 'Courier New', monospace; width: 80mm; padding: 10mm; font-size: 12px; }
+          @page { size: 80mm auto; margin: 0; }
+          html, body { font-family: 'Courier New', monospace; width: 80mm; height: auto; overflow: visible; margin: 0; padding: 0 2mm; font-size: 12px; color: #000; background: #fff; }
+          .report { padding-bottom: 15mm; /* Extra feed for auto-cutter */ }
           .header { text-align: center; margin-bottom: 15px; border-bottom: 2px dashed #000; padding-bottom: 10px; }
           .header h1 { font-size: 16px; margin-bottom: 5px; }
-          .section { margin: 15px 0; padding-bottom: 10px; border-bottom: 1px dashed #000; }
+          .section { margin: 15px 0; padding-bottom: 10px; border-bottom: 1px dashed #000; page-break-inside: avoid; }
           .section h2 { font-size: 14px; margin-bottom: 10px; }
           .row { display: flex; justify-content: space-between; margin: 5px 0; }
           .total { font-size: 18px; font-weight: bold; }
           .footer { text-align: center; margin-top: 20px; font-size: 10px; }
-          @media print { body { padding: 0; } }
         </style>
       </head>
       <body>
+      <div class="report">
         <div class="header">
           <h1>${session?.restaurantName || 'Restaurant'}</h1>
           ${restaurantInfo.address ? `<p style="font-size: 10px;">${restaurantInfo.address}</p>` : ''}
@@ -392,9 +394,13 @@ export default function CashierDashboardPage() {
           <p>Printed: ${new Date().toLocaleString()}</p>
           <p>Powered by Smart Menu</p>
         </div>
+      </div>
 
         <script>
-          window.onload = function() { window.print(); window.close(); }
+          window.onafterprint = function() { window.close(); };
+          window.onload = function() {
+            setTimeout(function() { window.print(); }, 400);
+          };
         </script>
       </body>
       </html>
