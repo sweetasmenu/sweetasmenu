@@ -175,33 +175,120 @@ class TrialLimitsService:
             print(f"⚠️ TrialLimits: Failed to get Supabase counts: {e}")
         return None
 
+    def _get_supabase_user_data(self, user_id: str) -> Optional[Dict[str, Any]]:
+        """Get trial dates AND usage counts from Supabase in one query"""
+        if not _supabase_client or not self._is_valid_uuid(user_id):
+            return None
+        try:
+            result = _supabase_client.table('user_profiles').select(
+                'trial_start_date, trial_end_date, image_generation_count, image_enhancement_count, menu_items_count'
+            ).eq('user_id', user_id).limit(1).execute()
+            if result.data and len(result.data) > 0:
+                data = result.data[0]
+                parsed = {
+                    'image_generation_count': data.get('image_generation_count') or 0,
+                    'image_enhancement_count': data.get('image_enhancement_count') or 0,
+                    'menu_items_count': data.get('menu_items_count') or 0,
+                }
+                trial_start = data.get('trial_start_date')
+                trial_end = data.get('trial_end_date')
+                if trial_start:
+                    if isinstance(trial_start, str):
+                        trial_start = datetime.fromisoformat(trial_start.replace('+00', '+00:00').replace('Z', '+00:00'))
+                        trial_start = trial_start.replace(tzinfo=None)
+                    parsed['trial_start_date'] = trial_start
+                if trial_end:
+                    if isinstance(trial_end, str):
+                        trial_end = datetime.fromisoformat(trial_end.replace('+00', '+00:00').replace('Z', '+00:00'))
+                        trial_end = trial_end.replace(tzinfo=None)
+                    parsed['trial_end_date'] = trial_end
+                return parsed
+        except Exception as e:
+            print(f"⚠️ TrialLimits: Failed to get Supabase user data: {e}")
+        return None
+
+    def _get_supabase_trial_dates(self, user_id: str) -> Optional[Dict[str, Any]]:
+        """Get trial dates from Supabase user_profiles table (persistent storage)"""
+        if not _supabase_client or not self._is_valid_uuid(user_id):
+            return None
+        try:
+            result = _supabase_client.table('user_profiles').select(
+                'trial_start_date, trial_end_date'
+            ).eq('user_id', user_id).limit(1).execute()
+            if result.data and len(result.data) > 0:
+                data = result.data[0]
+                trial_start = data.get('trial_start_date')
+                trial_end = data.get('trial_end_date')
+                if trial_start and trial_end:
+                    # Parse ISO date strings to datetime
+                    if isinstance(trial_start, str):
+                        trial_start = datetime.fromisoformat(trial_start.replace('+00', '+00:00').replace('Z', '+00:00'))
+                        # Convert to naive datetime (remove timezone) for consistency
+                        trial_start = trial_start.replace(tzinfo=None)
+                    if isinstance(trial_end, str):
+                        trial_end = datetime.fromisoformat(trial_end.replace('+00', '+00:00').replace('Z', '+00:00'))
+                        trial_end = trial_end.replace(tzinfo=None)
+                    return {
+                        'trial_start_date': trial_start,
+                        'trial_end_date': trial_end
+                    }
+        except Exception as e:
+            print(f"⚠️ TrialLimits: Failed to get Supabase trial dates: {e}")
+        return None
+
+    def _save_supabase_trial_dates(self, user_id: str, trial_start: datetime, trial_end: datetime):
+        """Save trial dates to Supabase user_profiles table"""
+        if not _supabase_client or not self._is_valid_uuid(user_id):
+            return
+        try:
+            _supabase_client.table('user_profiles').update({
+                'trial_start_date': trial_start.isoformat(),
+                'trial_end_date': trial_end.isoformat()
+            }).eq('user_id', user_id).execute()
+            print(f"✅ TrialLimits: Saved trial dates to Supabase for user {user_id[:8]}...")
+        except Exception as e:
+            print(f"⚠️ TrialLimits: Failed to save trial dates to Supabase: {e}")
+
     def initialize_user(self, user_id: str) -> Dict[str, Any]:
         """
         เริ่มต้น trial สำหรับ user ใหม่
-        
+
         Args:
             user_id: User ID
-            
+
         Returns:
             Dictionary with trial information
         """
         if user_id not in self.usage_data or not self.usage_data[user_id].get('trial_start_date'):
-            now = datetime.now()
-            trial_end = now + timedelta(days=self.TRIAL_DURATION_DAYS)
-            
+            # Check Supabase first for existing trial dates (persistent storage)
+            supabase_dates = self._get_supabase_trial_dates(user_id)
+
+            if supabase_dates:
+                # User already has trial dates in Supabase - use those
+                trial_start = supabase_dates['trial_start_date']
+                trial_end = supabase_dates['trial_end_date']
+                print(f"✅ TrialLimits: Restored trial dates from Supabase for user {user_id[:8]}...")
+            else:
+                # Brand new user - create fresh trial
+                now = datetime.utcnow()
+                trial_start = now
+                trial_end = now + timedelta(days=self.TRIAL_DURATION_DAYS)
+                # Save to Supabase for persistence
+                self._save_supabase_trial_dates(user_id, trial_start, trial_end)
+
             self.usage_data[user_id] = {
                 "user_id": user_id,
-                "trial_start_date": now,
+                "trial_start_date": trial_start,
                 "trial_end_date": trial_end,
                 "is_subscribed": False,
                 "subscription_plan": None,
                 "menu_items_count": 0,
                 "image_generation_count": 0,
                 "image_enhancement_count": 0,
-                "last_reset": now
+                "last_reset": datetime.utcnow()
             }
             self.save_data()
-        
+
         return self.get_user_status(user_id)
     
     def get_user_status(self, user_id: str, user_role: str = None) -> Dict[str, Any]:
@@ -234,37 +321,41 @@ class TrialLimitsService:
         # Initialize if not exists
         if user_id not in self.usage_data:
             self.initialize_user(user_id)
-        
-        user_data = self.usage_data[user_id]
-        now = datetime.now()
-        
-        # Check if trial expired
-        trial_end = user_data.get('trial_end_date')
-        if trial_end and isinstance(trial_end, str):
-            trial_end = datetime.fromisoformat(trial_end)
-        
-        is_trial_active = (
-            user_role == 'free_trial' and
-            trial_end and
-            now < trial_end
-        )
-        
-        # Override subscription status based on role
-        if is_subscribed:
-            user_data['is_subscribed'] = True
-            user_data['subscription_plan'] = plan_from_role
 
-        # Try to get counts from Supabase first (persistent storage)
-        supabase_counts = self._get_supabase_counts(user_id)
-        if supabase_counts:
-            menu_items_count = supabase_counts['menu_items_count']
-            image_generation_count = supabase_counts['image_generation_count']
-            image_enhancement_count = supabase_counts['image_enhancement_count']
+        user_data = self.usage_data[user_id]
+        now = datetime.utcnow()
+
+        # Get all data from Supabase in one query (trial dates + counts)
+        supabase_data = self._get_supabase_user_data(user_id)
+        if supabase_data:
+            if supabase_data.get('trial_start_date'):
+                user_data['trial_start_date'] = supabase_data['trial_start_date']
+            if supabase_data.get('trial_end_date'):
+                user_data['trial_end_date'] = supabase_data['trial_end_date']
+            menu_items_count = supabase_data.get('menu_items_count', 0)
+            image_generation_count = supabase_data.get('image_generation_count', 0)
+            image_enhancement_count = supabase_data.get('image_enhancement_count', 0)
         else:
             # Fallback to local data
             menu_items_count = user_data.get('menu_items_count', 0)
             image_generation_count = user_data.get('image_generation_count', 0)
             image_enhancement_count = user_data.get('image_enhancement_count', 0)
+
+        # Check if trial expired
+        trial_end = user_data.get('trial_end_date')
+        if trial_end and isinstance(trial_end, str):
+            trial_end = datetime.fromisoformat(trial_end)
+
+        is_trial_active = (
+            user_role == 'free_trial' and
+            trial_end and
+            now < trial_end
+        )
+
+        # Override subscription status based on role
+        if is_subscribed:
+            user_data['is_subscribed'] = True
+            user_data['subscription_plan'] = plan_from_role
 
         return {
             "user_id": user_id,
