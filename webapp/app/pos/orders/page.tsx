@@ -563,7 +563,7 @@ export default function StaffOrdersPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          reason: voidReason,
+          void_reason: voidReason,
           voided_by: session?.staffId
         })
       });

@@ -4143,7 +4143,7 @@ async def void_order(order_id: str, request: VoidOrderRequest):
         # Update order to void
         update_data = {
             "is_voided": True,
-            "voided_at": "now()",
+            "voided_at": datetime.utcnow().isoformat(),
             "void_reason": request.void_reason,
             "status": "cancelled"
         }
