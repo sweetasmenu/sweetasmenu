@@ -542,12 +542,12 @@ export default function KitchenDisplayPage() {
           @page { size: 80mm auto; margin: 0; }
           html, body {
             font-family: 'Courier New', Courier, monospace;
-            width: 100%;
+            width: 80mm;
             margin: 0;
-            padding: 1mm 2mm;
+            padding: 0 2mm;
             font-size: 12px;
-            background: white;
-            color: black;
+            color: #000;
+            background: #fff;
           }
           .order-number {
             font-size: 24px;

@@ -721,33 +721,20 @@ export default function StaffOrdersPage() {
         <meta name="viewport" content="width=80mm, initial-scale=1.0">
         <title>Receipt - ${order.id.slice(0, 8).toUpperCase()}</title>
         <style>
-          /* Thermal Printer CSS - 80mm roll */
-          * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-          }
-
-          @page {
-            size: 80mm auto;
-            margin: 0;
-          }
-
+          /* Thermal Printer - 80mm roll */
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          @page { size: 80mm auto; margin: 0; }
           html, body {
             font-family: 'Courier New', Courier, monospace;
-            width: 100%;
+            width: 80mm;
             margin: 0;
-            padding: 1mm 2mm;
+            padding: 0 2mm;
             font-size: 12px;
             line-height: 1.3;
-            background: white;
-            color: black;
+            color: #000;
+            background: #fff;
           }
-
-          .receipt {
-            width: 100%;
-            position: relative;
-          }
+          .receipt { width: 100%; }
 
           .copy-watermark {
             position: absolute;
@@ -1041,12 +1028,12 @@ export default function StaffOrdersPage() {
           @page { size: 80mm auto; margin: 0; }
           html, body {
             font-family: 'Courier New', Courier, monospace;
-            width: 100%;
+            width: 80mm;
             margin: 0;
-            padding: 1mm 2mm;
+            padding: 0 2mm;
             font-size: 12px;
-            background: white;
-            color: black;
+            color: #000;
+            background: #fff;
           }
           .order-number {
             font-size: 24px;
