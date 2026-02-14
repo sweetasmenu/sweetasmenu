@@ -48,19 +48,22 @@ export function printViaIframe(htmlContent: string): Promise<void> {
         body > *:not(#${PRINT_IFRAME_ID}) {
           display: none !important;
         }
-        /* Reset body for clean print */
+        /* Force body to 80mm — prevents iframe inheriting full viewport width */
         html, body {
+          width: 80mm !important;
+          max-width: 80mm !important;
           margin: 0 !important;
           padding: 0 !important;
           background: white !important;
           overflow: visible !important;
         }
-        /* Show the receipt iframe */
+        /* Show the receipt iframe at exactly 80mm */
         #${PRINT_IFRAME_ID} {
           display: block !important;
           position: static !important;
           visibility: visible !important;
-          width: 100% !important;
+          width: 80mm !important;
+          max-width: 80mm !important;
           border: none !important;
           opacity: 1 !important;
         }
