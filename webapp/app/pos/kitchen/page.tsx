@@ -540,10 +540,11 @@ export default function KitchenDisplayPage() {
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
           @page { size: 80mm auto; margin: 0; }
-          body {
+          html, body {
             font-family: 'Courier New', Courier, monospace;
-            width: 80mm;
-            padding: 3mm;
+            width: 100%;
+            margin: 0;
+            padding: 1mm 2mm;
             font-size: 12px;
             background: white;
             color: black;

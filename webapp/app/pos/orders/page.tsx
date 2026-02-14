@@ -721,48 +721,32 @@ export default function StaffOrdersPage() {
         <meta name="viewport" content="width=80mm, initial-scale=1.0">
         <title>Receipt - ${order.id.slice(0, 8).toUpperCase()}</title>
         <style>
-          /* Thermal Printer CSS - 80mm width (optimized for thermal printers) */
+          /* Thermal Printer CSS - 80mm roll */
           * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
           }
 
-          /* Force 80mm paper size with zero browser margins */
           @page {
             size: 80mm auto;
-            margin: 0 !important;
-            padding: 0 !important;
-          }
-
-          html {
-            width: 80mm;
             margin: 0;
-            padding: 0;
           }
 
-          body {
+          html, body {
             font-family: 'Courier New', Courier, monospace;
-            width: 80mm;
-            max-width: 80mm;
-            min-width: 80mm;
-            margin: 0 auto;
-            padding: 2mm 2.5mm; /* Safe padding to prevent edge cutting */
+            width: 100%;
+            margin: 0;
+            padding: 1mm 2mm;
             font-size: 12px;
             line-height: 1.3;
             background: white;
             color: black;
-            overflow: hidden;
           }
 
           .receipt {
             width: 100%;
-            max-width: 75mm; /* Safe width within 80mm paper */
-            margin: 0 auto;
             position: relative;
-            overflow: hidden;
           }
 
           .copy-watermark {
@@ -937,56 +921,10 @@ export default function StaffOrdersPage() {
             color: #999;
           }
 
-          /* Print-specific styles */
-          @media print {
-            html, body {
-              width: 80mm !important;
-              max-width: 80mm !important;
-              min-width: 80mm !important;
-              margin: 0 !important;
-              padding: 2mm 2.5mm !important;
-              -webkit-print-color-adjust: exact !important;
-              print-color-adjust: exact !important;
-            }
-
-            .receipt {
-              width: 100% !important;
-              max-width: 75mm !important;
-              page-break-inside: avoid;
-            }
-
-            .no-print {
-              display: none !important;
-            }
-
-            /* Ensure text doesn't overflow */
-            .item-name {
-              word-wrap: break-word;
-              overflow-wrap: break-word;
-              max-width: 40mm;
-            }
-
-            /* Force black text for thermal printers */
-            * {
-              color: #000 !important;
-            }
-
-            .copy-watermark {
-              color: rgba(0, 0, 0, 0.1) !important;
-            }
-          }
-
-          /* Screen preview styles */
-          @media screen {
-            body {
-              background: #f0f0f0;
-              padding: 10mm;
-            }
-            .receipt {
-              background: white;
-              box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-              padding: 3mm;
-            }
+          /* Ensure text doesn't overflow */
+          .item-name {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
           }
         </style>
       </head>
@@ -1101,10 +1039,11 @@ export default function StaffOrdersPage() {
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
           @page { size: 80mm auto; margin: 0; }
-          body {
+          html, body {
             font-family: 'Courier New', Courier, monospace;
-            width: 80mm;
-            padding: 3mm;
+            width: 100%;
+            margin: 0;
+            padding: 1mm 2mm;
             font-size: 12px;
             background: white;
             color: black;

@@ -60,9 +60,8 @@ export function printViaIframe(htmlContent: string): Promise<void> {
           display: block !important;
           position: static !important;
           visibility: visible !important;
-          width: 80mm !important;
+          width: 100% !important;
           height: auto !important;
-          min-height: 100vh;
           border: none !important;
           opacity: 1 !important;
         }
