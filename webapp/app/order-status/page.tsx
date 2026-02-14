@@ -298,6 +298,32 @@ export default function MyOrdersPage() {
     router.push(`/payment/${orderId}?restaurant=${restaurantSlug}`);
   };
 
+  // Handle cancel order
+  const handleCancelOrder = async (orderId: string) => {
+    if (!confirm('Are you sure you want to cancel this order?')) return;
+
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    try {
+      const response = await fetch(`${API_URL}/api/orders/${orderId}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'cancelled', cancel_reason: 'Cancelled by customer' })
+      });
+
+      if (response.ok) {
+        setOrders(prev => prev.map(o =>
+          o.id === orderId ? { ...o, status: 'cancelled' as const } : o
+        ));
+      } else {
+        const data = await response.json();
+        alert(data.detail || 'Failed to cancel order');
+      }
+    } catch (error) {
+      console.error('Failed to cancel order:', error);
+      alert('Failed to cancel order');
+    }
+  };
+
   // Filter: Show active orders first, then recent completed/cancelled
   const activeOrders = orders.filter(o =>
     !['completed', 'cancelled'].includes(o.status)
@@ -413,15 +439,25 @@ export default function MyOrdersPage() {
                           )}
                         </div>
 
-                        {/* Pay Now Button for pending_payment orders */}
+                        {/* Pay Now / Cancel Buttons for pending_payment orders */}
                         {order.status === 'pending_payment' && (
-                          <div className="mt-3 pt-3 border-t border-gray-100">
+                          <div className="mt-3 pt-3 border-t border-gray-100 flex gap-2">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleCancelOrder(order.id);
+                              }}
+                              className="py-2.5 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-semibold flex items-center justify-center gap-2"
+                            >
+                              <XCircle className="w-5 h-5" />
+                              Cancel
+                            </button>
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handlePayNow(order.id, restaurantSlug);
                               }}
-                              className="w-full py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold flex items-center justify-center gap-2"
+                              className="flex-1 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold flex items-center justify-center gap-2"
                             >
                               <CreditCard className="w-5 h-5" />
                               Complete Payment
