@@ -3,8 +3,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { 
-  Upload as UploadIcon, 
+import {
+  Upload as UploadIcon,
   X,
   Check,
   Loader2,
@@ -14,7 +14,9 @@ import {
   Wand2,
   Plus,
   Trash2,
-  Eye
+  Eye,
+  Crown,
+  Lock
 } from 'lucide-react';
 import { translateText as translateTextAPI, detectLanguage, generateFoodImage, enhanceImage, applyLogoOnly } from '@/lib/api-client';
 import ImageGallery from '@/components/ImageGallery';
@@ -342,7 +344,7 @@ export default function AddMenuItemPage() {
           console.log('📸 Public URL:', result.enhanced_image_url);
         }
       } else {
-        setError(result.error || 'Enhancement failed');
+        setError(typeof result.error === 'string' ? result.error : 'Enhancement failed');
       }
     } catch (err: any) {
       console.error('Enhancement error:', err);
@@ -423,7 +425,7 @@ export default function AddMenuItemPage() {
           console.log('📸 Public URL:', result.image_url);
         }
       } else {
-        setError(result.error || 'Failed to apply logo');
+        setError(typeof result.error === 'string' ? result.error : 'Failed to apply logo');
       }
     } catch (err: any) {
       console.error('Apply logo error:', err);
@@ -475,7 +477,7 @@ export default function AddMenuItemPage() {
             console.log('✅ Logo applied and photo accepted!');
           }
         } else {
-          setError(result.error || 'Failed to apply logo');
+          setError(typeof result.error === 'string' ? result.error : 'Failed to apply logo');
         }
       } catch (err: any) {
         console.error('Apply logo error:', err);
@@ -570,7 +572,7 @@ export default function AddMenuItemPage() {
           }
         }
       } else {
-        setError(result.error || 'Failed to generate image. Please try again.');
+        setError(typeof result.error === 'string' ? result.error : 'Failed to generate image. Please try again.');
       }
     } catch (err: any) {
       console.error('Image generation error:', err);
@@ -940,12 +942,17 @@ export default function AddMenuItemPage() {
     }
   };
 
+  // Check if trial has expired
+  const isTrialExpired = !loadingLimits && trialLimits &&
+    trialLimits.role === 'free_trial' &&
+    trialLimits.trial_days_remaining <= 0;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 py-8">
       <div className="container mx-auto px-4 max-w-4xl">
         {/* Header */}
-        <Link 
-          href="/dashboard" 
+        <Link
+          href="/dashboard"
           className="inline-flex items-center text-gray-600 hover:text-orange-500 transition-colors mb-8"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
@@ -963,6 +970,42 @@ export default function AddMenuItemPage() {
             Create a new menu item with photo, details, and translations
           </p>
         </div>
+
+        {/* Trial Expired Blocker */}
+        {isTrialExpired && (
+          <div className="bg-white rounded-2xl shadow-xl p-10 text-center">
+            <div className="inline-block bg-red-100 p-5 rounded-full mb-6">
+              <Lock className="w-14 h-14 text-red-500" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-3">
+              Free Trial Expired
+            </h2>
+            <p className="text-gray-600 mb-2 max-w-md mx-auto">
+              Your free trial has ended. Upgrade your plan to continue adding and managing menu items.
+            </p>
+            <p className="text-sm text-gray-500 mb-8 max-w-md mx-auto">
+              Upgrade now to unlock unlimited menu items, AI image generation, AI image enhancement, and more.
+            </p>
+            <Link
+              href="/pricing"
+              className="inline-flex items-center justify-center bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold py-4 px-10 rounded-xl transition-all shadow-lg hover:shadow-xl text-lg"
+            >
+              <Crown className="w-6 h-6 mr-3" />
+              Upgrade Plan
+            </Link>
+            <div className="mt-6">
+              <Link
+                href="/dashboard"
+                className="text-gray-500 hover:text-gray-700 text-sm transition-colors"
+              >
+                Back to Dashboard
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {/* Main content - hidden when trial expired */}
+        {!isTrialExpired && (<>
 
         {/* Restaurant Selector (Enterprise only) */}
         <RestaurantSelector
@@ -1080,7 +1123,7 @@ export default function AddMenuItemPage() {
 
         {error && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg">
-            {error}
+            {typeof error === 'string' ? error : JSON.stringify(error)}
           </div>
         )}
 
@@ -2591,6 +2634,8 @@ export default function AddMenuItemPage() {
             onClose={() => setShowImageGallery(false)}
           />
         )}
+
+        </>)}
       </div>
     </div>
   );
