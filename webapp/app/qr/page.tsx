@@ -11,7 +11,8 @@ import {
   Loader2,
   Copy,
   Check,
-  QrCode
+  QrCode,
+  Eye
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { supabase } from '@/lib/supabase/client';
@@ -353,11 +354,11 @@ export default function RestaurantQRCodePage() {
           </div>
 
           {/* Actions */}
-          <div className="grid md:grid-cols-3 gap-4">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <button
               onClick={handleDownload}
               disabled={downloading}
-              className="flex items-center justify-center gap-2 px-6 py-3 bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white rounded-lg font-semibold transition-colors"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3 bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white rounded-lg font-semibold transition-colors shadow-md hover:shadow-lg"
             >
               {downloading ? (
                 <>
@@ -374,21 +375,22 @@ export default function RestaurantQRCodePage() {
 
             <button
               onClick={handleShare}
-              className="flex items-center justify-center gap-2 px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition-colors"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition-colors shadow-md hover:shadow-lg"
             >
               <Share2 className="w-5 h-5" />
               Share
             </button>
           </div>
 
-          {/* Preview Link */}
-          <div className="mt-8 pt-8 border-t border-gray-200 text-center">
+          {/* View Menu */}
+          <div className="mt-6 pt-6 border-t border-gray-200 flex justify-center">
             <Link
               href={`/restaurant/${restaurantId}`}
               target="_blank"
-              className="inline-flex items-center text-orange-500 hover:text-orange-600 font-semibold"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg font-semibold transition-colors shadow-md hover:shadow-lg"
             >
-              View Menu →
+              <Eye className="w-5 h-5" />
+              View Menu
             </Link>
           </div>
         </div>
