@@ -9,8 +9,9 @@
  *   Opens the receipt HTML in a new tab. Same auto-print behavior.
  *   Works with AirPrint (iOS) or Android system print dialog.
  *
- * Mobile (RawBT): rawbt: URL scheme — sends HTML directly to RawBT app
- *   which renders and prints to Bluetooth thermal printer.
+ * Mobile (RawBT): Renders receipt HTML to a PNG image via html2canvas,
+ *   then sends it to RawBT app as rawbt:data:image/png;base64,...
+ *   RawBT prints the image to the connected Bluetooth thermal printer.
  *   Requires RawBT app installed on Android (free on Play Store).
  */
 
@@ -99,23 +100,74 @@ export function printViaIframe(htmlContent: string): void {
 
 /**
  * Print via RawBT app (Android Bluetooth thermal printing).
- * Uses the rawbt: URL scheme to send HTML directly to the app.
- * RawBT renders the HTML and sends it to the connected Bluetooth printer.
+ *
+ * RawBT only supports image/pdf data URIs — NOT text/html.
+ * So we render the receipt HTML to a PNG image using html2canvas,
+ * then send the image via rawbt:data:image/png;base64,...
  *
  * Requires: RawBT app installed from Google Play Store.
  * https://play.google.com/store/apps/details?id=ru.a402d.rawbtprinter
  */
-function printViaRawBT(htmlContent: string): void {
+async function printViaRawBT(htmlContent: string): Promise<void> {
   try {
-    // Strip <script> tags — RawBT renders HTML only, no JS execution needed
+    // Dynamic import — html2canvas is already in package.json
+    const html2canvas = (await import('html2canvas')).default;
+
+    // Strip <script> tags
     const cleanHtml = htmlContent.replace(/<script[\s\S]*?<\/script>/gi, '');
 
-    // Encode HTML to base64 (handle Unicode characters like Thai text)
-    const base64Content = btoa(unescape(encodeURIComponent(cleanHtml)));
+    // Extract <style> and <body> content from the receipt HTML
+    const styleMatch = cleanHtml.match(/<style[^>]*>([\s\S]*?)<\/style>/i);
+    const bodyMatch = cleanHtml.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
 
-    // Open RawBT via data URI — must use data:text/html so RawBT
-    // renders the HTML instead of printing it as raw code/text
-    const rawbtUrl = `rawbt:data:text/html;base64,${base64Content}`;
+    if (!bodyMatch) throw new Error('Invalid receipt HTML');
+
+    // Create off-screen container to render the receipt
+    const container = document.createElement('div');
+    container.style.position = 'fixed';
+    container.style.left = '-9999px';
+    container.style.top = '0';
+    container.style.width = '384px'; // ~58mm at 203dpi, safe for 80mm printers
+    container.style.background = '#fff';
+    container.style.fontFamily = "'Courier New', Courier, monospace";
+    container.style.fontSize = '12px';
+    container.style.lineHeight = '1.4';
+    container.style.color = '#000';
+    container.style.padding = '0 4px';
+
+    // Inject receipt styles
+    if (styleMatch) {
+      const style = document.createElement('style');
+      style.textContent = styleMatch[1];
+      container.appendChild(style);
+    }
+
+    // Inject receipt body content
+    const content = document.createElement('div');
+    content.innerHTML = bodyMatch[1];
+    container.appendChild(content);
+
+    document.body.appendChild(container);
+
+    // Wait for fonts and layout to settle
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    // Render receipt to canvas image
+    const canvas = await html2canvas(container, {
+      width: 384,
+      background: '#ffffff',
+      logging: false,
+    });
+
+    // Clean up temporary DOM element
+    document.body.removeChild(container);
+
+    // Convert canvas to base64 PNG
+    const dataUrl = canvas.toDataURL('image/png');
+    const base64Data = dataUrl.split(',')[1];
+
+    // Send image to RawBT — rawbt:data:image/png;base64,... is the supported format
+    const rawbtUrl = `rawbt:data:image/png;base64,${base64Data}`;
     const a = document.createElement('a');
     a.href = rawbtUrl;
     document.body.appendChild(a);
