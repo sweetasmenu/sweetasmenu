@@ -340,12 +340,10 @@ export default function CashierDashboardPage() {
         <title>Daily Cashier Report</title>
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
-          @page { size: 80mm auto; margin: 0; }
-          @media print { @page { size: 80mm auto; margin: 0; } body { margin: 0; padding: 0; } }
+          @page { margin: 0; }
           html, body {
             font-family: 'Courier New', Courier, monospace;
-            width: 80mm;
-            max-width: 80mm;
+            width: 100%;
             height: auto;
             overflow: visible;
             margin: 0;

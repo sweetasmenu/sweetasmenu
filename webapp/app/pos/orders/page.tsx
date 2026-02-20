@@ -729,14 +729,12 @@ export default function StaffOrdersPage() {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Receipt - ${order.id.slice(0, 8).toUpperCase()}</title>
         <style>
-          /* Thermal Printer 80mm - table-based layout for driver compatibility */
+          /* Thermal Printer - let driver handle paper width */
           * { margin: 0; padding: 0; box-sizing: border-box; }
-          @page { size: 80mm auto; margin: 0; }
-          @media print { @page { size: 80mm auto; margin: 0; } body { margin: 0; padding: 0; } }
+          @page { margin: 0; }
           html, body {
             font-family: 'Courier New', Courier, monospace;
-            width: 80mm;
-            max-width: 80mm;
+            width: 100%;
             height: auto;
             overflow: visible;
             margin: 0;
@@ -746,7 +744,7 @@ export default function StaffOrdersPage() {
             color: #000;
             background: #fff;
           }
-          .receipt { width: 100%; padding-bottom: 20mm; }
+          .receipt { width: 100%; padding-bottom: 10mm; }
           table { width: 100%; border-collapse: collapse; }
           td { vertical-align: top; color: #000; padding: 1px 0; }
 
@@ -934,12 +932,10 @@ export default function StaffOrdersPage() {
         <title>Kitchen - ${order.id.slice(0, 8).toUpperCase()}</title>
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
-          @page { size: 80mm auto; margin: 0; }
-          @media print { @page { size: 80mm auto; margin: 0; } body { margin: 0; padding: 0; } }
+          @page { margin: 0; }
           html, body {
             font-family: 'Courier New', Courier, monospace;
-            width: 80mm;
-            max-width: 80mm;
+            width: 100%;
             height: auto;
             overflow: visible;
             margin: 0;
@@ -948,7 +944,7 @@ export default function StaffOrdersPage() {
             color: #000;
             background: #fff;
           }
-          .ticket { padding-bottom: 20mm; }
+          .ticket { padding-bottom: 10mm; }
           .order-number {
             font-size: 24px;
             font-weight: bold;

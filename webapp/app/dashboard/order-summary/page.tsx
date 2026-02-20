@@ -617,13 +617,11 @@ export default function OrderSummaryPage() {
         <title>Daily Sales Summary</title>
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
-          @page { size: 80mm auto; margin: 0; }
-          @media print { @page { size: 80mm auto; margin: 0; } body { margin: 0; padding: 2mm; } }
+          @page { margin: 0; }
           body {
             font-family: 'Courier New', Courier, monospace;
             padding: 2mm;
-            width: 80mm;
-            max-width: 80mm;
+            width: 100%;
             margin: 0;
             font-size: 12px;
             color: #000;
@@ -752,13 +750,11 @@ export default function OrderSummaryPage() {
         <title>Order Receipt</title>
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
-          @page { size: 80mm auto; margin: 0; }
-          @media print { @page { size: 80mm auto; margin: 0; } body { margin: 0; padding: 2mm; } }
+          @page { margin: 0; }
           body {
             font-family: 'Courier New', Courier, monospace;
             padding: 2mm;
-            width: 80mm;
-            max-width: 80mm;
+            width: 100%;
             margin: 0;
             font-size: 12px;
             color: #000;

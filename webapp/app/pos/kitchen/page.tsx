@@ -549,12 +549,10 @@ export default function KitchenDisplayPage() {
         <title>Kitchen - ${order.id.slice(0, 8).toUpperCase()}</title>
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
-          @page { size: 80mm auto; margin: 0; }
-          @media print { @page { size: 80mm auto; margin: 0; } body { margin: 0; padding: 0; } }
+          @page { margin: 0; }
           html, body {
             font-family: 'Courier New', Courier, monospace;
-            width: 80mm;
-            max-width: 80mm;
+            width: 100%;
             height: auto;
             overflow: visible;
             margin: 0;
@@ -563,7 +561,7 @@ export default function KitchenDisplayPage() {
             color: #000;
             background: #fff;
           }
-          .ticket { padding-bottom: 20mm; }
+          .ticket { padding-bottom: 10mm; }
           .order-number {
             font-size: 24px;
             font-weight: bold;
