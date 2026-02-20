@@ -113,8 +113,9 @@ function printViaRawBT(htmlContent: string): void {
     // Encode HTML to base64 (handle Unicode characters like Thai text)
     const base64Content = btoa(unescape(encodeURIComponent(cleanHtml)));
 
-    // Open RawBT via URL scheme
-    const rawbtUrl = `rawbt:base64,${base64Content}`;
+    // Open RawBT via data URI — must use data:text/html so RawBT
+    // renders the HTML instead of printing it as raw code/text
+    const rawbtUrl = `rawbt:data:text/html;base64,${base64Content}`;
     const a = document.createElement('a');
     a.href = rawbtUrl;
     document.body.appendChild(a);
