@@ -350,11 +350,9 @@ function CheckoutSuccessContent() {
             </a>
           </p>
           <div className="flex items-center justify-center space-x-4 text-sm text-gray-500">
-            <span>📞 Priority Support</span>
+            <span>📧 Email Support</span>
             <span>•</span>
             <span>📚 Knowledge Base</span>
-            <span>•</span>
-            <span>💬 Live Chat</span>
           </div>
         </div>
 

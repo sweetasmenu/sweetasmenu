@@ -840,9 +840,9 @@ export default function HomePage() {
                   "Unlimited everything",
                   "500 AI enhancements/month",
                   "13+ languages",
-                  "White label branding",
                   "Multi-branch support",
-                  "Priority support"
+                  "Analytics dashboard",
+                  "AI Assistant"
                 ].map((feature, i) => (
                   <li key={i} className="flex items-center text-neutral-400 text-xs sm:text-sm">
                     <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-600 mr-2 sm:mr-3 flex-shrink-0" />

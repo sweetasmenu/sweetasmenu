@@ -85,15 +85,18 @@ export default function PricingPage() {
         { name: 'Custom Logo', free: false, starter: 'Small', pro: 'Prominent', enterprise: 'Full' },
         { name: 'Theme Color', free: false, starter: false, pro: true, enterprise: true },
         { name: 'Cover Image', free: false, starter: false, pro: true, enterprise: true },
-        { name: 'White Label (No Branding)', free: false, starter: false, pro: false, enterprise: true },
       ]
     },
     {
       category: 'Operations',
       features: [
+        { name: 'Online Ordering & Payments', free: true, starter: true, pro: true, enterprise: true },
         { name: 'QR Code Menu', free: true, starter: true, pro: true, enterprise: true },
         { name: 'POS System', free: 'Basic', starter: 'Basic', pro: 'Full', enterprise: 'Full' },
         { name: 'Kitchen Display', free: true, starter: true, pro: true, enterprise: true },
+        { name: 'Staff Management', free: true, starter: true, pro: true, enterprise: true },
+        { name: 'Analytics Dashboard', free: false, starter: false, pro: true, enterprise: true },
+        { name: 'AI Assistant', free: false, starter: false, pro: false, enterprise: true },
         { name: 'Multi-branch', free: false, starter: false, pro: false, enterprise: true },
       ]
     },
