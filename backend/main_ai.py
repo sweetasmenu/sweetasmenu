@@ -36,6 +36,7 @@ from services.image_library_service import image_library_service  # Shared Image
 from services.delivery_service import delivery_service  # Delivery distance calculation
 from services.admin_service import admin_service  # Super Admin Dashboard
 from services.security_middleware import setup_security  # Security: Rate limiting, headers
+from services.ai_assistant_service import ai_assistant_service  # AI Assistant (Enterprise)
 
 # Initialize Supabase client for direct database access (menu_translations, etc.)
 try:
@@ -135,6 +136,7 @@ class TranslateRequest(BaseModel):
     text: str
     source_lang: str
     target_lang: str = "English"
+    user_id: Optional[str] = None  # For plan-based language restriction
 
 class TranslateResponse(BaseModel):
     original_text: str
@@ -146,6 +148,7 @@ class BatchTranslateRequest(BaseModel):
     texts: List[str]
     source_lang: str = "auto"
     target_lang: str = "en"
+    user_id: Optional[str] = None  # For plan-based language restriction
 
 class BatchTranslateResponse(BaseModel):
     translations: List[str]
@@ -513,23 +516,36 @@ async def translate_text(request: TranslateRequest):
         # Validate input
         if not request.text or not request.text.strip():
             raise HTTPException(status_code=400, detail="Text to translate cannot be empty")
-        
+
         if not request.source_lang:
             raise HTTPException(status_code=400, detail="Source language is required")
-        
+
+        # Check language restriction based on plan (Enterprise = 13+ languages, others = English only)
+        if request.user_id:
+            target = (request.target_lang or "").lower().strip()
+            allowed_targets = ['en', 'english']
+            if target not in allowed_targets:
+                user_status = trial_limits_service.get_user_status(request.user_id)
+                user_role = user_status.get('role', 'free_trial')
+                if user_role not in ['enterprise', 'admin']:
+                    raise HTTPException(
+                        status_code=403,
+                        detail=f"Translation to {request.target_lang} is only available in Enterprise plan. Your plan supports English translation only."
+                    )
+
         # Translate using AI Service (cost-optimized: gemini-1.5-flash)
         if not ai_service.ready:
             raise HTTPException(status_code=503, detail="AI service is not available. Please check API key configuration.")
-        
+
         translated = await ai_service.translate(
             text=request.text,
             source_lang=request.source_lang,
             target_lang=request.target_lang
         )
-        
+
         # Note: If translated == original, it's likely already in target language
         # The ai_service handles logging, no need to duplicate warning here
-        
+
         return TranslateResponse(
             original_text=request.text,
             translated_text=translated,
@@ -554,6 +570,19 @@ async def translate_batch(request: BatchTranslateRequest):
         # Validate input
         if not request.texts or len(request.texts) == 0:
             raise HTTPException(status_code=400, detail="Texts array cannot be empty")
+
+        # Check language restriction based on plan
+        if request.user_id:
+            target = (request.target_lang or "").lower().strip()
+            allowed_targets = ['en', 'english']
+            if target not in allowed_targets:
+                user_status = trial_limits_service.get_user_status(request.user_id)
+                user_role = user_status.get('role', 'free_trial')
+                if user_role not in ['enterprise', 'admin']:
+                    raise HTTPException(
+                        status_code=403,
+                        detail=f"Translation to {request.target_lang} is only available in Enterprise plan. Your plan supports English translation only."
+                    )
 
         # Check AI service
         if not ai_service.ready:
@@ -1020,6 +1049,24 @@ async def save_menu_item(menu_item: SaveMenuItemRequest):
         if not menu_item.restaurant_id or menu_item.restaurant_id == 'default':
             raise HTTPException(status_code=400, detail="Valid restaurant_id is required. Please select a restaurant.")
         
+        # Check menu items limit based on plan
+        try:
+            rest_result = restaurant_service.supabase_client.table('restaurants').select('user_id').eq('id', menu_item.restaurant_id).limit(1).execute()
+            if rest_result.data and rest_result.data[0].get('user_id'):
+                owner_user_id = rest_result.data[0]['user_id']
+                current_count = menu_service.count_menu_items(menu_item.restaurant_id)
+                owner_status = trial_limits_service.get_user_status(owner_user_id)
+                menu_limit = owner_status.get('limits', {}).get('menu_items', 20)
+                if menu_limit < 999999 and current_count >= menu_limit:
+                    raise HTTPException(
+                        status_code=403,
+                        detail=f"Menu items limit reached ({current_count}/{menu_limit}). Please upgrade your plan to add more items."
+                    )
+        except HTTPException:
+            raise
+        except Exception as limit_err:
+            print(f"⚠️ Menu limit check failed (allowing save): {limit_err}")
+
         print(f"🔄 Saving menu item for restaurant: {menu_item.restaurant_id}")
         print(f"   Name: {menu_data.get('name', 'N/A')}")
         print(f"   Price: {menu_data.get('price', 'N/A')}")
@@ -1028,7 +1075,7 @@ async def save_menu_item(menu_item: SaveMenuItemRequest):
         print(f"   Meats: {len(menu_data.get('meats', []))} options")
         print(f"   AddOns: {len(menu_data.get('addOns', []))} options")
         print(f"   Is Best Seller: {menu_data.get('is_best_seller', False)}")
-        
+
         # Save to Supabase (NO FALLBACK!)
         saved_item = menu_service.create_menu_item(menu_item.restaurant_id, menu_data)
         
@@ -1294,6 +1341,11 @@ async def enhance_image_upload(
                     "remaining": limit_check["remaining"]
                 }
             )
+        # Check storage limit
+        storage_check = trial_limits_service.check_storage_limit(user_id)
+        if not storage_check["allowed"]:
+            raise HTTPException(status_code=403, detail=storage_check["message"])
+
         # Validate file using comprehensive validation
         image_bytes, detected_type = await validate_image_upload(
             file,
@@ -1497,6 +1549,11 @@ async def generate_image(request: Dict[str, Any]):
                     "remaining": limit_check["remaining"]
                 }
             )
+
+        # Check storage limit
+        storage_check = trial_limits_service.check_storage_limit(user_id)
+        if not storage_check["allowed"]:
+            raise HTTPException(status_code=403, detail=storage_check["message"])
 
         # Get user's plan for watermark (Enterprise = no watermark)
         user_plan = user_role_service.get_user_role(user_id) if user_id != "default" else "free_trial"
@@ -2635,16 +2692,16 @@ async def update_theme_color(request: UpdateThemeColorRequest):
     try:
         # Check user plan
         user_status = trial_limits_service.get_user_status(request.user_id)
-        plan = user_status.get('subscription_plan', 'starter') if user_status.get('is_subscribed') else 'starter'
-        
-        # Starter plan cannot customize (only Pro and Premium can)
-        if plan == 'starter':
+        user_role = user_status.get('role', 'free_trial')
+
+        # Free Trial and Starter cannot customize theme color
+        if user_role in ['free_trial', 'starter']:
             raise HTTPException(
                 status_code=403,
                 detail={
                     "error": "Plan restriction",
-                    "message": "Theme color customization is not available in Starter plan. Please upgrade to Pro or Premium plan.",
-                    "current_plan": plan
+                    "message": "Theme color customization is not available in your plan. Please upgrade to Professional or Enterprise plan.",
+                    "current_plan": user_role
                 }
             )
         
@@ -4851,10 +4908,20 @@ async def verify_staff_pin(request: dict):
             raise HTTPException(status_code=400, detail="Invalid PIN code format")
         
         staff = staff_service.verify_pin(restaurant_id, pin_code)
-        
+
         if not staff:
             raise HTTPException(status_code=401, detail="Invalid PIN code")
-        
+
+        # Get owner's plan for POS feature gating
+        owner_plan = "free_trial"
+        try:
+            rest_result = restaurant_service.supabase_client.table('restaurants').select('user_id').eq('id', restaurant_id).limit(1).execute()
+            if rest_result.data and rest_result.data[0].get('user_id'):
+                owner_status = trial_limits_service.get_user_status(rest_result.data[0]['user_id'])
+                owner_plan = owner_status.get('role', 'free_trial')
+        except Exception as plan_err:
+            print(f"⚠️ Failed to get owner plan: {plan_err}")
+
         # Log login activity
         staff_service.log_activity(
             staff['id'],
@@ -4862,10 +4929,11 @@ async def verify_staff_pin(request: dict):
             'staff_login',
             f"{staff['name']} logged in via PIN"
         )
-        
+
         return {
             "success": True,
-            "staff": staff
+            "staff": staff,
+            "owner_plan": owner_plan
         }
     except HTTPException:
         raise
@@ -5077,7 +5145,24 @@ async def create_restaurant(request: Dict[str, Any]):
         
         if not restaurant_data["name"]:
             raise HTTPException(status_code=400, detail="name is required")
-        
+
+        # Multi-branch restriction: only Enterprise can have multiple restaurants
+        try:
+            existing = restaurant_service.supabase_client.table('restaurants').select('id', count='exact').eq('user_id', user_id).execute()
+            existing_count = existing.count or 0
+            if existing_count >= 1:
+                user_status = trial_limits_service.get_user_status(user_id)
+                user_role = user_status.get('role', 'free_trial')
+                if user_role not in ['enterprise', 'admin']:
+                    raise HTTPException(
+                        status_code=403,
+                        detail="Multi-branch support is only available in Enterprise plan. Please upgrade to add more restaurants."
+                    )
+        except HTTPException:
+            raise
+        except Exception as branch_err:
+            print(f"⚠️ Branch limit check failed (allowing create): {branch_err}")
+
         restaurant = restaurant_service.create_restaurant(user_id, restaurant_data)
         
         if restaurant:
@@ -5369,6 +5454,57 @@ async def get_order_trends(
         print(f"❌ Get order trends error: {str(e)}")
         import traceback
         traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ============================================================================
+# AI ASSISTANT ENDPOINTS (Enterprise Only)
+# ============================================================================
+
+@app.post("/api/ai/assistant/chat", summary="AI Assistant Chat (Enterprise Only)")
+async def ai_assistant_chat(request: Dict[str, Any]):
+    """AI-powered restaurant management assistant - Enterprise plan only"""
+    try:
+        user_id = request.get('user_id')
+        restaurant_id = request.get('restaurant_id')
+        message = request.get('message', '')
+        history = request.get('history', [])
+
+        if not user_id or not restaurant_id or not message:
+            raise HTTPException(status_code=400, detail="user_id, restaurant_id, and message are required")
+
+        # Enterprise plan gate
+        user_status = trial_limits_service.get_user_status(user_id)
+        user_role = user_status.get('role', 'free_trial')
+        if user_role not in ['enterprise', 'admin']:
+            raise HTTPException(status_code=403, detail="AI Assistant is only available in Enterprise plan.")
+
+        result = ai_assistant_service.chat(user_id, restaurant_id, message, history)
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ AI Assistant chat error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/ai/assistant/analytics-summary/{restaurant_id}", summary="AI Analytics Summary (Enterprise Only)")
+async def ai_analytics_summary(restaurant_id: str, user_id: str = "", days: int = 30):
+    """AI-generated analytics summary with insights - Enterprise plan only"""
+    try:
+        if not user_id:
+            raise HTTPException(status_code=400, detail="user_id is required")
+
+        # Enterprise plan gate
+        user_status = trial_limits_service.get_user_status(user_id)
+        user_role = user_status.get('role', 'free_trial')
+        if user_role not in ['enterprise', 'admin']:
+            raise HTTPException(status_code=403, detail="AI Analytics is only available in Enterprise plan.")
+
+        result = ai_assistant_service.get_analytics_summary(restaurant_id, days)
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ AI Analytics summary error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 # ============================================================================

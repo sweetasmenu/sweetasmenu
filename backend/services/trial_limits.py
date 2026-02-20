@@ -95,6 +95,21 @@ class TrialLimitsService:
             }
         }
         
+        # Storage limits per plan (in bytes)
+        self.STORAGE_LIMITS = {
+            "free_trial": 1 * 1024 * 1024 * 1024,       # 1GB
+            "starter": 5 * 1024 * 1024 * 1024,           # 5GB
+            "professional": 20 * 1024 * 1024 * 1024,     # 20GB
+            "enterprise": 100 * 1024 * 1024 * 1024,      # 100GB
+            "admin": 100 * 1024 * 1024 * 1024,           # 100GB
+            # Legacy
+            "pro": 20 * 1024 * 1024 * 1024,
+            "standard": 20 * 1024 * 1024 * 1024,
+            "premium": 100 * 1024 * 1024 * 1024,
+        }
+        # Cache for storage usage (avoid repeated API calls)
+        self._storage_cache: Dict[str, Any] = {}
+
         # Load from file if exists
         self.data_file = Path(__file__).parent.parent / "trial_usage_data.json"
         self.load_data()
@@ -248,6 +263,58 @@ class TrialLimitsService:
             print(f"✅ TrialLimits: Saved trial dates to Supabase for user {user_id[:8]}...")
         except Exception as e:
             print(f"⚠️ TrialLimits: Failed to save trial dates to Supabase: {e}")
+
+    def get_storage_usage(self, user_id: str) -> int:
+        """Get total storage usage in bytes for a user across all their restaurants"""
+        import time
+        # Check cache (5 min TTL)
+        cached = self._storage_cache.get(user_id)
+        if cached and time.time() - cached['time'] < 300:
+            return cached['bytes']
+
+        total_bytes = 0
+        if not _supabase_client or not self._is_valid_uuid(user_id):
+            return 0
+        try:
+            # Get all restaurants for user
+            rest_result = _supabase_client.table('restaurants').select('id').eq('user_id', user_id).execute()
+            restaurant_ids = [r['id'] for r in (rest_result.data or [])]
+
+            for rid in restaurant_ids:
+                for bucket in ['menu-images', 'shop_assets']:
+                    try:
+                        files = _supabase_client.storage.from_(bucket).list(rid)
+                        for f in (files or []):
+                            if isinstance(f, dict):
+                                total_bytes += f.get('metadata', {}).get('size', 0) if isinstance(f.get('metadata'), dict) else 0
+                    except Exception:
+                        pass  # Bucket/folder may not exist
+
+            self._storage_cache[user_id] = {'bytes': total_bytes, 'time': time.time()}
+        except Exception as e:
+            print(f"⚠️ TrialLimits: Failed to get storage usage: {e}")
+        return total_bytes
+
+    def check_storage_limit(self, user_id: str) -> Dict[str, Any]:
+        """Check if user is within storage limit"""
+        if user_role_service.is_admin(user_id):
+            return {"allowed": True, "usage_bytes": 0, "limit_bytes": self.STORAGE_LIMITS["admin"]}
+
+        status = self.get_user_status(user_id)
+        role = status.get('role', 'free_trial')
+        limit_bytes = self.STORAGE_LIMITS.get(role, self.STORAGE_LIMITS['free_trial'])
+        usage_bytes = self.get_storage_usage(user_id)
+
+        if usage_bytes >= limit_bytes:
+            usage_mb = round(usage_bytes / (1024 * 1024))
+            limit_mb = round(limit_bytes / (1024 * 1024))
+            return {
+                "allowed": False,
+                "usage_bytes": usage_bytes,
+                "limit_bytes": limit_bytes,
+                "message": f"Storage limit reached ({usage_mb}MB / {limit_mb}MB). Please upgrade your plan for more storage."
+            }
+        return {"allowed": True, "usage_bytes": usage_bytes, "limit_bytes": limit_bytes}
 
     def initialize_user(self, user_id: str) -> Dict[str, Any]:
         """

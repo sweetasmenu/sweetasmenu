@@ -4,10 +4,10 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase/client';
-import { 
-  TrendingUp, 
-  DollarSign, 
-  ShoppingBag, 
+import {
+  TrendingUp,
+  DollarSign,
+  ShoppingBag,
   Star,
   ArrowLeft,
   Loader2,
@@ -17,7 +17,9 @@ import {
   BarChart3,
   Download,
   FileText,
-  Printer
+  Printer,
+  Lock,
+  Crown
 } from 'lucide-react';
 import { 
   exportToCSV, 
@@ -66,6 +68,7 @@ export default function AnalyticsPage() {
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
   const [restaurantId, setRestaurantId] = useState<string | null>(null);
+  const [planDenied, setPlanDenied] = useState(false);
   const [revenueStats, setRevenueStats] = useState<RevenueStats | null>(null);
   const [popularItems, setPopularItems] = useState<PopularItem[]>([]);
   const [trends, setTrends] = useState<TrendData | null>(null);
@@ -81,6 +84,24 @@ export default function AnalyticsPage() {
       }
 
       setUserId(session.user.id);
+
+      // Check plan - Analytics is Pro+ only
+      try {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        const trialRes = await fetch(`${API_URL}/api/trial/status/${session.user.id}`);
+        if (trialRes.ok) {
+          const trialData = await trialRes.json();
+          const role = trialData.role || 'free_trial';
+          if (['free_trial', 'starter'].includes(role)) {
+            setPlanDenied(true);
+            setLoading(false);
+            return;
+          }
+        }
+      } catch (e) {
+        console.error('Failed to check plan:', e);
+      }
+
       await fetchRestaurant(session.user.id);
     };
 
@@ -174,6 +195,31 @@ export default function AnalyticsPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+      </div>
+    );
+  }
+
+  if (planDenied) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 py-8">
+        <div className="max-w-lg mx-auto px-4">
+          <Link href="/dashboard" className="inline-flex items-center text-gray-600 hover:text-orange-500 transition-colors mb-8">
+            <ArrowLeft className="w-4 h-4 mr-2" /> Back to Dashboard
+          </Link>
+          <div className="bg-white rounded-2xl shadow-xl p-10 text-center">
+            <div className="inline-block bg-red-100 p-5 rounded-full mb-6">
+              <Lock className="w-14 h-14 text-red-500" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-3">Analytics Dashboard</h2>
+            <p className="text-gray-600 mb-2">Professional Plan Required</p>
+            <p className="text-sm text-gray-500 mb-8">
+              Revenue analytics, popular items, and trend reports are available on Professional and Enterprise plans.
+            </p>
+            <Link href="/pricing" className="inline-flex items-center justify-center bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold py-4 px-10 rounded-xl transition-all shadow-lg hover:shadow-xl text-lg">
+              <Crown className="w-6 h-6 mr-3" /> Upgrade Plan
+            </Link>
+          </div>
+        </div>
       </div>
     );
   }

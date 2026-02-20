@@ -53,6 +53,19 @@ class MenuService:
         )
         return bool(uuid_pattern.match(uuid_string))
     
+    def count_menu_items(self, restaurant_id: str) -> int:
+        """Count total menu items for a restaurant"""
+        if not self.supabase_client or not self._is_valid_uuid(restaurant_id):
+            return 0
+        try:
+            result = self.supabase_client.table('menus').select('id', count='exact').eq(
+                'restaurant_id', restaurant_id
+            ).execute()
+            return result.count or 0
+        except Exception as e:
+            print(f"⚠️ Menu Service: Failed to count menu items: {e}")
+            return 0
+
     def create_menu_item(self, restaurant_id: str, menu_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """
         สร้าง menu item ใหม่

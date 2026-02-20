@@ -140,7 +140,7 @@ export default function POSLoginPage() {
       const data = await response.json();
 
       if (data.success && data.staff) {
-        // Save session with language
+        // Save session with language and owner plan
         const session = {
           staffId: data.staff.id,
           staffName: data.staff.name,
@@ -149,6 +149,7 @@ export default function POSLoginPage() {
           restaurantName: selectedRestaurant?.name,
           restaurantSlug: selectedRestaurant?.slug,
           primaryLanguage: selectedRestaurant?.primaryLanguage || 'en',
+          ownerPlan: data.owner_plan || 'free_trial',
           expires: Date.now() + (8 * 60 * 60 * 1000) // 8 hours
         };
         localStorage.setItem('pos_session', JSON.stringify(session));

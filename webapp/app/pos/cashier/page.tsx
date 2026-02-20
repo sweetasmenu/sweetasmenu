@@ -29,6 +29,7 @@ interface POSSession {
   restaurantId: string;
   restaurantName: string;
   restaurantSlug: string;
+  ownerPlan?: string;
   expires: number;
 }
 
@@ -152,12 +153,23 @@ export default function CashierDashboardPage() {
     }
   }, [session?.restaurantId]);
 
+  // Plan access denied state
+  const [planDenied, setPlanDenied] = useState(false);
+
   // Check session on mount
   useEffect(() => {
     const savedSession = localStorage.getItem('pos_session');
     if (savedSession) {
       const parsedSession = JSON.parse(savedSession);
       if (parsedSession.expires > Date.now()) {
+        // Check if owner's plan supports Cashier Dashboard (Pro/Enterprise only)
+        const ownerPlan = parsedSession.ownerPlan || 'free_trial';
+        const fullPosPlans = ['professional', 'pro', 'enterprise', 'premium', 'admin'];
+        if (!fullPosPlans.includes(ownerPlan)) {
+          setPlanDenied(true);
+          setLoading(false);
+          return;
+        }
         // Check if user is cashier or has permission
         if (parsedSession.role === 'cashier' || parsedSession.role === 'manager' || parsedSession.role === 'owner') {
           setSession(parsedSession);
@@ -413,6 +425,29 @@ export default function CashierDashboardPage() {
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center">
         <Loader2 className="w-12 h-12 animate-spin text-orange-500" />
+      </div>
+    );
+  }
+
+  if (planDenied) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center p-8">
+        <div className="bg-slate-800 rounded-2xl p-10 text-center max-w-md">
+          <div className="inline-block bg-orange-500/20 p-4 rounded-full mb-6">
+            <AlertTriangle className="w-12 h-12 text-orange-400" />
+          </div>
+          <h2 className="text-2xl font-bold text-white mb-3">Cashier Dashboard</h2>
+          <p className="text-slate-400 mb-2">Professional Plan Required</p>
+          <p className="text-slate-500 text-sm mb-8">
+            The Cashier Dashboard with daily reports and payment management is available on Professional and Enterprise plans.
+          </p>
+          <button
+            onClick={() => router.push('/pos/orders')}
+            className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+          >
+            Go to Orders
+          </button>
+        </div>
       </div>
     );
   }
