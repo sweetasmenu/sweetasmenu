@@ -718,44 +718,35 @@ export default function StaffOrdersPage() {
       <html>
       <head>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=80mm, initial-scale=1.0">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Receipt - ${order.id.slice(0, 8).toUpperCase()}</title>
         <style>
-          /* Thermal Printer - 80mm roll */
+          /* Thermal Printer 80mm - table-based layout for driver compatibility */
           * { margin: 0; padding: 0; box-sizing: border-box; }
           @page { size: 80mm auto; margin: 0; }
+          @media print { @page { size: 80mm auto; margin: 0; } body { margin: 0; padding: 0; } }
           html, body {
             font-family: 'Courier New', Courier, monospace;
             width: 80mm;
+            max-width: 80mm;
             height: auto;
             overflow: visible;
             margin: 0;
             padding: 0 2mm;
             font-size: 12px;
-            line-height: 1.3;
+            line-height: 1.4;
             color: #000;
             background: #fff;
           }
-          .receipt { width: 100%; padding-bottom: 15mm; /* Extra feed for auto-cutter */ }
-
-          .copy-watermark {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(-45deg);
-            font-size: 48px;
-            font-weight: bold;
-            color: rgba(0, 0, 0, 0.08);
-            pointer-events: none;
-            z-index: 1;
-            white-space: nowrap;
-          }
+          .receipt { width: 100%; padding-bottom: 20mm; }
+          table { width: 100%; border-collapse: collapse; }
+          td { vertical-align: top; color: #000; padding: 1px 0; }
 
           .copy-badge {
             text-align: center;
             border: 3px solid #000;
-            padding: 2mm;
-            margin-bottom: 2mm;
+            padding: 4px;
+            margin-bottom: 4px;
             font-size: 14px;
             font-weight: bold;
             letter-spacing: 3px;
@@ -764,164 +755,71 @@ export default function StaffOrdersPage() {
           .header {
             text-align: center;
             border-bottom: 2px dashed #000;
-            padding-bottom: 3mm;
-            margin-bottom: 3mm;
+            padding-bottom: 6px;
+            margin-bottom: 6px;
           }
+          .header h1 { font-size: 18px; font-weight: bold; margin-bottom: 2px; }
+          .header p { font-size: 11px; color: #000; margin: 2px 0; }
+          .header .tax-info { font-size: 10px; color: #000; margin-top: 2px; }
+          .header .subtitle { font-size: 11px; font-weight: bold; margin-top: 4px; }
+          .order-type { font-size: 13px; font-weight: bold; margin-top: 4px; display: block; }
 
-          .header h1 {
-            font-size: 16px;
-            font-weight: bold;
-            margin-bottom: 1mm;
-          }
+          .info { margin-bottom: 6px; font-size: 11px; }
+          .info p { margin: 2px 0; color: #000; }
 
-          .header .address {
-            font-size: 9px;
-            color: #333;
-            margin: 1mm 0;
-          }
-
-          .header .contact {
-            font-size: 9px;
-            color: #333;
-          }
-
-          .header .tax-info {
-            font-size: 8px;
-            color: #555;
-            margin-top: 1mm;
-          }
-
-          .header .subtitle {
-            font-size: 10px;
-            margin-top: 2mm;
-          }
-
-          .order-type {
-            font-size: 12px;
-            font-weight: bold;
-            margin-top: 2mm;
-          }
-
-          .info {
-            margin-bottom: 3mm;
-            font-size: 11px;
-          }
-
-          .info p { margin: 1mm 0; }
-
-          .items {
-            border-top: 1px dashed #000;
-            border-bottom: 1px dashed #000;
-            padding: 2mm 0;
-            margin: 2mm 0;
-          }
-
-          .item {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin: 1.5mm 0;
-            font-size: 11px;
-          }
-
-          .item-qty {
-            width: 8mm;
-            font-weight: bold;
-          }
-
-          .item-name {
-            flex: 1;
-            padding: 0 1mm;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-            max-width: 45mm;
-          }
-
-          .item-price {
-            width: 16mm;
-            min-width: 16mm;
-            text-align: right;
-            white-space: nowrap;
-          }
-
-          .modifier {
-            font-size: 9px;
-            color: #333;
-            padding-left: 10mm;
-            margin: 0.5mm 0;
-          }
+          .items { border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 4px 0; margin: 4px 0; }
+          .items table td { font-size: 11px; padding: 2px 0; }
+          .item-qty { width: 24px; font-weight: bold; }
+          .item-name { word-wrap: break-word; overflow-wrap: break-word; }
+          .item-price { width: 60px; text-align: right; white-space: nowrap; }
+          .modifier { font-size: 10px; color: #000; padding-left: 28px; margin: 1px 0; }
 
           .special {
-            background: #f0f0f0;
-            border: 1px solid #999;
-            padding: 2mm;
-            margin: 2mm 0;
-            font-size: 10px;
-          }
-
-          .special-label {
-            font-weight: bold;
-            margin-bottom: 1mm;
-          }
-
-          .totals {
-            margin-top: 2mm;
-            padding-top: 2mm;
+            border: 2px solid #000;
+            padding: 4px;
+            margin: 4px 0;
             font-size: 11px;
           }
+          .special-label { font-weight: bold; margin-bottom: 2px; }
 
-          .total-line {
-            display: flex;
-            justify-content: space-between;
-            margin: 1mm 0;
-          }
-
-          .grand-total {
+          .totals { margin-top: 4px; padding-top: 4px; font-size: 11px; }
+          .totals table td { padding: 2px 0; }
+          .totals .right { text-align: right; }
+          .grand-total td {
             font-size: 14px;
             font-weight: bold;
             border-top: 2px solid #000;
-            padding-top: 2mm;
-            margin-top: 2mm;
+            padding-top: 4px;
           }
-
-          .gst-info {
-            font-size: 9px;
-            text-align: right;
-            color: #333;
-            margin-top: 1mm;
-          }
+          .gst-info { font-size: 10px; text-align: right; color: #000; margin-top: 2px; }
 
           .footer {
             text-align: center;
-            margin-top: 4mm;
-            padding-top: 3mm;
+            margin-top: 8px;
+            padding-top: 6px;
             border-top: 2px dashed #000;
-            font-size: 9px;
+            font-size: 11px;
+            color: #000;
           }
-
-          .footer p { margin: 1mm 0; }
+          .footer p { margin: 2px 0; }
 
           .cut-line {
             text-align: center;
-            margin-top: 5mm;
-            padding-top: 3mm;
-            border-top: 1px dashed #999;
-            font-size: 8px;
-            color: #999;
+            margin-top: 10px;
+            padding-top: 6px;
+            border-top: 1px dashed #000;
+            font-size: 10px;
+            color: #000;
           }
-
-          /* Prevent content from being split across pages */
-          .item, .totals, .footer { page-break-inside: avoid; }
         </style>
       </head>
       <body>
         <div class="receipt">
-          ${isCopy ? '<div class="copy-watermark">COPY</div>' : ''}
           ${isCopy ? '<div class="copy-badge">*** COPY ***</div>' : ''}
           <div class="header">
             <h1>${restName}</h1>
-            ${restAddress ? `<p class="address">${restAddress}</p>` : ''}
-            ${restPhone ? `<p class="contact">Tel: ${restPhone}</p>` : ''}
+            ${restAddress ? `<p>${restAddress}</p>` : ''}
+            ${restPhone ? `<p>Tel: ${restPhone}</p>` : ''}
             ${gstNumber || irdNumber ? `
               <p class="tax-info">
                 ${gstNumber ? `GST No: ${gstNumber}` : ''}
@@ -930,30 +828,32 @@ export default function StaffOrdersPage() {
               </p>
             ` : ''}
             <p class="subtitle">TAX INVOICE</p>
-            <span class="order-type">${order.service_type === 'dine_in' ? 'Dine In' : order.service_type === 'pickup' ? 'Pick Up' : 'Delivery'}</span>
+            <span class="order-type">${order.service_type === 'dine_in' ? 'DINE IN' : order.service_type === 'pickup' ? 'PICK UP' : 'DELIVERY'}</span>
           </div>
 
           <div class="info">
-            <p><strong>Order #:</strong> ${order.id.slice(0, 8).toUpperCase()}</p>
-            <p><strong>Date:</strong> ${new Date(order.created_at).toLocaleString('en-NZ', {
+            <p><b>Order #:</b> ${order.id.slice(0, 8).toUpperCase()}</p>
+            <p><b>Date:</b> ${new Date(order.created_at).toLocaleString('en-NZ', {
               day: '2-digit', month: '2-digit', year: 'numeric',
               hour: '2-digit', minute: '2-digit'
             })}</p>
-            ${order.table_no ? `<p><strong>Table:</strong> ${order.table_no}</p>` : ''}
-            ${order.customer_name || order.customer_details?.name ? `<p><strong>Customer:</strong> ${order.customer_name || order.customer_details?.name}</p>` : ''}
+            ${order.table_no ? `<p><b>Table:</b> ${order.table_no}</p>` : ''}
+            ${order.customer_name || order.customer_details?.name ? `<p><b>Customer:</b> ${order.customer_name || order.customer_details?.name}</p>` : ''}
           </div>
 
           <div class="items">
-            ${order.items.map(item => `
-              <div class="item">
-                <span class="item-qty">${item.quantity}x</span>
-                <span class="item-name">${item.nameEn || item.name}</span>
-                <span class="item-price">$${(item.price * item.quantity).toFixed(2)}</span>
-              </div>
-              ${item.selectedMeat ? `<div class="modifier">+ ${item.selectedMeat}</div>` : ''}
-              ${item.selectedAddOns?.length ? `<div class="modifier">+ ${item.selectedAddOns.join(', ')}</div>` : ''}
-              ${item.notes ? `<div class="modifier">"${item.notes}"</div>` : ''}
-            `).join('')}
+            <table>
+              ${order.items.map(item => `
+                <tr>
+                  <td class="item-qty">${item.quantity}x</td>
+                  <td class="item-name">${item.nameEn || item.name}</td>
+                  <td class="item-price">$${(item.price * item.quantity).toFixed(2)}</td>
+                </tr>
+                ${item.selectedMeat ? `<tr><td></td><td colspan="2" class="modifier">+ ${item.selectedMeat}</td></tr>` : ''}
+                ${item.selectedAddOns?.length ? `<tr><td></td><td colspan="2" class="modifier">+ ${item.selectedAddOns.join(', ')}</td></tr>` : ''}
+                ${item.notes ? `<tr><td></td><td colspan="2" class="modifier">"${item.notes}"</td></tr>` : ''}
+              `).join('')}
+            </table>
           </div>
 
           ${order.special_instructions ? `
@@ -964,26 +864,28 @@ export default function StaffOrdersPage() {
           ` : ''}
 
           <div class="totals">
-            <div class="total-line">
-              <span>Subtotal:</span>
-              <span>$${subtotal.toFixed(2)}</span>
-            </div>
-            ${deliveryFee > 0 ? `
-              <div class="total-line">
-                <span>Delivery Fee:</span>
-                <span>$${deliveryFee.toFixed(2)}</span>
-              </div>
-            ` : ''}
-            ${surchargeAmount > 0 ? `
-              <div class="total-line">
-                <span>Service Fee:</span>
-                <span>$${surchargeAmount.toFixed(2)}</span>
-              </div>
-            ` : ''}
-            <div class="total-line grand-total">
-              <span>TOTAL:</span>
-              <span>$${totalPrice.toFixed(2)} NZD</span>
-            </div>
+            <table>
+              <tr>
+                <td>Subtotal:</td>
+                <td class="right">$${subtotal.toFixed(2)}</td>
+              </tr>
+              ${deliveryFee > 0 ? `
+                <tr>
+                  <td>Delivery Fee:</td>
+                  <td class="right">$${deliveryFee.toFixed(2)}</td>
+                </tr>
+              ` : ''}
+              ${surchargeAmount > 0 ? `
+                <tr>
+                  <td>Service Fee:</td>
+                  <td class="right">$${surchargeAmount.toFixed(2)}</td>
+                </tr>
+              ` : ''}
+              <tr class="grand-total">
+                <td>TOTAL:</td>
+                <td class="right">$${totalPrice.toFixed(2)} NZD</td>
+              </tr>
+            </table>
             <div class="gst-info">
               Incl. GST (15%): $${gstAmount.toFixed(2)}
             </div>
@@ -995,14 +897,14 @@ export default function StaffOrdersPage() {
           </div>
 
           <div class="cut-line">
-            - - - - - - - - - - - -
+            --------------------------------
           </div>
         </div>
 
         <script>
           window.onafterprint = function() { window.close(); };
           window.onload = function() {
-            setTimeout(function() { window.print(); }, 400);
+            setTimeout(function() { window.print(); }, 600);
           };
         </script>
       </body>
@@ -1019,13 +921,17 @@ export default function StaffOrdersPage() {
       <!DOCTYPE html>
       <html>
       <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Kitchen - ${order.id.slice(0, 8).toUpperCase()}</title>
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
           @page { size: 80mm auto; margin: 0; }
+          @media print { @page { size: 80mm auto; margin: 0; } body { margin: 0; padding: 0; } }
           html, body {
             font-family: 'Courier New', Courier, monospace;
             width: 80mm;
+            max-width: 80mm;
             height: auto;
             overflow: visible;
             margin: 0;
@@ -1034,54 +940,64 @@ export default function StaffOrdersPage() {
             color: #000;
             background: #fff;
           }
-          .ticket { padding-bottom: 15mm; /* Extra feed for auto-cutter */ }
+          .ticket { padding-bottom: 20mm; }
           .order-number {
             font-size: 24px;
             font-weight: bold;
             text-align: center;
-            border: 3px solid black;
-            padding: 3mm;
-            margin-bottom: 3mm;
+            border: 3px solid #000;
+            padding: 6px;
+            margin-bottom: 6px;
           }
           .order-type {
-            font-size: 14px;
+            font-size: 16px;
             font-weight: bold;
             text-align: center;
-            margin-bottom: 3mm;
+            margin-bottom: 6px;
+            color: #000;
           }
-          .info { font-size: 11px; margin-bottom: 3mm; }
-          .info p { margin: 1mm 0; }
-          .items { border-top: 2px solid black; padding-top: 3mm; }
+          .info { font-size: 12px; margin-bottom: 6px; color: #000; }
+          .info p { margin: 2px 0; }
+          .items { border-top: 2px solid #000; padding-top: 6px; }
           .item {
             font-size: 14px;
             font-weight: bold;
-            margin: 3mm 0;
-            padding-bottom: 2mm;
-            border-bottom: 1px dashed #ccc;
-            page-break-inside: avoid;
+            margin: 6px 0;
+            padding-bottom: 4px;
+            border-bottom: 1px dashed #000;
+            color: #000;
           }
           .item-qty { font-size: 16px; }
           .modifier {
             font-size: 12px;
             font-weight: normal;
-            padding-left: 5mm;
-            margin: 1mm 0;
+            padding-left: 20px;
+            margin: 2px 0;
+            color: #000;
           }
           .special {
-            background: #f0f0f0;
-            border: 3px solid black;
-            padding: 3mm;
-            margin: 3mm 0;
+            border: 3px solid #000;
+            padding: 6px;
+            margin: 6px 0;
             font-size: 14px;
             font-weight: bold;
-            page-break-inside: avoid;
+            color: #000;
           }
           .time {
             text-align: center;
-            font-size: 11px;
-            margin-top: 3mm;
-            padding-top: 2mm;
-            border-top: 1px dashed black;
+            font-size: 12px;
+            margin-top: 6px;
+            padding-top: 4px;
+            border-top: 1px dashed #000;
+            color: #000;
+          }
+          .cut-line {
+            text-align: center;
+            margin-top: 10px;
+            padding-top: 6px;
+            border-top: 1px dashed #000;
+            font-size: 10px;
+            color: #000;
           }
         </style>
       </head>
@@ -1092,11 +1008,11 @@ export default function StaffOrdersPage() {
         </div>
 
         <div class="order-type">
-          ${order.service_type === 'dine_in' ? 'Dine In' : order.service_type === 'pickup' ? 'Pick Up' : 'Delivery'}
+          ${order.service_type === 'dine_in' ? 'DINE IN' : order.service_type === 'pickup' ? 'PICK UP' : 'DELIVERY'}
         </div>
 
         <div class="info">
-          ${order.table_no ? `<p><strong>TABLE: ${order.table_no}</strong></p>` : ''}
+          ${order.table_no ? `<p><b>TABLE: ${order.table_no}</b></p>` : ''}
           ${order.customer_name ? `<p>Customer: ${order.customer_name}</p>` : ''}
         </div>
 
@@ -1122,12 +1038,16 @@ export default function StaffOrdersPage() {
             hour: '2-digit', minute: '2-digit', second: '2-digit'
           })}
         </div>
+
+        <div class="cut-line">
+          --------------------------------
+        </div>
       </div>
 
         <script>
           window.onafterprint = function() { window.close(); };
           window.onload = function() {
-            setTimeout(function() { window.print(); }, 400);
+            setTimeout(function() { window.print(); }, 600);
           };
         </script>
       </body>

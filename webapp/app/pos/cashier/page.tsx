@@ -335,65 +335,91 @@ export default function CashierDashboardPage() {
       <!DOCTYPE html>
       <html>
       <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Daily Cashier Report</title>
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
           @page { size: 80mm auto; margin: 0; }
-          html, body { font-family: 'Courier New', monospace; width: 80mm; height: auto; overflow: visible; margin: 0; padding: 0 2mm; font-size: 12px; color: #000; background: #fff; }
-          .report { padding-bottom: 15mm; /* Extra feed for auto-cutter */ }
-          .header { text-align: center; margin-bottom: 15px; border-bottom: 2px dashed #000; padding-bottom: 10px; }
-          .header h1 { font-size: 16px; margin-bottom: 5px; }
-          .section { margin: 15px 0; padding-bottom: 10px; border-bottom: 1px dashed #000; page-break-inside: avoid; }
-          .section h2 { font-size: 14px; margin-bottom: 10px; }
-          .row { display: flex; justify-content: space-between; margin: 5px 0; }
-          .total { font-size: 18px; font-weight: bold; }
-          .footer { text-align: center; margin-top: 20px; font-size: 10px; }
+          @media print { @page { size: 80mm auto; margin: 0; } body { margin: 0; padding: 0; } }
+          html, body {
+            font-family: 'Courier New', Courier, monospace;
+            width: 80mm;
+            max-width: 80mm;
+            height: auto;
+            overflow: visible;
+            margin: 0;
+            padding: 0 2mm;
+            font-size: 12px;
+            color: #000;
+            background: #fff;
+          }
+          table { width: 100%; border-collapse: collapse; }
+          td { vertical-align: top; color: #000; padding: 2px 0; }
+          .right { text-align: right; }
+          .report { padding-bottom: 20mm; }
+          .header { text-align: center; margin-bottom: 10px; border-bottom: 2px dashed #000; padding-bottom: 8px; }
+          .header h1 { font-size: 18px; margin-bottom: 4px; }
+          .header p { font-size: 11px; color: #000; margin: 2px 0; }
+          .section { margin: 10px 0; padding-bottom: 8px; border-bottom: 1px dashed #000; }
+          .section h2 { font-size: 13px; margin-bottom: 6px; font-weight: bold; }
+          .total td { font-size: 16px; font-weight: bold; padding-top: 4px; }
+          .gst-info td { font-size: 10px; color: #000; }
+          .footer { text-align: center; margin-top: 10px; font-size: 11px; color: #000; }
+          .footer p { margin: 2px 0; }
+          .cut-line { text-align: center; margin-top: 10px; padding-top: 6px; border-top: 1px dashed #000; font-size: 10px; color: #000; }
         </style>
       </head>
       <body>
       <div class="report">
         <div class="header">
           <h1>${session?.restaurantName || 'Restaurant'}</h1>
-          ${restaurantInfo.address ? `<p style="font-size: 10px;">${restaurantInfo.address}</p>` : ''}
-          ${restaurantInfo.phone ? `<p style="font-size: 10px;">Tel: ${restaurantInfo.phone}</p>` : ''}
-          ${restaurantInfo.gst_number ? `<p style="font-size: 10px;">GST No: ${restaurantInfo.gst_number}</p>` : ''}
-          ${restaurantInfo.ird_number ? `<p style="font-size: 10px;">IRD No: ${restaurantInfo.ird_number}</p>` : ''}
-          <p style="margin-top: 10px; font-weight: bold;">Daily Cashier Report</p>
+          ${restaurantInfo.address ? `<p>${restaurantInfo.address}</p>` : ''}
+          ${restaurantInfo.phone ? `<p>Tel: ${restaurantInfo.phone}</p>` : ''}
+          ${restaurantInfo.gst_number ? `<p>GST No: ${restaurantInfo.gst_number}</p>` : ''}
+          ${restaurantInfo.ird_number ? `<p>IRD No: ${restaurantInfo.ird_number}</p>` : ''}
+          <p style="margin-top: 6px; font-weight: bold; font-size: 13px;">Daily Cashier Report</p>
           <p>${selectedDate}</p>
         </div>
 
         <div class="section">
           <h2>Orders Summary</h2>
-          <div class="row"><span>Total Orders:</span><span>${summary.total_orders}</span></div>
-          <div class="row"><span>Completed:</span><span>${summary.completed_orders}</span></div>
-          <div class="row"><span>Voided:</span><span>${summary.voided_orders}</span></div>
-          <div class="row"><span>Pending Payment:</span><span>${summary.pending_payment}</span></div>
+          <table>
+            <tr><td>Total Orders:</td><td class="right">${summary.total_orders}</td></tr>
+            <tr><td>Completed:</td><td class="right">${summary.completed_orders}</td></tr>
+            <tr><td>Voided:</td><td class="right">${summary.voided_orders}</td></tr>
+            <tr><td>Pending Payment:</td><td class="right">${summary.pending_payment}</td></tr>
+          </table>
         </div>
 
         <div class="section">
           <h2>Revenue by Payment Method</h2>
-          <div class="row"><span>Credit/Debit Card:</span><span>$${summary.revenue_by_method.card.toFixed(2)}</span></div>
-          <div class="row"><span>Bank Transfer:</span><span>$${summary.revenue_by_method.bank_transfer.toFixed(2)}</span></div>
-          <div class="row"><span>Pay at Cashier:</span><span>$${summary.revenue_by_method.cash_at_counter.toFixed(2)}</span></div>
-          <div class="row"><span>Unpaid:</span><span>$${summary.revenue_by_method.unpaid.toFixed(2)}</span></div>
+          <table>
+            <tr><td>Credit/Debit Card:</td><td class="right">$${summary.revenue_by_method.card.toFixed(2)}</td></tr>
+            <tr><td>Bank Transfer:</td><td class="right">$${summary.revenue_by_method.bank_transfer.toFixed(2)}</td></tr>
+            <tr><td>Pay at Cashier:</td><td class="right">$${summary.revenue_by_method.cash_at_counter.toFixed(2)}</td></tr>
+            <tr><td>Unpaid:</td><td class="right">$${summary.revenue_by_method.unpaid.toFixed(2)}</td></tr>
+          </table>
         </div>
 
         <div class="section">
-          <div class="row total">
-            <span>TOTAL REVENUE:</span>
-            <span>$${summary.total_revenue.toFixed(2)} NZD</span>
-          </div>
-          <div class="row" style="font-size: 10px; color: #666;">
-            <span>Incl. GST (15%):</span>
-            <span>$${(summary.total_revenue * 3 / 23).toFixed(2)}</span>
-          </div>
+          <table>
+            <tr class="total">
+              <td>TOTAL REVENUE:</td>
+              <td class="right">$${summary.total_revenue.toFixed(2)} NZD</td>
+            </tr>
+            <tr class="gst-info">
+              <td>Incl. GST (15%):</td>
+              <td class="right">$${(summary.total_revenue * 3 / 23).toFixed(2)}</td>
+            </tr>
+          </table>
         </div>
 
         ${summary.void_reasons.length > 0 ? `
           <div class="section">
             <h2>Void Reasons</h2>
             ${summary.void_reasons.map(v => `
-              <div style="margin: 5px 0; font-size: 10px;">
+              <div style="margin: 4px 0; font-size: 10px; color: #000;">
                 <div>Order: ${v.order_id.slice(0, 8)}</div>
                 <div>Reason: ${v.reason}</div>
                 <div>Amount: $${v.amount.toFixed(2)}</div>
@@ -406,12 +432,16 @@ export default function CashierDashboardPage() {
           <p>Printed: ${new Date().toLocaleString()}</p>
           <p>Powered by Smart Menu</p>
         </div>
+
+        <div class="cut-line">
+          --------------------------------
+        </div>
       </div>
 
         <script>
           window.onafterprint = function() { window.close(); };
           window.onload = function() {
-            setTimeout(function() { window.print(); }, 400);
+            setTimeout(function() { window.print(); }, 600);
           };
         </script>
       </body>

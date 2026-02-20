@@ -612,71 +612,86 @@ export default function OrderSummaryPage() {
       <!DOCTYPE html>
       <html>
       <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Daily Sales Summary</title>
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
+          @page { size: 80mm auto; margin: 0; }
+          @media print { @page { size: 80mm auto; margin: 0; } body { margin: 0; padding: 2mm; } }
           body {
-            font-family: 'Courier New', monospace;
-            padding: 10mm;
+            font-family: 'Courier New', Courier, monospace;
+            padding: 2mm;
+            width: 80mm;
             max-width: 80mm;
-            margin: 0 auto;
+            margin: 0;
             font-size: 12px;
+            color: #000;
+            background: #fff;
           }
-          .header { text-align: center; margin-bottom: 15px; border-bottom: 1px dashed #000; padding-bottom: 10px; }
-          .header h1 { font-size: 16px; margin-bottom: 5px; }
-          .header p { font-size: 11px; color: #333; }
-          .section { margin-bottom: 15px; }
-          .section-title { font-weight: bold; margin-bottom: 5px; border-bottom: 1px solid #000; padding-bottom: 3px; }
-          .row { display: flex; justify-content: space-between; margin-bottom: 3px; }
-          .row.total { font-weight: bold; border-top: 1px solid #000; padding-top: 5px; margin-top: 5px; }
-          .row.grand-total { font-size: 14px; border-top: 2px solid #000; padding-top: 8px; margin-top: 8px; }
-          .footer { text-align: center; margin-top: 20px; font-size: 10px; border-top: 1px dashed #000; padding-top: 10px; }
-          @media print {
-            body { padding: 5mm; }
-            .no-print { display: none; }
-          }
+          table { width: 100%; border-collapse: collapse; }
+          td { vertical-align: top; color: #000; padding: 2px 0; }
+          .right { text-align: right; }
+          .header { text-align: center; margin-bottom: 10px; border-bottom: 1px dashed #000; padding-bottom: 8px; }
+          .header h1 { font-size: 18px; margin-bottom: 4px; }
+          .header p { font-size: 11px; color: #000; margin: 2px 0; }
+          .section { margin-bottom: 10px; }
+          .section-title { font-weight: bold; margin-bottom: 4px; border-bottom: 1px solid #000; padding-bottom: 2px; }
+          .total td { font-weight: bold; border-top: 1px solid #000; padding-top: 4px; }
+          .grand-total td { font-size: 14px; font-weight: bold; border-top: 2px solid #000; padding-top: 6px; }
+          .footer { text-align: center; margin-top: 10px; font-size: 11px; color: #000; border-top: 1px dashed #000; padding-top: 8px; }
+          .footer p { margin: 2px 0; }
+          .cut-line { text-align: center; margin-top: 10px; padding-top: 6px; border-top: 1px dashed #000; font-size: 10px; color: #000; }
         </style>
       </head>
       <body>
         <div class="header">
           <h1>${restaurantName || 'Restaurant'}</h1>
-          ${restaurantGstNumber || restaurantIrdNumber ? `<p style="font-size:10px;">${restaurantIrdNumber ? `IRD: ${restaurantIrdNumber}` : ''}${restaurantGstNumber && restaurantIrdNumber ? ' | ' : ''}${restaurantGstNumber ? `GST: ${restaurantGstNumber}` : ''}</p>` : ''}
-          <p>Daily Sales Summary</p>
+          ${restaurantGstNumber || restaurantIrdNumber ? `<p>${restaurantIrdNumber ? `IRD: ${restaurantIrdNumber}` : ''}${restaurantGstNumber && restaurantIrdNumber ? ' | ' : ''}${restaurantGstNumber ? `GST: ${restaurantGstNumber}` : ''}</p>` : ''}
+          <p style="font-weight:bold;">Daily Sales Summary</p>
           <p>${startDate === endDate ? startDate : `${startDate} to ${endDate}`}</p>
         </div>
 
         <div class="section">
           <div class="section-title">ORDER SUMMARY</div>
-          <div class="row"><span>Total Orders:</span><span>${summary?.total_orders || 0}</span></div>
-          <div class="row"><span>Paid Orders:</span><span>${summary?.payment_status?.paid || 0}</span></div>
-          <div class="row"><span>Pending Orders:</span><span>${summary?.payment_status?.pending || 0}</span></div>
-          ${voidedCount > 0 ? `<div class="row"><span>Voided Orders:</span><span>${voidedCount}</span></div>` : ''}
+          <table>
+            <tr><td>Total Orders:</td><td class="right">${summary?.total_orders || 0}</td></tr>
+            <tr><td>Paid Orders:</td><td class="right">${summary?.payment_status?.paid || 0}</td></tr>
+            <tr><td>Pending Orders:</td><td class="right">${summary?.payment_status?.pending || 0}</td></tr>
+            ${voidedCount > 0 ? `<tr><td>Voided Orders:</td><td class="right">${voidedCount}</td></tr>` : ''}
+          </table>
         </div>
 
         <div class="section">
           <div class="section-title">PAYMENT METHODS</div>
-          <div class="row"><span>Card:</span><span>${summary?.payment_method?.card?.count || 0} orders ($${(summary?.payment_method?.card?.revenue || 0).toFixed(2)})</span></div>
-          <div class="row"><span>Bank Transfer:</span><span>${summary?.payment_method?.bank_transfer?.count || 0} orders ($${(summary?.payment_method?.bank_transfer?.revenue || 0).toFixed(2)})</span></div>
-          ${summary?.payment_method?.cash?.count ? `<div class="row"><span>Cash:</span><span>${summary.payment_method.cash.count} orders ($${(summary.payment_method.cash.revenue || 0).toFixed(2)})</span></div>` : ''}
-          ${summary?.payment_method?.cashier_cash?.count ? `<div class="row"><span>Cashier/Cash:</span><span>${summary.payment_method.cashier_cash.count} orders ($${(summary.payment_method.cashier_cash.revenue || 0).toFixed(2)})</span></div>` : ''}
-          ${summary?.payment_method?.cashier_eftpos?.count ? `<div class="row"><span>Cashier/EFTPOS:</span><span>${summary.payment_method.cashier_eftpos.count} orders ($${(summary.payment_method.cashier_eftpos.revenue || 0).toFixed(2)})</span></div>` : ''}
-          ${summary?.payment_method?.cash_at_cashier?.count ? `<div class="row"><span>Cashier/Cash:</span><span>${summary.payment_method.cash_at_cashier.count} orders ($${(summary.payment_method.cash_at_cashier.revenue || 0).toFixed(2)})</span></div>` : ''}
+          <table>
+            <tr><td>Card:</td><td class="right">${summary?.payment_method?.card?.count || 0} ($${(summary?.payment_method?.card?.revenue || 0).toFixed(2)})</td></tr>
+            <tr><td>Bank Transfer:</td><td class="right">${summary?.payment_method?.bank_transfer?.count || 0} ($${(summary?.payment_method?.bank_transfer?.revenue || 0).toFixed(2)})</td></tr>
+            ${summary?.payment_method?.cash?.count ? `<tr><td>Cash:</td><td class="right">${summary.payment_method.cash.count} ($${(summary.payment_method.cash.revenue || 0).toFixed(2)})</td></tr>` : ''}
+            ${summary?.payment_method?.cashier_cash?.count ? `<tr><td>Cashier/Cash:</td><td class="right">${summary.payment_method.cashier_cash.count} ($${(summary.payment_method.cashier_cash.revenue || 0).toFixed(2)})</td></tr>` : ''}
+            ${summary?.payment_method?.cashier_eftpos?.count ? `<tr><td>Cashier/EFTPOS:</td><td class="right">${summary.payment_method.cashier_eftpos.count} ($${(summary.payment_method.cashier_eftpos.revenue || 0).toFixed(2)})</td></tr>` : ''}
+            ${summary?.payment_method?.cash_at_cashier?.count ? `<tr><td>Cashier/Cash:</td><td class="right">${summary.payment_method.cash_at_cashier.count} ($${(summary.payment_method.cash_at_cashier.revenue || 0).toFixed(2)})</td></tr>` : ''}
+          </table>
         </div>
 
         <div class="section">
           <div class="section-title">SERVICE TYPES</div>
-          <div class="row"><span>Dine In:</span><span>${summary?.service_type?.dine_in || 0} orders</span></div>
-          <div class="row"><span>Pickup:</span><span>${summary?.service_type?.pickup || 0} orders</span></div>
-          <div class="row"><span>Delivery:</span><span>${summary?.service_type?.delivery || 0} orders</span></div>
+          <table>
+            <tr><td>Dine In:</td><td class="right">${summary?.service_type?.dine_in || 0} orders</td></tr>
+            <tr><td>Pickup:</td><td class="right">${summary?.service_type?.pickup || 0} orders</td></tr>
+            <tr><td>Delivery:</td><td class="right">${summary?.service_type?.delivery || 0} orders</td></tr>
+          </table>
         </div>
 
         <div class="section">
           <div class="section-title">REVENUE (Paid Orders Only)</div>
-          <div class="row"><span>Gross Revenue:</span><span>$${totalRevenue.toFixed(2)}</span></div>
-          <div class="row"><span>GST (15%):</span><span>$${totalTax.toFixed(2)}</span></div>
-          <div class="row total"><span>Net Revenue:</span><span>$${netRevenue.toFixed(2)}</span></div>
-          ${voidedCount > 0 ? `<div class="row"><span>Voided Amount:</span><span>-$${voidedAmount.toFixed(2)}</span></div>` : ''}
-          <div class="row grand-total"><span>TOTAL REVENUE:</span><span>$${totalRevenue.toFixed(2)} NZD</span></div>
+          <table>
+            <tr><td>Gross Revenue:</td><td class="right">$${totalRevenue.toFixed(2)}</td></tr>
+            <tr><td>GST (15%):</td><td class="right">$${totalTax.toFixed(2)}</td></tr>
+            <tr class="total"><td>Net Revenue:</td><td class="right">$${netRevenue.toFixed(2)}</td></tr>
+            ${voidedCount > 0 ? `<tr><td>Voided Amount:</td><td class="right">-$${voidedAmount.toFixed(2)}</td></tr>` : ''}
+            <tr class="grand-total"><td>TOTAL REVENUE:</td><td class="right">$${totalRevenue.toFixed(2)} NZD</td></tr>
+          </table>
         </div>
 
         <div class="footer">
@@ -684,11 +699,15 @@ export default function OrderSummaryPage() {
           <p>Generated by Smart Menu</p>
         </div>
 
+        <div class="cut-line">
+          --------------------------------
+        </div>
+
         <script>
+          window.onafterprint = function() { window.close(); };
           window.onload = function() {
-            window.print();
-            window.onafterprint = function() { window.close(); }
-          }
+            setTimeout(function() { window.print(); }, 600);
+          };
         </script>
       </body>
       </html>
@@ -713,65 +732,72 @@ export default function OrderSummaryPage() {
       : `Name: ${order.customer_details?.name || order.customer_name || '-'}<br/>Phone: ${order.customer_details?.phone || order.customer_phone || '-'}`;
 
     const itemsHtml = order.items && order.items.length > 0
-      ? order.items.map(item => {
+      ? `<table>${order.items.map(item => {
           const meatInfo = item.selectedMeat && (item.selectedMeat.name || item.selectedMeat.nameEn)
-            ? `<br/><span style="font-size:10px;margin-left:10px;">+ ${item.selectedMeat.nameEn || item.selectedMeat.name}${item.selectedMeat.price > 0 ? ` (+$${item.selectedMeat.price.toFixed(2)})` : ''}</span>`
+            ? `<tr><td></td><td colspan="2" style="font-size:10px;color:#000;padding-left:20px;">+ ${item.selectedMeat.nameEn || item.selectedMeat.name}${item.selectedMeat.price > 0 ? ` (+$${item.selectedMeat.price.toFixed(2)})` : ''}</td></tr>`
             : '';
           const addOnsInfo = item.selectedAddOns && item.selectedAddOns.length > 0 && item.selectedAddOns.some(a => a.name || a.nameEn)
-            ? `<br/><span style="font-size:10px;margin-left:10px;">+ ${item.selectedAddOns.filter(a => a.name || a.nameEn).map(a => a.nameEn || a.name).join(', ')}</span>`
+            ? `<tr><td></td><td colspan="2" style="font-size:10px;color:#000;padding-left:20px;">+ ${item.selectedAddOns.filter(a => a.name || a.nameEn).map(a => a.nameEn || a.name).join(', ')}</td></tr>`
             : '';
-          return `<div class="item"><span>${item.quantity}x ${item.nameEn || item.name}${meatInfo}${addOnsInfo}</span><span>$${(item.itemTotal || (item.price * item.quantity)).toFixed(2)}</span></div>`;
-        }).join('')
-      : '<p style="text-align:center;color:#666;">No items</p>';
+          return `<tr class="item-row"><td style="width:24px;font-weight:bold;">${item.quantity}x</td><td class="item-name">${item.nameEn || item.name}</td><td class="right" style="width:60px;white-space:nowrap;">$${(item.itemTotal || (item.price * item.quantity)).toFixed(2)}</td></tr>${meatInfo}${addOnsInfo}`;
+        }).join('')}</table>`
+      : '<p style="text-align:center;color:#000;">No items</p>';
 
     const html = `
       <!DOCTYPE html>
       <html>
       <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Order Receipt</title>
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
+          @page { size: 80mm auto; margin: 0; }
+          @media print { @page { size: 80mm auto; margin: 0; } body { margin: 0; padding: 2mm; } }
           body {
-            font-family: 'Courier New', monospace;
-            padding: 10mm;
+            font-family: 'Courier New', Courier, monospace;
+            padding: 2mm;
+            width: 80mm;
             max-width: 80mm;
-            margin: 0 auto;
+            margin: 0;
             font-size: 12px;
+            color: #000;
+            background: #fff;
           }
-          .header { text-align: center; margin-bottom: 15px; border-bottom: 1px dashed #000; padding-bottom: 10px; }
-          .header h1 { font-size: 16px; margin-bottom: 5px; }
-          .header p { font-size: 11px; color: #333; }
-          .section { margin-bottom: 12px; }
-          .section-title { font-weight: bold; margin-bottom: 5px; border-bottom: 1px solid #000; padding-bottom: 3px; font-size: 11px; }
-          .row { display: flex; justify-content: space-between; margin-bottom: 3px; }
-          .item { display: flex; justify-content: space-between; margin-bottom: 5px; align-items: flex-start; }
-          .item span:first-child { flex: 1; padding-right: 10px; }
-          .totals { border-top: 1px dashed #000; padding-top: 8px; margin-top: 8px; }
-          .totals .row { margin-bottom: 4px; }
-          .totals .total { font-size: 14px; font-weight: bold; border-top: 1px solid #000; padding-top: 5px; margin-top: 5px; }
-          .footer { text-align: center; margin-top: 15px; font-size: 10px; border-top: 1px dashed #000; padding-top: 10px; }
-          .special { background: #fff3cd; padding: 5px; margin: 8px 0; border-radius: 3px; font-size: 11px; }
-          @media print {
-            body { padding: 5mm; }
-          }
+          table { width: 100%; border-collapse: collapse; }
+          td { vertical-align: top; color: #000; padding: 2px 0; }
+          .right { text-align: right; }
+          .header { text-align: center; margin-bottom: 10px; border-bottom: 1px dashed #000; padding-bottom: 8px; }
+          .header h1 { font-size: 18px; margin-bottom: 4px; }
+          .header p { font-size: 11px; color: #000; margin: 2px 0; }
+          .section { margin-bottom: 8px; }
+          .section-title { font-weight: bold; margin-bottom: 4px; border-bottom: 1px solid #000; padding-bottom: 2px; font-size: 11px; }
+          .item-row td { padding: 2px 0; }
+          .item-name { word-wrap: break-word; }
+          .totals { border-top: 1px dashed #000; padding-top: 6px; margin-top: 6px; }
+          .totals .total td { font-size: 14px; font-weight: bold; border-top: 1px solid #000; padding-top: 4px; }
+          .footer { text-align: center; margin-top: 10px; font-size: 11px; color: #000; border-top: 1px dashed #000; padding-top: 8px; }
+          .footer p { margin: 2px 0; }
+          .special { border: 1px solid #000; padding: 4px; margin: 6px 0; font-size: 11px; color: #000; }
+          .cut-line { text-align: center; margin-top: 10px; padding-top: 6px; border-top: 1px dashed #000; font-size: 10px; color: #000; }
         </style>
       </head>
       <body>
         <div class="header">
           <h1>${restaurantName || 'Restaurant'}</h1>
-          ${restaurantGstNumber || restaurantIrdNumber ? `<p style="font-size:10px;">${restaurantIrdNumber ? `IRD: ${restaurantIrdNumber}` : ''}${restaurantGstNumber && restaurantIrdNumber ? ' | ' : ''}${restaurantGstNumber ? `GST: ${restaurantGstNumber}` : ''}</p>` : ''}
-          <p>ORDER RECEIPT</p>
+          ${restaurantGstNumber || restaurantIrdNumber ? `<p>${restaurantIrdNumber ? `IRD: ${restaurantIrdNumber}` : ''}${restaurantGstNumber && restaurantIrdNumber ? ' | ' : ''}${restaurantGstNumber ? `GST: ${restaurantGstNumber}` : ''}</p>` : ''}
+          <p style="font-weight:bold;">ORDER RECEIPT</p>
           <p>${orderDate}</p>
         </div>
 
         <div class="section">
           <div class="section-title">${getServiceTypeLabel(order.service_type).toUpperCase()}</div>
-          <p style="font-size:11px;">${customerInfo}</p>
+          <p style="font-size:11px;color:#000;">${customerInfo}</p>
           ${order.service_type === 'pickup' && order.customer_details?.pickup_time
-            ? `<p style="font-size:11px;">Pickup: ${new Date(order.customer_details.pickup_time).toLocaleTimeString('en-NZ', { hour: '2-digit', minute: '2-digit' })}</p>`
+            ? `<p style="font-size:11px;color:#000;">Pickup: ${new Date(order.customer_details.pickup_time).toLocaleTimeString('en-NZ', { hour: '2-digit', minute: '2-digit' })}</p>`
             : ''}
           ${order.service_type === 'delivery' && order.customer_details?.address
-            ? `<p style="font-size:11px;">Address: ${order.customer_details.address}</p>`
+            ? `<p style="font-size:11px;color:#000;">Address: ${order.customer_details.address}</p>`
             : ''}
         </div>
 
@@ -780,18 +806,22 @@ export default function OrderSummaryPage() {
           ${itemsHtml}
         </div>
 
-        ${order.special_instructions ? `<div class="special"><strong>Note:</strong> ${order.special_instructions}</div>` : ''}
+        ${order.special_instructions ? `<div class="special"><b>Note:</b> ${order.special_instructions}</div>` : ''}
 
         <div class="totals">
-          <div class="row"><span>Subtotal:</span><span>$${order.subtotal.toFixed(2)}</span></div>
-          ${order.tax > 0 ? `<div class="row"><span>GST (15%):</span><span>$${order.tax.toFixed(2)}</span></div>` : ''}
-          ${order.delivery_fee && order.delivery_fee > 0 ? `<div class="row"><span>Delivery:</span><span>$${order.delivery_fee.toFixed(2)}</span></div>` : ''}
-          <div class="row total"><span>TOTAL:</span><span>$${order.total_price.toFixed(2)} NZD</span></div>
+          <table>
+            <tr><td>Subtotal:</td><td class="right">$${order.subtotal.toFixed(2)}</td></tr>
+            ${order.tax > 0 ? `<tr><td>GST (15%):</td><td class="right">$${order.tax.toFixed(2)}</td></tr>` : ''}
+            ${order.delivery_fee && order.delivery_fee > 0 ? `<tr><td>Delivery:</td><td class="right">$${order.delivery_fee.toFixed(2)}</td></tr>` : ''}
+            <tr class="total"><td>TOTAL:</td><td class="right">$${order.total_price.toFixed(2)} NZD</td></tr>
+          </table>
         </div>
 
-        <div class="section" style="margin-top:10px;">
-          <div class="row"><span>Payment:</span><span>${getPaymentMethodLabel(order.payment_method)}</span></div>
-          <div class="row"><span>Status:</span><span>${order.payment_status === 'paid' ? 'PAID' : order.payment_status?.toUpperCase() || '-'}</span></div>
+        <div class="section" style="margin-top:8px;">
+          <table>
+            <tr><td>Payment:</td><td class="right">${getPaymentMethodLabel(order.payment_method)}</td></tr>
+            <tr><td>Status:</td><td class="right">${order.payment_status === 'paid' ? 'PAID' : order.payment_status?.toUpperCase() || '-'}</td></tr>
+          </table>
         </div>
 
         <div class="footer">
@@ -799,11 +829,15 @@ export default function OrderSummaryPage() {
           <p>Generated by Smart Menu</p>
         </div>
 
+        <div class="cut-line">
+          --------------------------------
+        </div>
+
         <script>
+          window.onafterprint = function() { window.close(); };
           window.onload = function() {
-            window.print();
-            window.onafterprint = function() { window.close(); }
-          }
+            setTimeout(function() { window.print(); }, 600);
+          };
         </script>
       </body>
       </html>

@@ -536,13 +536,17 @@ export default function KitchenDisplayPage() {
       <!DOCTYPE html>
       <html>
       <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Kitchen - ${order.id.slice(0, 8).toUpperCase()}</title>
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
           @page { size: 80mm auto; margin: 0; }
+          @media print { @page { size: 80mm auto; margin: 0; } body { margin: 0; padding: 0; } }
           html, body {
             font-family: 'Courier New', Courier, monospace;
             width: 80mm;
+            max-width: 80mm;
             height: auto;
             overflow: visible;
             margin: 0;
@@ -551,54 +555,64 @@ export default function KitchenDisplayPage() {
             color: #000;
             background: #fff;
           }
-          .ticket { padding-bottom: 15mm; /* Extra feed for auto-cutter */ }
+          .ticket { padding-bottom: 20mm; }
           .order-number {
             font-size: 24px;
             font-weight: bold;
             text-align: center;
-            border: 3px solid black;
-            padding: 3mm;
-            margin-bottom: 3mm;
+            border: 3px solid #000;
+            padding: 6px;
+            margin-bottom: 6px;
           }
           .order-type {
-            font-size: 14px;
+            font-size: 16px;
             font-weight: bold;
             text-align: center;
-            margin-bottom: 3mm;
+            margin-bottom: 6px;
+            color: #000;
           }
-          .info { font-size: 11px; margin-bottom: 3mm; }
-          .info p { margin: 1mm 0; }
-          .items { border-top: 2px solid black; padding-top: 3mm; }
+          .info { font-size: 12px; margin-bottom: 6px; color: #000; }
+          .info p { margin: 2px 0; }
+          .items { border-top: 2px solid #000; padding-top: 6px; }
           .item {
             font-size: 14px;
             font-weight: bold;
-            margin: 3mm 0;
-            padding-bottom: 2mm;
-            border-bottom: 1px dashed #ccc;
-            page-break-inside: avoid;
+            margin: 6px 0;
+            padding-bottom: 4px;
+            border-bottom: 1px dashed #000;
+            color: #000;
           }
           .item-qty { font-size: 16px; }
           .modifier {
             font-size: 12px;
             font-weight: normal;
-            padding-left: 5mm;
-            margin: 1mm 0;
+            padding-left: 20px;
+            margin: 2px 0;
+            color: #000;
           }
           .special {
-            background: #f0f0f0;
-            border: 3px solid black;
-            padding: 3mm;
-            margin: 3mm 0;
+            border: 3px solid #000;
+            padding: 6px;
+            margin: 6px 0;
             font-size: 14px;
             font-weight: bold;
-            page-break-inside: avoid;
+            color: #000;
           }
           .time {
             text-align: center;
-            font-size: 11px;
-            margin-top: 3mm;
-            padding-top: 2mm;
-            border-top: 1px dashed black;
+            font-size: 12px;
+            margin-top: 6px;
+            padding-top: 4px;
+            border-top: 1px dashed #000;
+            color: #000;
+          }
+          .cut-line {
+            text-align: center;
+            margin-top: 10px;
+            padding-top: 6px;
+            border-top: 1px dashed #000;
+            font-size: 10px;
+            color: #000;
           }
         </style>
       </head>
@@ -609,11 +623,11 @@ export default function KitchenDisplayPage() {
         </div>
 
         <div class="order-type">
-          ${order.service_type === 'dine_in' ? 'Dine In' : order.service_type === 'pickup' ? 'Pick Up' : 'Delivery'}
+          ${order.service_type === 'dine_in' ? 'DINE IN' : order.service_type === 'pickup' ? 'PICK UP' : 'DELIVERY'}
         </div>
 
         <div class="info">
-          ${order.table_no ? `<p><strong>TABLE: ${order.table_no}</strong></p>` : ''}
+          ${order.table_no ? `<p><b>TABLE: ${order.table_no}</b></p>` : ''}
           ${order.customer_name ? `<p>Customer: ${order.customer_name}</p>` : ''}
         </div>
 
@@ -639,12 +653,16 @@ export default function KitchenDisplayPage() {
             hour: '2-digit', minute: '2-digit', second: '2-digit'
           })}
         </div>
+
+        <div class="cut-line">
+          --------------------------------
+        </div>
       </div>
 
         <script>
           window.onafterprint = function() { window.close(); };
           window.onload = function() {
-            setTimeout(function() { window.print(); }, 400);
+            setTimeout(function() { window.print(); }, 600);
           };
         </script>
       </body>
