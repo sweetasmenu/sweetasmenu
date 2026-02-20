@@ -6,9 +6,9 @@ import {
   Users, Bell, Volume2, VolumeX, Clock, CheckCircle,
   AlertTriangle, LogOut, RefreshCw, Loader2, Timer,
   Utensils, Coffee, Hand, Droplets, Receipt,
-  MessageSquare, Store, MapPin, X, Printer, XCircle, Eye
+  MessageSquare, Store, MapPin, X, Printer, XCircle, Eye, Bluetooth
 } from 'lucide-react';
-import { printViaIframe } from '@/lib/utils/printHelper';
+import { printViaIframe, getPrintMethod, setPrintMethod, isMobileDevice, type PrintMethod } from '@/lib/utils/printHelper';
 import { supabase } from '@/lib/supabase/client';
 import { t, tBilingual, mapToPOSLanguage, POSLanguage } from '@/lib/pos-translations';
 import { getThemeClasses, POSTheme } from '@/lib/pos-theme';
@@ -123,6 +123,10 @@ export default function StaffOrdersPage() {
   const [cashierPaymentOrder, setCashierPaymentOrder] = useState<Order | null>(null);
   const [cashierPaymentLoading, setCashierPaymentLoading] = useState(false);
 
+  // Bluetooth print mode
+  const [currentPrintMethod, setCurrentPrintMethod] = useState<PrintMethod>('system');
+  const [showMobilePrintToggle, setShowMobilePrintToggle] = useState(false);
+
   // Restaurant details for receipts
   const [restaurantDetails, setRestaurantDetails] = useState<{
     name: string;
@@ -155,6 +159,10 @@ export default function StaffOrdersPage() {
       setLang(posLang);
       setPrimaryLanguage(parsedSession.primaryLanguage);
     }
+
+    // Initialize print method and detect mobile
+    setCurrentPrintMethod(getPrintMethod());
+    setShowMobilePrintToggle(isMobileDevice());
   }, [router]);
 
   // Update clock
@@ -1144,8 +1152,28 @@ export default function StaffOrdersPage() {
         showSoundControls={true}
       />
 
-      {/* Refresh Button */}
-      <div className="bg-slate-800 px-4 py-2 flex justify-end border-b border-slate-700">
+      {/* Toolbar */}
+      <div className="bg-slate-800 px-4 py-2 flex items-center justify-between border-b border-slate-700">
+        {/* Bluetooth Print Toggle (mobile/tablet only) */}
+        {showMobilePrintToggle ? (
+          <button
+            onClick={() => {
+              const newMethod: PrintMethod = currentPrintMethod === 'rawbt' ? 'system' : 'rawbt';
+              setPrintMethod(newMethod);
+              setCurrentPrintMethod(newMethod);
+            }}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors text-sm font-medium ${
+              currentPrintMethod === 'rawbt'
+                ? 'bg-blue-600 hover:bg-blue-500 text-white'
+                : 'bg-slate-700 hover:bg-slate-600 text-slate-300'
+            }`}
+            title={currentPrintMethod === 'rawbt' ? 'Bluetooth printing ON (RawBT)' : 'System print (tap to enable Bluetooth)'}
+          >
+            <Bluetooth className="w-4 h-4" />
+            <span>{currentPrintMethod === 'rawbt' ? (lang === 'th' ? 'BT ปริ้น: เปิด' : 'BT Print: ON') : (lang === 'th' ? 'BT ปริ้น: ปิด' : 'BT Print: OFF')}</span>
+          </button>
+        ) : <div />}
+
         <button
           onClick={() => { fetchOrders(); fetchServiceRequests(); }}
           className="flex items-center gap-2 px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors text-sm"

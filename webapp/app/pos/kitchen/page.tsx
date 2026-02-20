@@ -5,9 +5,9 @@ import { useRouter } from 'next/navigation';
 import {
   ChefHat, Bell, Volume2, VolumeX, Clock, CheckCircle,
   AlertTriangle, LogOut, RefreshCw, Loader2, Timer,
-  Utensils, Coffee, Users, XCircle, X, Printer
+  Utensils, Coffee, Users, XCircle, X, Printer, Bluetooth
 } from 'lucide-react';
-import { printViaIframe } from '@/lib/utils/printHelper';
+import { printViaIframe, getPrintMethod, setPrintMethod, isMobileDevice, type PrintMethod } from '@/lib/utils/printHelper';
 import { supabase } from '@/lib/supabase/client';
 import { t, tBilingual, mapToPOSLanguage, POSLanguage } from '@/lib/pos-translations';
 import { getThemeClasses, POSTheme } from '@/lib/pos-theme';
@@ -90,6 +90,10 @@ export default function KitchenDisplayPage() {
   });
   const themeClasses = getThemeClasses(posTheme);
 
+  // Bluetooth print mode
+  const [currentPrintMethod, setCurrentPrintMethod] = useState<PrintMethod>('system');
+  const [showMobilePrintToggle, setShowMobilePrintToggle] = useState(false);
+
   // Void order states
   const [showVoidModal, setShowVoidModal] = useState(false);
   const [voidingOrder, setVoidingOrder] = useState<Order | null>(null);
@@ -125,6 +129,10 @@ export default function KitchenDisplayPage() {
       setLang(posLang);
       setPrimaryLanguage(parsedSession.primaryLanguage);
     }
+
+    // Initialize print method and detect mobile
+    setCurrentPrintMethod(getPrintMethod());
+    setShowMobilePrintToggle(isMobileDevice());
   }, [router]);
 
   // Update clock
@@ -755,6 +763,25 @@ export default function KitchenDisplayPage() {
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Bluetooth Print Toggle (mobile/tablet only) */}
+          {showMobilePrintToggle && (
+            <button
+              onClick={() => {
+                const newMethod: PrintMethod = currentPrintMethod === 'rawbt' ? 'system' : 'rawbt';
+                setPrintMethod(newMethod);
+                setCurrentPrintMethod(newMethod);
+              }}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors text-sm font-medium ${
+                currentPrintMethod === 'rawbt'
+                  ? 'bg-blue-600 hover:bg-blue-500 text-white'
+                  : 'bg-slate-700 hover:bg-slate-600 text-slate-300'
+              }`}
+            >
+              <Bluetooth className="w-4 h-4" />
+              <span>{currentPrintMethod === 'rawbt' ? 'BT: ON' : 'BT: OFF'}</span>
+            </button>
+          )}
+
           {/* Settings */}
           <button
             onClick={() => setShowSettings(!showSettings)}
