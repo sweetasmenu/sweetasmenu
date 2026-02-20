@@ -339,23 +339,27 @@ export default function CashierDashboardPage() {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Daily Cashier Report</title>
         <style>
+          /* POS80 Thermal Printer — 80mm paper */
           * { margin: 0; padding: 0; box-sizing: border-box; }
-          @page { margin: 0; }
+          @page { size: 80mm auto; margin: 0; }
           html, body {
             font-family: 'Courier New', Courier, monospace;
-            width: 100%;
+            width: 80mm;
+            max-width: 80mm;
             height: auto;
-            overflow: visible;
-            margin: 0;
+            overflow: hidden;
+            margin: 0 auto;
             padding: 0 2mm;
             font-size: 12px;
             color: #000;
             background: #fff;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
           }
           table { width: 100%; border-collapse: collapse; }
           td { vertical-align: top; color: #000; padding: 2px 0; }
           .right { text-align: right; }
-          .report { padding-bottom: 20mm; }
+          .report { padding-bottom: 15mm; page-break-after: always; }
           .header { text-align: center; margin-bottom: 10px; border-bottom: 2px dashed #000; padding-bottom: 8px; }
           .header h1 { font-size: 18px; margin-bottom: 4px; }
           .header p { font-size: 11px; color: #000; margin: 2px 0; }
