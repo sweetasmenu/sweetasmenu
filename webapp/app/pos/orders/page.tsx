@@ -6,9 +6,9 @@ import {
   Users, Bell, Volume2, VolumeX, Clock, CheckCircle,
   AlertTriangle, LogOut, RefreshCw, Loader2, Timer,
   Utensils, Coffee, Hand, Droplets, Receipt,
-  MessageSquare, Store, MapPin, X, Printer, XCircle, Eye, Bluetooth
+  MessageSquare, Store, MapPin, X, Printer, XCircle, Eye, Bluetooth, Cloud
 } from 'lucide-react';
-import { printViaIframe, getPrintMethod, setPrintMethod, isMobileDevice, type PrintMethod } from '@/lib/utils/printHelper';
+import { printViaIframe, printViaCloud, getPrintMethod, setPrintMethod, isMobileDevice, type PrintMethod } from '@/lib/utils/printHelper';
 import { supabase } from '@/lib/supabase/client';
 import { t, tBilingual, mapToPOSLanguage, POSLanguage } from '@/lib/pos-translations';
 import { getThemeClasses, POSTheme } from '@/lib/pos-theme';
@@ -920,7 +920,11 @@ export default function StaffOrdersPage() {
       </html>
     `;
 
-    printViaIframe(html);
+    if (currentPrintMethod === 'cloud' && session?.restaurantId) {
+      printViaCloud(html, 'receipt', session.restaurantId, order.id);
+    } else {
+      printViaIframe(html);
+    }
   };
 
   // Print kitchen ticket (for kitchen display)
@@ -1066,7 +1070,11 @@ export default function StaffOrdersPage() {
       </html>
     `;
 
-    printViaIframe(html);
+    if (currentPrintMethod === 'cloud' && session?.restaurantId) {
+      printViaCloud(html, 'kitchen_ticket', session.restaurantId, order.id);
+    } else {
+      printViaIframe(html);
+    }
   };
 
   // Update service request status
@@ -1158,25 +1166,47 @@ export default function StaffOrdersPage() {
 
       {/* Toolbar */}
       <div className="bg-slate-800 px-4 py-2 flex items-center justify-between border-b border-slate-700">
-        {/* Bluetooth Print Toggle (mobile/tablet only) */}
-        {showMobilePrintToggle ? (
+        {/* Print Method Selector */}
+        <div className="flex items-center gap-1">
           <button
-            onClick={() => {
-              const newMethod: PrintMethod = currentPrintMethod === 'rawbt' ? 'system' : 'rawbt';
-              setPrintMethod(newMethod);
-              setCurrentPrintMethod(newMethod);
-            }}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors text-sm font-medium ${
-              currentPrintMethod === 'rawbt'
-                ? 'bg-blue-600 hover:bg-blue-500 text-white'
-                : 'bg-slate-700 hover:bg-slate-600 text-slate-300'
+            onClick={() => { setPrintMethod('system'); setCurrentPrintMethod('system'); }}
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors text-xs font-medium ${
+              currentPrintMethod === 'system'
+                ? 'bg-green-600 text-white'
+                : 'bg-slate-700 hover:bg-slate-600 text-slate-400'
             }`}
-            title={currentPrintMethod === 'rawbt' ? 'Bluetooth printing ON (RawBT)' : 'System print (tap to enable Bluetooth)'}
+            title="System Print"
           >
-            <Bluetooth className="w-4 h-4" />
-            <span>{currentPrintMethod === 'rawbt' ? (lang === 'th' ? 'BT ปริ้น: เปิด' : 'BT Print: ON') : (lang === 'th' ? 'BT ปริ้น: ปิด' : 'BT Print: OFF')}</span>
+            <Printer className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">{lang === 'th' ? 'ปริ้นปกติ' : 'System'}</span>
           </button>
-        ) : <div />}
+          {showMobilePrintToggle && (
+            <button
+              onClick={() => { setPrintMethod('rawbt'); setCurrentPrintMethod('rawbt'); }}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors text-xs font-medium ${
+                currentPrintMethod === 'rawbt'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-slate-700 hover:bg-slate-600 text-slate-400'
+              }`}
+              title="Bluetooth (RawBT)"
+            >
+              <Bluetooth className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">BT</span>
+            </button>
+          )}
+          <button
+            onClick={() => { setPrintMethod('cloud'); setCurrentPrintMethod('cloud'); }}
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors text-xs font-medium ${
+              currentPrintMethod === 'cloud'
+                ? 'bg-purple-600 text-white'
+                : 'bg-slate-700 hover:bg-slate-600 text-slate-400'
+            }`}
+            title="Cloud Print Queue"
+          >
+            <Cloud className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">{lang === 'th' ? 'คลาวด์' : 'Cloud'}</span>
+          </button>
+        </div>
 
         <button
           onClick={() => { fetchOrders(); fetchServiceRequests(); }}

@@ -13,13 +13,19 @@
  *   then sends it to RawBT app as rawbt:data:image/png;base64,...
  *   RawBT prints the image to the connected Bluetooth thermal printer.
  *   Requires RawBT app installed on Android (free on Play Store).
+ *
+ * Cloud Print Queue: Sends print jobs to Supabase print_queue table.
+ *   A Print Agent page running on a PC picks up jobs and prints them.
+ *   Works from any device (iPad, Android, desktop) without direct printer connection.
  */
+
+import { supabase } from '@/lib/supabase/client';
 
 /** Print method preference key in localStorage */
 const PRINT_METHOD_KEY = 'thermal_print_method';
 
 /** Available print methods */
-export type PrintMethod = 'system' | 'rawbt';
+export type PrintMethod = 'system' | 'rawbt' | 'cloud';
 
 /**
  * Get the current print method preference.
@@ -34,6 +40,7 @@ export function getPrintMethod(): PrintMethod {
  * Set the print method preference.
  * 'system' = regular browser print (default)
  * 'rawbt' = send to RawBT app for Bluetooth thermal printing
+ * 'cloud' = send to cloud print queue (for iPad → PC printing)
  */
 export function setPrintMethod(method: PrintMethod): void {
   if (typeof localStorage === 'undefined') return;
@@ -69,7 +76,7 @@ export function printViaIframe(htmlContent: string): void {
     return;
   }
 
-  // System print (default)
+  // System print (default) — also used by Print Agent for cloud jobs
   if (isMobile) {
     // Mobile: open via <a> click (not blocked as popup)
     const blob = new Blob([htmlContent], { type: 'text/html' });
@@ -95,6 +102,38 @@ export function printViaIframe(htmlContent: string): void {
       window.open(url, '_blank');
       setTimeout(() => URL.revokeObjectURL(url), 60000);
     }
+  }
+}
+
+/**
+ * Send a print job to the cloud print queue (Supabase).
+ * The Print Agent page on a PC will pick it up and print it.
+ */
+export async function printViaCloud(
+  htmlContent: string,
+  jobType: 'receipt' | 'kitchen_ticket',
+  restaurantId: string,
+  orderId?: string
+): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from('print_queue')
+      .insert({
+        restaurant_id: restaurantId,
+        order_id: orderId || null,
+        job_type: jobType,
+        html_content: htmlContent,
+        status: 'pending',
+      });
+
+    if (error) {
+      console.error('Cloud print queue insert failed:', error);
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.error('Cloud print failed:', e);
+    return false;
   }
 }
 
