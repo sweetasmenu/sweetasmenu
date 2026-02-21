@@ -341,7 +341,7 @@ export default function CashierDashboardPage() {
         <style>
           /* POS80 Thermal Printer — 80mm paper, ~72mm printable */
           * { margin: 0; padding: 0; box-sizing: border-box; }
-          @page { size: 80mm auto; margin: 0 4mm; }
+          @page { size: 80mm auto; margin: 0; }
           html, body {
             font-family: 'Courier New', Courier, monospace;
             width: 100%;
