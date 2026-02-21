@@ -729,18 +729,18 @@ export default function StaffOrdersPage() {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Receipt - ${order.id.slice(0, 8).toUpperCase()}</title>
         <style>
-          /* POS80 Thermal Printer — 80mm paper, ~72mm printable */
+          /* POS80 Thermal Printer — 72mm printable on 80mm paper */
           * { margin: 0; padding: 0; box-sizing: border-box; }
-          @page { size: 80mm auto; margin: 0; }
+          @page { margin: 0; }
           html, body {
             font-family: 'Courier New', Courier, monospace;
-            width: 100%;
+            width: 72mm;
             height: auto;
             overflow: hidden;
             margin: 0;
-            padding: 0 2mm;
-            font-size: 12px;
-            line-height: 1.4;
+            padding: 0;
+            font-size: 11px;
+            line-height: 1.3;
             color: #000;
             background: #fff;
             -webkit-print-color-adjust: exact;
@@ -752,71 +752,71 @@ export default function StaffOrdersPage() {
 
           .copy-badge {
             text-align: center;
-            border: 3px solid #000;
-            padding: 4px;
+            border: 2px solid #000;
+            padding: 3px;
             margin-bottom: 4px;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: bold;
-            letter-spacing: 3px;
+            letter-spacing: 2px;
           }
 
           .header {
             text-align: center;
-            border-bottom: 2px dashed #000;
-            padding-bottom: 6px;
-            margin-bottom: 6px;
+            border-bottom: 1px dashed #000;
+            padding-bottom: 4px;
+            margin-bottom: 4px;
           }
-          .header h1 { font-size: 18px; font-weight: bold; margin-bottom: 2px; }
-          .header p { font-size: 11px; color: #000; margin: 2px 0; }
-          .header .tax-info { font-size: 10px; color: #000; margin-top: 2px; }
-          .header .subtitle { font-size: 11px; font-weight: bold; margin-top: 4px; }
-          .order-type { font-size: 13px; font-weight: bold; margin-top: 4px; display: block; }
+          .header h1 { font-size: 14px; font-weight: bold; margin-bottom: 2px; }
+          .header p { font-size: 10px; color: #000; margin: 1px 0; }
+          .header .tax-info { font-size: 9px; color: #000; margin-top: 2px; }
+          .header .subtitle { font-size: 10px; font-weight: bold; margin-top: 3px; }
+          .order-type { font-size: 11px; font-weight: bold; margin-top: 3px; display: block; }
 
-          .info { margin-bottom: 6px; font-size: 11px; }
-          .info p { margin: 2px 0; color: #000; }
+          .info { margin-bottom: 4px; font-size: 10px; }
+          .info p { margin: 1px 0; color: #000; }
 
-          .items { border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 4px 0; margin: 4px 0; }
-          .items table td { font-size: 11px; padding: 2px 0; }
-          .item-qty { width: 20px; font-weight: bold; }
+          .items { border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 3px 0; margin: 3px 0; }
+          .items table td { font-size: 10px; padding: 1px 0; }
+          .item-qty { width: 18px; font-weight: bold; }
           .item-name { word-wrap: break-word; overflow-wrap: break-word; }
-          .item-price { width: 50px; text-align: right; white-space: nowrap; }
-          .modifier { font-size: 10px; color: #000; padding-left: 24px; margin: 1px 0; }
+          .item-price { width: 45px; text-align: right; white-space: nowrap; }
+          .modifier { font-size: 9px; color: #000; padding-left: 20px; margin: 1px 0; }
 
           .special {
-            border: 2px solid #000;
-            padding: 4px;
-            margin: 4px 0;
-            font-size: 11px;
+            border: 1px solid #000;
+            padding: 3px;
+            margin: 3px 0;
+            font-size: 10px;
           }
           .special-label { font-weight: bold; margin-bottom: 2px; }
 
-          .totals { margin-top: 4px; padding-top: 4px; font-size: 11px; }
-          .totals table td { padding: 2px 0; }
+          .totals { margin-top: 3px; padding-top: 3px; font-size: 10px; }
+          .totals table td { padding: 1px 0; }
           .totals .right { text-align: right; }
           .grand-total td {
-            font-size: 14px;
+            font-size: 12px;
             font-weight: bold;
-            border-top: 2px solid #000;
-            padding-top: 4px;
+            border-top: 1px solid #000;
+            padding-top: 3px;
           }
-          .gst-info { font-size: 10px; text-align: right; color: #000; margin-top: 2px; }
+          .gst-info { font-size: 9px; text-align: right; color: #000; margin-top: 2px; }
 
           .footer {
             text-align: center;
-            margin-top: 8px;
-            padding-top: 6px;
-            border-top: 2px dashed #000;
-            font-size: 11px;
+            margin-top: 6px;
+            padding-top: 4px;
+            border-top: 1px dashed #000;
+            font-size: 10px;
             color: #000;
           }
-          .footer p { margin: 2px 0; }
+          .footer p { margin: 1px 0; }
 
           .cut-line {
             text-align: center;
-            margin-top: 10px;
-            padding-top: 6px;
+            margin-top: 6px;
+            padding-top: 4px;
             border-top: 1px dashed #000;
-            font-size: 10px;
+            font-size: 9px;
             color: #000;
           }
         </style>
@@ -933,17 +933,17 @@ export default function StaffOrdersPage() {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Kitchen - ${order.id.slice(0, 8).toUpperCase()}</title>
         <style>
-          /* POS80 Thermal Printer — 80mm paper, ~72mm printable */
+          /* POS80 Thermal Printer — 72mm printable on 80mm paper */
           * { margin: 0; padding: 0; box-sizing: border-box; }
-          @page { size: 80mm auto; margin: 0; }
+          @page { margin: 0; }
           html, body {
             font-family: 'Courier New', Courier, monospace;
-            width: 100%;
+            width: 72mm;
             height: auto;
             overflow: hidden;
             margin: 0;
-            padding: 0 2mm;
-            font-size: 12px;
+            padding: 0;
+            font-size: 11px;
             color: #000;
             background: #fff;
             -webkit-print-color-adjust: exact;
@@ -951,32 +951,32 @@ export default function StaffOrdersPage() {
           }
           .ticket { padding-bottom: 5mm; }
           .order-number {
-            font-size: 24px;
+            font-size: 18px;
             font-weight: bold;
             text-align: center;
-            border: 3px solid #000;
-            padding: 6px;
-            margin-bottom: 6px;
+            border: 2px solid #000;
+            padding: 4px;
+            margin-bottom: 4px;
           }
           .order-type {
-            font-size: 16px;
+            font-size: 13px;
             font-weight: bold;
             text-align: center;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             color: #000;
           }
-          .info { font-size: 12px; margin-bottom: 6px; color: #000; }
-          .info p { margin: 2px 0; }
-          .items { border-top: 2px solid #000; padding-top: 6px; }
+          .info { font-size: 11px; margin-bottom: 4px; color: #000; }
+          .info p { margin: 1px 0; }
+          .items { border-top: 1px solid #000; padding-top: 4px; }
           .item {
-            font-size: 14px;
+            font-size: 12px;
             font-weight: bold;
-            margin: 6px 0;
-            padding-bottom: 4px;
+            margin: 4px 0;
+            padding-bottom: 3px;
             border-bottom: 1px dashed #000;
             color: #000;
           }
-          .item-qty { font-size: 16px; }
+          .item-qty { font-size: 13px; }
           .modifier {
             font-size: 12px;
             font-weight: normal;

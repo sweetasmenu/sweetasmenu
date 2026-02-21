@@ -548,17 +548,17 @@ export default function KitchenDisplayPage() {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Kitchen - ${order.id.slice(0, 8).toUpperCase()}</title>
         <style>
-          /* POS80 Thermal Printer — 80mm paper, ~72mm printable */
+          /* POS80 Thermal Printer — 72mm printable on 80mm paper */
           * { margin: 0; padding: 0; box-sizing: border-box; }
-          @page { size: 80mm auto; margin: 0; }
+          @page { margin: 0; }
           html, body {
             font-family: 'Courier New', Courier, monospace;
-            width: 100%;
+            width: 72mm;
             height: auto;
             overflow: hidden;
             margin: 0;
-            padding: 0 2mm;
-            font-size: 12px;
+            padding: 0;
+            font-size: 11px;
             color: #000;
             background: #fff;
             -webkit-print-color-adjust: exact;
@@ -566,61 +566,61 @@ export default function KitchenDisplayPage() {
           }
           .ticket { padding-bottom: 5mm; }
           .order-number {
-            font-size: 24px;
+            font-size: 18px;
             font-weight: bold;
             text-align: center;
-            border: 3px solid #000;
-            padding: 6px;
-            margin-bottom: 6px;
+            border: 2px solid #000;
+            padding: 4px;
+            margin-bottom: 4px;
           }
           .order-type {
-            font-size: 16px;
+            font-size: 13px;
             font-weight: bold;
             text-align: center;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             color: #000;
           }
-          .info { font-size: 12px; margin-bottom: 6px; color: #000; }
-          .info p { margin: 2px 0; }
-          .items { border-top: 2px solid #000; padding-top: 6px; }
+          .info { font-size: 11px; margin-bottom: 4px; color: #000; }
+          .info p { margin: 1px 0; }
+          .items { border-top: 1px solid #000; padding-top: 4px; }
           .item {
-            font-size: 14px;
+            font-size: 12px;
             font-weight: bold;
-            margin: 6px 0;
-            padding-bottom: 4px;
+            margin: 4px 0;
+            padding-bottom: 3px;
             border-bottom: 1px dashed #000;
             color: #000;
           }
-          .item-qty { font-size: 16px; }
+          .item-qty { font-size: 13px; }
           .modifier {
-            font-size: 12px;
+            font-size: 10px;
             font-weight: normal;
-            padding-left: 20px;
-            margin: 2px 0;
+            padding-left: 16px;
+            margin: 1px 0;
             color: #000;
           }
           .special {
-            border: 3px solid #000;
-            padding: 6px;
-            margin: 6px 0;
-            font-size: 14px;
+            border: 2px solid #000;
+            padding: 4px;
+            margin: 4px 0;
+            font-size: 12px;
             font-weight: bold;
             color: #000;
           }
           .time {
             text-align: center;
-            font-size: 12px;
-            margin-top: 6px;
-            padding-top: 4px;
+            font-size: 10px;
+            margin-top: 4px;
+            padding-top: 3px;
             border-top: 1px dashed #000;
             color: #000;
           }
           .cut-line {
             text-align: center;
-            margin-top: 10px;
-            padding-top: 6px;
+            margin-top: 6px;
+            padding-top: 4px;
             border-top: 1px dashed #000;
-            font-size: 10px;
+            font-size: 9px;
             color: #000;
           }
         </style>
