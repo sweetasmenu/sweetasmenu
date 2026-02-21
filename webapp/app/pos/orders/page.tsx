@@ -738,7 +738,7 @@ export default function StaffOrdersPage() {
             height: auto;
             overflow: hidden;
             margin: 0;
-            padding: 0;
+            padding: 0 2mm 0 0;
             font-size: 11px;
             line-height: 1.3;
             color: #000;
@@ -942,7 +942,7 @@ export default function StaffOrdersPage() {
             height: auto;
             overflow: hidden;
             margin: 0;
-            padding: 0;
+            padding: 0 2mm 0 0;
             font-size: 11px;
             color: #000;
             background: #fff;

@@ -348,7 +348,7 @@ export default function CashierDashboardPage() {
             height: auto;
             overflow: hidden;
             margin: 0;
-            padding: 0;
+            padding: 0 2mm 0 0;
             font-size: 10px;
             color: #000;
             background: #fff;
