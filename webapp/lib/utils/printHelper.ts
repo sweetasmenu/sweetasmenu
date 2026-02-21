@@ -123,17 +123,19 @@ async function printViaRawBT(htmlContent: string): Promise<void> {
     if (!bodyMatch) throw new Error('Invalid receipt HTML');
 
     // Create off-screen container to render the receipt
+    // Match desktop print CSS: 72mm width, bold, same font sizes
     const container = document.createElement('div');
     container.style.position = 'fixed';
     container.style.left = '-9999px';
     container.style.top = '0';
-    container.style.width = '384px'; // ~58mm at 203dpi, safe for 80mm printers
+    container.style.width = '72mm';
     container.style.background = '#fff';
     container.style.fontFamily = "Arial, Helvetica, sans-serif";
     container.style.fontSize = '12px';
-    container.style.lineHeight = '1.4';
+    container.style.fontWeight = 'bold';
+    container.style.lineHeight = '1.3';
     container.style.color = '#000';
-    container.style.padding = '0 4px';
+    container.style.padding = '0 3mm 0 0';
 
     // Inject receipt styles
     if (styleMatch) {
@@ -152,9 +154,8 @@ async function printViaRawBT(htmlContent: string): Promise<void> {
     // Wait for fonts and layout to settle
     await new Promise(resolve => setTimeout(resolve, 300));
 
-    // Render receipt to canvas image
+    // Render receipt to canvas image (use container's natural width from 72mm CSS)
     const canvas = await html2canvas(container, {
-      width: 384,
       background: '#ffffff',
       logging: false,
     });
