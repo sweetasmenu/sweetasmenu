@@ -619,7 +619,7 @@ export default function OrderSummaryPage() {
           * { margin: 0; padding: 0; box-sizing: border-box; }
           @page { margin: 0; }
           body {
-            font-family: 'Courier New', Courier, monospace;
+            font-family: Arial, Helvetica, sans-serif;
             padding: 2mm;
             width: 100%;
             margin: 0;
@@ -752,7 +752,7 @@ export default function OrderSummaryPage() {
           * { margin: 0; padding: 0; box-sizing: border-box; }
           @page { margin: 0; }
           body {
-            font-family: 'Courier New', Courier, monospace;
+            font-family: Arial, Helvetica, sans-serif;
             padding: 2mm;
             width: 100%;
             margin: 0;

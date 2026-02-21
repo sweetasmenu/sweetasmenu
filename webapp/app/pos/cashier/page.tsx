@@ -343,7 +343,7 @@ export default function CashierDashboardPage() {
           * { margin: 0; padding: 0; box-sizing: border-box; }
           @page { margin: 0; }
           html, body {
-            font-family: 'Courier New', Courier, monospace;
+            font-family: Arial, Helvetica, sans-serif;
             width: 72mm;
             height: auto;
             overflow: hidden;

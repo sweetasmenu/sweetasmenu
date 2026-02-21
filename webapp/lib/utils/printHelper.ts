@@ -129,7 +129,7 @@ async function printViaRawBT(htmlContent: string): Promise<void> {
     container.style.top = '0';
     container.style.width = '384px'; // ~58mm at 203dpi, safe for 80mm printers
     container.style.background = '#fff';
-    container.style.fontFamily = "'Courier New', Courier, monospace";
+    container.style.fontFamily = "Arial, Helvetica, sans-serif";
     container.style.fontSize = '12px';
     container.style.lineHeight = '1.4';
     container.style.color = '#000';
