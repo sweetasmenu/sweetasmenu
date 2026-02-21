@@ -557,7 +557,7 @@ export default function KitchenDisplayPage() {
             height: auto;
             overflow: hidden;
             margin: 0;
-            padding: 0;
+            padding: 0 2mm;
             font-size: 12px;
             color: #000;
             background: #fff;

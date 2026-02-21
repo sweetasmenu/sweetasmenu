@@ -348,14 +348,14 @@ export default function CashierDashboardPage() {
             height: auto;
             overflow: hidden;
             margin: 0;
-            padding: 0;
+            padding: 0 2mm;
             font-size: 12px;
             color: #000;
             background: #fff;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
           }
-          table { width: 100%; border-collapse: collapse; }
+          table { width: 100%; border-collapse: collapse; table-layout: fixed; }
           td { vertical-align: top; color: #000; padding: 2px 0; }
           .right { text-align: right; }
           .report { padding-bottom: 5mm; }

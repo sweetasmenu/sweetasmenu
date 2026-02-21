@@ -738,7 +738,7 @@ export default function StaffOrdersPage() {
             height: auto;
             overflow: hidden;
             margin: 0;
-            padding: 0;
+            padding: 0 2mm;
             font-size: 12px;
             line-height: 1.4;
             color: #000;
@@ -747,7 +747,7 @@ export default function StaffOrdersPage() {
             print-color-adjust: exact;
           }
           .receipt { width: 100%; padding-bottom: 5mm; }
-          table { width: 100%; border-collapse: collapse; }
+          table { width: 100%; border-collapse: collapse; table-layout: fixed; }
           td { vertical-align: top; color: #000; padding: 1px 0; }
 
           .copy-badge {
@@ -777,10 +777,10 @@ export default function StaffOrdersPage() {
 
           .items { border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 4px 0; margin: 4px 0; }
           .items table td { font-size: 11px; padding: 2px 0; }
-          .item-qty { width: 24px; font-weight: bold; }
+          .item-qty { width: 20px; font-weight: bold; }
           .item-name { word-wrap: break-word; overflow-wrap: break-word; }
-          .item-price { width: 60px; text-align: right; white-space: nowrap; }
-          .modifier { font-size: 10px; color: #000; padding-left: 28px; margin: 1px 0; }
+          .item-price { width: 50px; text-align: right; white-space: nowrap; }
+          .modifier { font-size: 10px; color: #000; padding-left: 24px; margin: 1px 0; }
 
           .special {
             border: 2px solid #000;
@@ -942,7 +942,7 @@ export default function StaffOrdersPage() {
             height: auto;
             overflow: hidden;
             margin: 0;
-            padding: 0;
+            padding: 0 2mm;
             font-size: 12px;
             color: #000;
             background: #fff;
