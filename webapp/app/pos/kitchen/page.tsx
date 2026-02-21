@@ -558,7 +558,9 @@ export default function KitchenDisplayPage() {
             overflow: hidden;
             margin: 0;
             padding: 0 3mm 0 0;
-            font-size: 11px;
+            font-size: 12px;
+            font-weight: bold;
+            line-height: 1.3;
             color: #000;
             background: #fff;
             -webkit-print-color-adjust: exact;
@@ -566,61 +568,61 @@ export default function KitchenDisplayPage() {
           }
           .ticket { padding-bottom: 5mm; }
           .order-number {
-            font-size: 18px;
-            font-weight: bold;
+            font-size: 20px;
+            font-weight: 900;
             text-align: center;
             border: 2px solid #000;
             padding: 4px;
             margin-bottom: 4px;
           }
           .order-type {
-            font-size: 13px;
-            font-weight: bold;
+            font-size: 14px;
+            font-weight: 900;
             text-align: center;
             margin-bottom: 4px;
             color: #000;
           }
-          .info { font-size: 11px; margin-bottom: 4px; color: #000; }
+          .info { font-size: 12px; margin-bottom: 4px; color: #000; }
           .info p { margin: 1px 0; }
-          .items { border-top: 1px solid #000; padding-top: 4px; }
+          .items { border-top: 2px solid #000; padding-top: 4px; }
           .item {
-            font-size: 12px;
-            font-weight: bold;
+            font-size: 13px;
+            font-weight: 900;
             margin: 4px 0;
             padding-bottom: 3px;
             border-bottom: 1px dashed #000;
             color: #000;
           }
-          .item-qty { font-size: 13px; }
+          .item-qty { font-size: 14px; font-weight: 900; }
           .modifier {
-            font-size: 10px;
+            font-size: 12px;
             font-weight: normal;
-            padding-left: 16px;
-            margin: 1px 0;
+            padding-left: 20px;
+            margin: 2px 0;
             color: #000;
           }
           .special {
-            border: 2px solid #000;
-            padding: 4px;
-            margin: 4px 0;
-            font-size: 12px;
-            font-weight: bold;
+            border: 3px solid #000;
+            padding: 6px;
+            margin: 6px 0;
+            font-size: 15px;
+            font-weight: 900;
             color: #000;
           }
           .time {
             text-align: center;
-            font-size: 10px;
-            margin-top: 4px;
-            padding-top: 3px;
+            font-size: 12px;
+            margin-top: 6px;
+            padding-top: 4px;
             border-top: 1px dashed #000;
             color: #000;
           }
           .cut-line {
             text-align: center;
-            margin-top: 6px;
-            padding-top: 4px;
+            margin-top: 10px;
+            padding-top: 6px;
             border-top: 1px dashed #000;
-            font-size: 9px;
+            font-size: 11px;
             color: #000;
           }
         </style>

@@ -739,7 +739,8 @@ export default function StaffOrdersPage() {
             overflow: hidden;
             margin: 0;
             padding: 0 3mm 0 0;
-            font-size: 11px;
+            font-size: 12px;
+            font-weight: bold;
             line-height: 1.3;
             color: #000;
             background: #fff;
@@ -755,58 +756,58 @@ export default function StaffOrdersPage() {
             border: 2px solid #000;
             padding: 3px;
             margin-bottom: 4px;
-            font-size: 12px;
-            font-weight: bold;
+            font-size: 13px;
+            font-weight: 900;
             letter-spacing: 2px;
           }
 
           .header {
             text-align: center;
-            border-bottom: 1px dashed #000;
+            border-bottom: 2px dashed #000;
             padding-bottom: 4px;
             margin-bottom: 4px;
           }
-          .header h1 { font-size: 14px; font-weight: bold; margin-bottom: 2px; }
-          .header p { font-size: 10px; color: #000; margin: 1px 0; }
-          .header .tax-info { font-size: 9px; color: #000; margin-top: 2px; }
-          .header .subtitle { font-size: 10px; font-weight: bold; margin-top: 3px; }
-          .order-type { font-size: 11px; font-weight: bold; margin-top: 3px; display: block; }
+          .header h1 { font-size: 16px; font-weight: 900; margin-bottom: 2px; }
+          .header p { font-size: 11px; color: #000; margin: 1px 0; }
+          .header .tax-info { font-size: 10px; color: #000; margin-top: 2px; }
+          .header .subtitle { font-size: 11px; font-weight: 900; margin-top: 3px; }
+          .order-type { font-size: 12px; font-weight: 900; margin-top: 3px; display: block; }
 
-          .info { margin-bottom: 4px; font-size: 10px; }
+          .info { margin-bottom: 4px; font-size: 11px; }
           .info p { margin: 1px 0; color: #000; }
 
           .items { border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 3px 0; margin: 3px 0; }
-          .items table td { font-size: 10px; padding: 1px 0; }
-          .item-qty { width: 18px; font-weight: bold; }
+          .items table td { font-size: 11px; padding: 1px 0; }
+          .item-qty { width: 18px; font-weight: 900; }
           .item-name { word-wrap: break-word; overflow-wrap: break-word; }
-          .item-price { width: 45px; text-align: right; white-space: nowrap; }
-          .modifier { font-size: 9px; color: #000; padding-left: 20px; margin: 1px 0; }
+          .item-price { width: 48px; text-align: right; white-space: nowrap; }
+          .modifier { font-size: 10px; color: #000; padding-left: 20px; margin: 1px 0; font-weight: normal; }
 
           .special {
-            border: 1px solid #000;
+            border: 2px solid #000;
             padding: 3px;
             margin: 3px 0;
-            font-size: 10px;
+            font-size: 11px;
           }
-          .special-label { font-weight: bold; margin-bottom: 2px; }
+          .special-label { font-weight: 900; margin-bottom: 2px; }
 
-          .totals { margin-top: 3px; padding-top: 3px; font-size: 10px; }
+          .totals { margin-top: 3px; padding-top: 3px; font-size: 11px; }
           .totals table td { padding: 1px 0; }
           .totals .right { text-align: right; }
           .grand-total td {
-            font-size: 12px;
-            font-weight: bold;
-            border-top: 1px solid #000;
+            font-size: 14px;
+            font-weight: 900;
+            border-top: 2px solid #000;
             padding-top: 3px;
           }
-          .gst-info { font-size: 9px; text-align: right; color: #000; margin-top: 2px; }
+          .gst-info { font-size: 10px; text-align: right; color: #000; margin-top: 2px; }
 
           .footer {
             text-align: center;
             margin-top: 6px;
             padding-top: 4px;
-            border-top: 1px dashed #000;
-            font-size: 10px;
+            border-top: 2px dashed #000;
+            font-size: 11px;
             color: #000;
           }
           .footer p { margin: 1px 0; }
@@ -816,7 +817,7 @@ export default function StaffOrdersPage() {
             margin-top: 6px;
             padding-top: 4px;
             border-top: 1px dashed #000;
-            font-size: 9px;
+            font-size: 10px;
             color: #000;
           }
         </style>
@@ -943,7 +944,9 @@ export default function StaffOrdersPage() {
             overflow: hidden;
             margin: 0;
             padding: 0 3mm 0 0;
-            font-size: 11px;
+            font-size: 12px;
+            font-weight: bold;
+            line-height: 1.3;
             color: #000;
             background: #fff;
             -webkit-print-color-adjust: exact;
@@ -951,32 +954,32 @@ export default function StaffOrdersPage() {
           }
           .ticket { padding-bottom: 5mm; }
           .order-number {
-            font-size: 18px;
-            font-weight: bold;
+            font-size: 20px;
+            font-weight: 900;
             text-align: center;
             border: 2px solid #000;
             padding: 4px;
             margin-bottom: 4px;
           }
           .order-type {
-            font-size: 13px;
-            font-weight: bold;
+            font-size: 14px;
+            font-weight: 900;
             text-align: center;
             margin-bottom: 4px;
             color: #000;
           }
-          .info { font-size: 11px; margin-bottom: 4px; color: #000; }
+          .info { font-size: 12px; margin-bottom: 4px; color: #000; }
           .info p { margin: 1px 0; }
-          .items { border-top: 1px solid #000; padding-top: 4px; }
+          .items { border-top: 2px solid #000; padding-top: 4px; }
           .item {
-            font-size: 12px;
-            font-weight: bold;
+            font-size: 13px;
+            font-weight: 900;
             margin: 4px 0;
             padding-bottom: 3px;
             border-bottom: 1px dashed #000;
             color: #000;
           }
-          .item-qty { font-size: 13px; }
+          .item-qty { font-size: 14px; font-weight: 900; }
           .modifier {
             font-size: 12px;
             font-weight: normal;
@@ -988,8 +991,8 @@ export default function StaffOrdersPage() {
             border: 3px solid #000;
             padding: 6px;
             margin: 6px 0;
-            font-size: 14px;
-            font-weight: bold;
+            font-size: 15px;
+            font-weight: 900;
             color: #000;
           }
           .time {
@@ -1005,7 +1008,7 @@ export default function StaffOrdersPage() {
             margin-top: 10px;
             padding-top: 6px;
             border-top: 1px dashed #000;
-            font-size: 10px;
+            font-size: 11px;
             color: #000;
           }
         </style>

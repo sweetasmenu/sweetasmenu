@@ -349,26 +349,28 @@ export default function CashierDashboardPage() {
             overflow: hidden;
             margin: 0;
             padding: 0 3mm 0 0;
-            font-size: 10px;
+            font-size: 11px;
+            font-weight: bold;
+            line-height: 1.3;
             color: #000;
             background: #fff;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
           }
           table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-          td { vertical-align: top; color: #000; padding: 2px 0; }
+          td { vertical-align: top; color: #000; padding: 2px 0; font-size: 11px; }
           .right { text-align: right; }
           .report { padding-bottom: 5mm; }
           .header { text-align: center; margin-bottom: 10px; border-bottom: 2px dashed #000; padding-bottom: 8px; }
-          .header h1 { font-size: 18px; margin-bottom: 4px; }
+          .header h1 { font-size: 18px; font-weight: 900; margin-bottom: 4px; }
           .header p { font-size: 11px; color: #000; margin: 2px 0; }
           .section { margin: 10px 0; padding-bottom: 8px; border-bottom: 1px dashed #000; }
-          .section h2 { font-size: 13px; margin-bottom: 6px; font-weight: bold; }
-          .total td { font-size: 16px; font-weight: bold; padding-top: 4px; }
-          .gst-info td { font-size: 10px; color: #000; }
+          .section h2 { font-size: 14px; margin-bottom: 6px; font-weight: 900; }
+          .total td { font-size: 16px; font-weight: 900; padding-top: 4px; }
+          .gst-info td { font-size: 11px; color: #000; }
           .footer { text-align: center; margin-top: 10px; font-size: 11px; color: #000; }
           .footer p { margin: 2px 0; }
-          .cut-line { text-align: center; margin-top: 10px; padding-top: 6px; border-top: 1px dashed #000; font-size: 10px; color: #000; }
+          .cut-line { text-align: center; margin-top: 10px; padding-top: 6px; border-top: 1px dashed #000; font-size: 11px; color: #000; }
         </style>
       </head>
       <body>
