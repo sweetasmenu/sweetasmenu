@@ -1587,7 +1587,7 @@ export default function StaffOrdersPage() {
             </div>
 
             {/* Receipt Preview */}
-            <div className="p-6 font-mono text-sm">
+            <div className="p-6 font-sans text-sm">
               <div className="text-center border-b-2 border-dashed border-gray-400 pb-4 mb-4">
                 <h1 className="text-xl font-bold">{restaurantDetails.name || session?.restaurantName || 'Restaurant'}</h1>
                 {restaurantDetails.address && (

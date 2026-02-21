@@ -889,7 +889,7 @@ export default function CashierDashboardPage() {
             </div>
 
             {/* Report Preview */}
-            <div className="p-6 font-mono text-sm">
+            <div className="p-6 font-sans text-sm">
               <div className="text-center border-b-2 border-dashed border-gray-400 pb-4 mb-4">
                 <h1 className="text-lg font-bold">{session?.restaurantName}</h1>
                 {restaurantInfo.address && (
