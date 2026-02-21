@@ -253,7 +253,7 @@ export default function PublicMenuPage() {
 
         {/* Footer Info */}
         <div className="mt-6 text-center text-sm text-gray-600">
-          <p>Powered by Smart Menu 🍽️</p>
+          <p>Powered by SweetAsMenu 🍽️</p>
           <p className="text-xs mt-1">Digital menu for modern restaurants</p>
         </div>
       </div>

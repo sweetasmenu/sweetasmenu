@@ -339,17 +339,16 @@ export default function CashierDashboardPage() {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Daily Cashier Report</title>
         <style>
-          /* POS80 Thermal Printer — 80mm paper */
+          /* POS80 Thermal Printer — 80mm paper, ~72mm printable */
           * { margin: 0; padding: 0; box-sizing: border-box; }
-          @page { size: 80mm auto; margin: 0; }
+          @page { size: 80mm auto; margin: 0 4mm; }
           html, body {
             font-family: 'Courier New', Courier, monospace;
-            width: 80mm;
-            max-width: 80mm;
+            width: 100%;
             height: auto;
             overflow: hidden;
-            margin: 0 auto;
-            padding: 0 2mm;
+            margin: 0;
+            padding: 0;
             font-size: 12px;
             color: #000;
             background: #fff;
@@ -359,7 +358,7 @@ export default function CashierDashboardPage() {
           table { width: 100%; border-collapse: collapse; }
           td { vertical-align: top; color: #000; padding: 2px 0; }
           .right { text-align: right; }
-          .report { padding-bottom: 15mm; page-break-after: always; }
+          .report { padding-bottom: 5mm; }
           .header { text-align: center; margin-bottom: 10px; border-bottom: 2px dashed #000; padding-bottom: 8px; }
           .header h1 { font-size: 18px; margin-bottom: 4px; }
           .header p { font-size: 11px; color: #000; margin: 2px 0; }
@@ -432,7 +431,7 @@ export default function CashierDashboardPage() {
 
         <div class="footer">
           <p>Printed: ${new Date().toLocaleString()}</p>
-          <p>Powered by Smart Menu</p>
+          <p>Powered by SweetAsMenu</p>
         </div>
 
         <div class="cut-line">

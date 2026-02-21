@@ -548,24 +548,23 @@ export default function KitchenDisplayPage() {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Kitchen - ${order.id.slice(0, 8).toUpperCase()}</title>
         <style>
-          /* POS80 Thermal Printer — 80mm paper */
+          /* POS80 Thermal Printer — 80mm paper, ~72mm printable */
           * { margin: 0; padding: 0; box-sizing: border-box; }
-          @page { size: 80mm auto; margin: 0; }
+          @page { size: 80mm auto; margin: 0 4mm; }
           html, body {
             font-family: 'Courier New', Courier, monospace;
-            width: 80mm;
-            max-width: 80mm;
+            width: 100%;
             height: auto;
             overflow: hidden;
-            margin: 0 auto;
-            padding: 0 2mm;
+            margin: 0;
+            padding: 0;
             font-size: 12px;
             color: #000;
             background: #fff;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
           }
-          .ticket { padding-bottom: 15mm; page-break-after: always; }
+          .ticket { padding-bottom: 5mm; }
           .order-number {
             font-size: 24px;
             font-weight: bold;
