@@ -407,6 +407,10 @@ class OrdersService:
             return None
 
         try:
+            # Fetch current order to check transition
+            current_order = self.get_order(order_id)
+            current_status = current_order.get("status") if current_order else None
+
             update_data = {"status": status}
 
             # Add cancel_reason if provided (for cancelled orders)
@@ -417,6 +421,11 @@ class OrdersService:
             if status == 'completed':
                 update_data["payment_status"] = "paid"
                 update_data["completed_at"] = datetime.now().isoformat()
+
+            # When confirming a verifying_payment order, mark payment as paid
+            # (customer already paid online, staff just verified the proof)
+            if status == 'confirmed' and current_status == 'verifying_payment':
+                update_data["payment_status"] = "paid"
 
             result = self.supabase_client.table('orders').update(update_data).eq('id', order_id).execute()
 

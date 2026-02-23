@@ -4267,8 +4267,9 @@ async def get_cashier_daily_summary(restaurant_id: str, date: Optional[str] = No
         orders = result.data if result.data else []
 
         # Calculate summary
+        # For cashier dashboard: "completed" = payment received (paid), not kitchen status
         total_orders = len(orders)
-        completed_orders = len([o for o in orders if o.get("status") == "completed"])
+        completed_orders = len([o for o in orders if o.get("payment_status") == "paid" and not o.get("is_voided")])
         voided_orders = len([o for o in orders if o.get("is_voided")])
         pending_payment = len([o for o in orders if o.get("payment_status") == "pending" and not o.get("is_voided")])
 
@@ -4292,7 +4293,10 @@ async def get_cashier_daily_summary(restaurant_id: str, date: Optional[str] = No
 
             if payment_status == "paid":
                 total_revenue += amount
-                if payment_method in revenue_by_method:
+                # Map cashier payment types to cash_at_counter bucket
+                if payment_method in ("cashier_cash", "cashier_eftpos", "cash_at_cashier"):
+                    revenue_by_method["cash_at_counter"] += amount
+                elif payment_method in revenue_by_method:
                     revenue_by_method[payment_method] += amount
                 else:
                     revenue_by_method["card"] += amount  # Default to card
@@ -4379,7 +4383,8 @@ async def get_cashier_orders(restaurant_id: str, date: Optional[str] = None, fil
             if filter == "all":
                 include_order = True
             elif filter == "completed":
-                include_order = order.get("status") == "completed" and not order.get("is_voided")
+                # For cashier: "completed" = payment received (paid), not kitchen status
+                include_order = order.get("payment_status") == "paid" and not order.get("is_voided")
             elif filter == "voided":
                 include_order = order.get("is_voided") == True
             elif filter == "pending_payment":
