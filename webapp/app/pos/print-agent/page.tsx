@@ -3,8 +3,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  Printer, Cloud, CheckCircle, XCircle, Clock, RefreshCw,
-  Loader2, Power, ArrowLeft, Trash2, RotateCcw
+  Printer, Cloud, CheckCircle, XCircle, Clock,
+  Loader2, Power, ArrowLeft, Trash2, RotateCcw, Volume2, VolumeX
 } from 'lucide-react';
 import { printViaIframe } from '@/lib/utils/printHelper';
 import { supabase } from '@/lib/supabase/client';
@@ -32,21 +32,42 @@ interface PrintJob {
   printed_at: string | null;
 }
 
+/** Play a beep notification sound using Web Audio API */
+function playBeep() {
+  try {
+    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    // Play two short beeps
+    [0, 0.2].forEach((offset) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.value = 880; // A5 note
+      osc.type = 'square';
+      gain.gain.value = 0.3;
+      osc.start(ctx.currentTime + offset);
+      osc.stop(ctx.currentTime + offset + 0.15);
+    });
+  } catch {
+    // Audio not available
+  }
+}
+
 export default function PrintAgentPage() {
   const router = useRouter();
   const [session, setSession] = useState<POSSession | null>(null);
   const [connected, setConnected] = useState(false);
-  const [autoPrint, setAutoPrint] = useState(true);
   const [pendingJobs, setPendingJobs] = useState<PrintJob[]>([]);
   const [printHistory, setPrintHistory] = useState<PrintJob[]>([]);
   const [stats, setStats] = useState({ printed: 0, failed: 0 });
   const [printing, setPrinting] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [flashJob, setFlashJob] = useState(false); // visual flash for new job
   const printQueueRef = useRef<PrintJob[]>([]);
-  const isProcessingRef = useRef(false);
-  const autoPrintRef = useRef(true);
+  const soundRef = useRef(true);
 
   // Keep ref in sync
-  useEffect(() => { autoPrintRef.current = autoPrint; }, [autoPrint]);
+  useEffect(() => { soundRef.current = soundEnabled; }, [soundEnabled]);
 
   // Check session
   useEffect(() => {
@@ -66,71 +87,20 @@ export default function PrintAgentPage() {
     setSession(parsedSession);
   }, [router]);
 
-  // Process print queue sequentially
-  const processQueue = useCallback(async () => {
-    if (isProcessingRef.current || printQueueRef.current.length === 0) return;
-    if (!autoPrintRef.current) return;
-
-    isProcessingRef.current = true;
-    setPrinting(true);
-
-    while (printQueueRef.current.length > 0 && autoPrintRef.current) {
-      const job = printQueueRef.current[0];
-
-      try {
-        // Update status to 'printing'
-        await supabase
-          .from('print_queue')
-          .update({ status: 'printing' })
-          .eq('id', job.id);
-
-        // Print using existing desktop print helper
-        printViaIframe(job.html_content);
-
-        // Wait for print to process
-        await new Promise(resolve => setTimeout(resolve, 3000));
-
-        // Mark as completed
-        await supabase
-          .from('print_queue')
-          .update({ status: 'completed', printed_at: new Date().toISOString() })
-          .eq('id', job.id);
-
-        // Update local state
-        const completedJob = { ...job, status: 'completed' as const, printed_at: new Date().toISOString() };
-        setPrintHistory(prev => [completedJob, ...prev.slice(0, 49)]);
-        setStats(prev => ({ ...prev, printed: prev.printed + 1 }));
-      } catch (error) {
-        console.error('Print job failed:', error);
-
-        await supabase
-          .from('print_queue')
-          .update({ status: 'failed', error_message: String(error) })
-          .eq('id', job.id);
-
-        const failedJob = { ...job, status: 'failed' as const, error_message: String(error) };
-        setPrintHistory(prev => [failedJob, ...prev.slice(0, 49)]);
-        setStats(prev => ({ ...prev, failed: prev.failed + 1 }));
-      }
-
-      // Remove from queue
-      printQueueRef.current = printQueueRef.current.slice(1);
-      setPendingJobs([...printQueueRef.current]);
-    }
-
-    isProcessingRef.current = false;
-    setPrinting(false);
-  }, []);
-
-  // Manual print single job
-  const printSingleJob = useCallback(async (job: PrintJob) => {
+  // Print a single job (must be called from user click/keyboard = user gesture)
+  const printJob = useCallback(async (job: PrintJob) => {
     setPrinting(true);
     try {
+      // Update status to 'printing'
       await supabase.from('print_queue').update({ status: 'printing' }).eq('id', job.id);
 
+      // Print using desktop print helper — this works because triggered by user gesture
       printViaIframe(job.html_content);
-      await new Promise(resolve => setTimeout(resolve, 3000));
 
+      // Wait for print window to open and process
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      // Mark as completed
       await supabase
         .from('print_queue')
         .update({ status: 'completed', printed_at: new Date().toISOString() })
@@ -144,21 +114,68 @@ export default function PrintAgentPage() {
       setPrintHistory(prev => [completedJob, ...prev.slice(0, 49)]);
       setStats(prev => ({ ...prev, printed: prev.printed + 1 }));
     } catch (error) {
-      console.error('Manual print failed:', error);
-
+      console.error('Print failed:', error);
       await supabase
         .from('print_queue')
         .update({ status: 'failed', error_message: String(error) })
         .eq('id', job.id);
 
+      const failedJob = { ...job, status: 'failed' as const, error_message: String(error) };
+      setPrintHistory(prev => [failedJob, ...prev.slice(0, 49)]);
       setStats(prev => ({ ...prev, failed: prev.failed + 1 }));
+
+      printQueueRef.current = printQueueRef.current.filter(j => j.id !== job.id);
+      setPendingJobs([...printQueueRef.current]);
     }
+    setPrinting(false);
+  }, []);
+
+  // Print ALL pending jobs sequentially (user gesture from button click)
+  const printAllJobs = useCallback(async () => {
+    if (printQueueRef.current.length === 0) return;
+    setPrinting(true);
+
+    // Process each job
+    const jobsToProcess = [...printQueueRef.current];
+    for (const job of jobsToProcess) {
+      try {
+        await supabase.from('print_queue').update({ status: 'printing' }).eq('id', job.id);
+
+        printViaIframe(job.html_content);
+        await new Promise(resolve => setTimeout(resolve, 3000));
+
+        await supabase
+          .from('print_queue')
+          .update({ status: 'completed', printed_at: new Date().toISOString() })
+          .eq('id', job.id);
+
+        printQueueRef.current = printQueueRef.current.filter(j => j.id !== job.id);
+        setPendingJobs([...printQueueRef.current]);
+
+        const completedJob = { ...job, status: 'completed' as const, printed_at: new Date().toISOString() };
+        setPrintHistory(prev => [completedJob, ...prev.slice(0, 49)]);
+        setStats(prev => ({ ...prev, printed: prev.printed + 1 }));
+      } catch (error) {
+        console.error('Print all - job failed:', error);
+        await supabase
+          .from('print_queue')
+          .update({ status: 'failed', error_message: String(error) })
+          .eq('id', job.id);
+
+        const failedJob = { ...job, status: 'failed' as const, error_message: String(error) };
+        setPrintHistory(prev => [failedJob, ...prev.slice(0, 49)]);
+        setStats(prev => ({ ...prev, failed: prev.failed + 1 }));
+
+        printQueueRef.current = printQueueRef.current.filter(j => j.id !== job.id);
+        setPendingJobs([...printQueueRef.current]);
+      }
+    }
+
     setPrinting(false);
   }, []);
 
   // Retry failed job
   const retryJob = useCallback(async (job: PrintJob) => {
-    // Reset to pending and add back to queue
     await supabase.from('print_queue').update({ status: 'pending', error_message: null }).eq('id', job.id);
 
     const resetJob = { ...job, status: 'pending' as const, error_message: null };
@@ -166,12 +183,26 @@ export default function PrintAgentPage() {
     setPendingJobs([...printQueueRef.current]);
     setPrintHistory(prev => prev.filter(j => j.id !== job.id));
     setStats(prev => ({ ...prev, failed: Math.max(0, prev.failed - 1) }));
+  }, []);
 
-    // Process if auto-print is on
-    if (autoPrintRef.current) {
-      processQueue();
-    }
-  }, [processQueue]);
+  // Keyboard shortcut: Enter or P = print next job
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger if typing in an input
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+      if ((e.key === 'Enter' || e.key === 'p' || e.key === 'P') && printQueueRef.current.length > 0) {
+        e.preventDefault();
+        const nextJob = printQueueRef.current[0];
+        if (nextJob) {
+          printJob(nextJob);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [printJob]);
 
   // Fetch pending jobs on load
   useEffect(() => {
@@ -188,13 +219,9 @@ export default function PrintAgentPage() {
       if (data && data.length > 0) {
         printQueueRef.current = data as PrintJob[];
         setPendingJobs(data as PrintJob[]);
-        if (autoPrintRef.current) {
-          processQueue();
-        }
       }
     };
 
-    // Also fetch recent history
     const fetchHistory = async () => {
       const { data } = await supabase
         .from('print_queue')
@@ -214,7 +241,7 @@ export default function PrintAgentPage() {
 
     fetchPending();
     fetchHistory();
-  }, [session?.restaurantId, processQueue]);
+  }, [session?.restaurantId]);
 
   // Realtime subscription for new print jobs
   useEffect(() => {
@@ -236,9 +263,14 @@ export default function PrintAgentPage() {
             printQueueRef.current = [...printQueueRef.current, newJob];
             setPendingJobs([...printQueueRef.current]);
 
-            if (autoPrintRef.current) {
-              processQueue();
+            // Sound notification
+            if (soundRef.current) {
+              playBeep();
             }
+
+            // Visual flash
+            setFlashJob(true);
+            setTimeout(() => setFlashJob(false), 2000);
           }
         }
       )
@@ -249,18 +281,16 @@ export default function PrintAgentPage() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [session?.restaurantId, processQueue]);
+  }, [session?.restaurantId]);
 
-  // Clear all completed/failed history
+  // Clear history
   const clearHistory = async () => {
     if (!session?.restaurantId) return;
-
     await supabase
       .from('print_queue')
       .delete()
       .eq('restaurant_id', session.restaurantId)
       .in('status', ['completed', 'failed']);
-
     setPrintHistory([]);
     setStats({ printed: 0, failed: 0 });
   };
@@ -305,23 +335,66 @@ export default function PrintAgentPage() {
               {connected ? 'Connected' : 'Disconnected'}
             </div>
 
-            {/* Auto-Print Toggle */}
+            {/* Sound Toggle */}
             <button
-              onClick={() => setAutoPrint(!autoPrint)}
+              onClick={() => setSoundEnabled(!soundEnabled)}
               className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                autoPrint
-                  ? 'bg-purple-600 hover:bg-purple-500 text-white'
+                soundEnabled
+                  ? 'bg-blue-600 hover:bg-blue-500 text-white'
                   : 'bg-slate-700 hover:bg-slate-600 text-slate-300'
               }`}
             >
-              <Power className="w-4 h-4" />
-              Auto-Print: {autoPrint ? 'ON' : 'OFF'}
+              {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+              Sound
             </button>
           </div>
         </div>
       </div>
 
       <div className="p-4 max-w-4xl mx-auto">
+        {/* New Job Flash Alert */}
+        {flashJob && (
+          <div className="bg-yellow-600/30 border-2 border-yellow-500 rounded-xl p-4 mb-4 flex items-center gap-3 animate-pulse">
+            <Printer className="w-6 h-6 text-yellow-400" />
+            <span className="text-yellow-300 font-bold text-lg">New print job received!</span>
+          </div>
+        )}
+
+        {/* PRINT NEXT - Big Action Button */}
+        {pendingJobs.length > 0 && (
+          <div className="mb-6">
+            <button
+              onClick={() => {
+                if (pendingJobs.length === 1) {
+                  printJob(pendingJobs[0]);
+                } else {
+                  printAllJobs();
+                }
+              }}
+              disabled={printing}
+              className="w-full py-5 bg-green-600 hover:bg-green-500 disabled:bg-green-800 disabled:opacity-50 rounded-2xl text-white font-bold text-2xl flex items-center justify-center gap-3 transition-colors shadow-lg shadow-green-900/50"
+            >
+              {printing ? (
+                <>
+                  <Loader2 className="w-7 h-7 animate-spin" />
+                  Printing...
+                </>
+              ) : (
+                <>
+                  <Printer className="w-7 h-7" />
+                  {pendingJobs.length === 1
+                    ? 'PRINT'
+                    : `PRINT ALL (${pendingJobs.length})`
+                  }
+                </>
+              )}
+            </button>
+            <p className="text-center text-slate-500 text-xs mt-2">
+              Press <kbd className="px-1.5 py-0.5 bg-slate-700 rounded text-slate-300 font-mono">Enter</kbd> or <kbd className="px-1.5 py-0.5 bg-slate-700 rounded text-slate-300 font-mono">P</kbd> to print
+            </p>
+          </div>
+        )}
+
         {/* Stats Cards */}
         <div className="grid grid-cols-3 gap-4 mb-6">
           <div className="bg-slate-800 rounded-xl p-4 border border-slate-700">
@@ -357,36 +430,26 @@ export default function PrintAgentPage() {
 
         {/* Pending Jobs */}
         <div className="bg-slate-800 rounded-xl border border-slate-700 mb-6">
-          <div className="px-4 py-3 border-b border-slate-700 flex items-center justify-between">
+          <div className="px-4 py-3 border-b border-slate-700">
             <h2 className="font-semibold flex items-center gap-2">
               <Clock className="w-4 h-4 text-orange-400" />
               Pending Jobs ({pendingJobs.length})
             </h2>
-            {pendingJobs.length > 0 && !autoPrint && (
-              <button
-                onClick={processQueue}
-                disabled={printing}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-600 hover:bg-purple-500 rounded-lg text-sm font-medium disabled:opacity-50"
-              >
-                <Printer className="w-3.5 h-3.5" />
-                Print All
-              </button>
-            )}
           </div>
 
           {pendingJobs.length === 0 ? (
             <div className="p-8 text-center text-slate-500">
               <Cloud className="w-12 h-12 mx-auto mb-2 opacity-30" />
-              <p>No pending print jobs</p>
-              <p className="text-xs mt-1">Jobs will appear here when sent from iPad/tablet</p>
+              <p>Waiting for print jobs...</p>
+              <p className="text-xs mt-1">Send from iPad/tablet using Cloud print method</p>
             </div>
           ) : (
             <div className="divide-y divide-slate-700">
-              {pendingJobs.map((job) => (
+              {pendingJobs.map((job, idx) => (
                 <div key={job.id} className="px-4 py-3 flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className={`w-2 h-2 rounded-full ${
-                      job.status === 'printing' ? 'bg-blue-400 animate-pulse' : 'bg-orange-400'
+                    <div className={`w-2.5 h-2.5 rounded-full ${
+                      idx === 0 ? 'bg-green-400 animate-pulse' : 'bg-orange-400'
                     }`} />
                     <div>
                       <span className="font-medium text-sm">
@@ -401,11 +464,11 @@ export default function PrintAgentPage() {
                     </div>
                   </div>
                   <button
-                    onClick={() => printSingleJob(job)}
+                    onClick={() => printJob(job)}
                     disabled={printing}
-                    className="flex items-center gap-1.5 px-2.5 py-1 bg-blue-600 hover:bg-blue-500 rounded text-xs font-medium disabled:opacity-50"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-500 rounded-lg text-xs font-medium disabled:opacity-50"
                   >
-                    <Printer className="w-3 h-3" />
+                    <Printer className="w-3.5 h-3.5" />
                     Print
                   </button>
                 </div>
@@ -483,9 +546,10 @@ export default function PrintAgentPage() {
         <div className="mt-6 bg-slate-800/50 rounded-xl p-4 border border-slate-700/50 text-sm text-slate-400">
           <p className="font-medium text-slate-300 mb-2">How to use:</p>
           <ol className="list-decimal list-inside space-y-1">
-            <li>Keep this page open on the computer connected to the thermal printer</li>
-            <li>On iPad/tablet, set print method to <span className="text-purple-400 font-medium">Cloud</span> in the POS Orders toolbar</li>
-            <li>When staff prints from iPad, the job will appear here and print automatically</li>
+            <li>Keep this page open on the PC connected to the thermal printer</li>
+            <li>On iPad/tablet, set print method to <span className="text-purple-400 font-medium">Cloud</span></li>
+            <li>When staff prints from iPad, this page beeps and shows <span className="text-green-400 font-medium">PRINT</span> button</li>
+            <li>Click the button or press <kbd className="px-1 py-0.5 bg-slate-700 rounded text-slate-300 font-mono text-xs">Enter</kbd> to print</li>
           </ol>
         </div>
       </div>
