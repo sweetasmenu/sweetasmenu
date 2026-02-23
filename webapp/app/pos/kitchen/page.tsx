@@ -755,17 +755,17 @@ export default function KitchenDisplayPage() {
       />
 
       {/* Sub Header - Orders count and controls */}
-      <div className="bg-slate-800 px-4 py-2 flex items-center justify-between border-b border-slate-700">
-        <div className="flex items-center gap-4">
+      <div className="bg-slate-800 px-2 md:px-4 py-1.5 md:py-2 flex items-center justify-between border-b border-slate-700">
+        <div className="flex items-center gap-2">
           {/* Orders count */}
-          <div className={`flex items-center gap-2 px-4 py-2 ${themeClasses.bgLight} rounded-lg`}>
-            <Utensils className={`w-5 h-5 ${themeClasses.textPrimary}`} />
-            <span className={`font-bold ${themeClasses.textPrimary}`}>{orders.length}</span>
-            <span className="text-slate-400">{lang === 'th' ? 'ออเดอร์' : 'Orders'}</span>
+          <div className={`flex items-center gap-1.5 px-2.5 md:px-4 py-1.5 md:py-2 ${themeClasses.bgLight} rounded-lg`}>
+            <Utensils className={`w-4 h-4 md:w-5 md:h-5 ${themeClasses.textPrimary}`} />
+            <span className={`font-bold text-sm md:text-base ${themeClasses.textPrimary}`}>{orders.length}</span>
+            <span className="text-slate-400 text-xs md:text-sm">{lang === 'th' ? 'ออเดอร์' : 'Orders'}</span>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 md:gap-2">
           {/* Bluetooth Print Toggle (mobile/tablet only) */}
           {showMobilePrintToggle && (
             <button
@@ -774,32 +774,32 @@ export default function KitchenDisplayPage() {
                 setPrintMethod(newMethod);
                 setCurrentPrintMethod(newMethod);
               }}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors text-sm font-medium ${
+              className={`flex items-center gap-1 px-2 md:px-3 py-1.5 rounded-lg transition-colors text-xs md:text-sm font-medium ${
                 currentPrintMethod === 'rawbt'
                   ? 'bg-blue-600 hover:bg-blue-500 text-white'
                   : 'bg-slate-700 hover:bg-slate-600 text-slate-300'
               }`}
             >
-              <Bluetooth className="w-4 h-4" />
-              <span>{currentPrintMethod === 'rawbt' ? 'BT: ON' : 'BT: OFF'}</span>
+              <Bluetooth className="w-3.5 h-3.5 md:w-4 md:h-4" />
+              <span>{currentPrintMethod === 'rawbt' ? 'BT' : 'BT'}</span>
             </button>
           )}
 
           {/* Settings */}
           <button
             onClick={() => setShowSettings(!showSettings)}
-            className="flex items-center gap-2 px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors text-sm"
+            className="p-1.5 md:p-2 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
+            title={lang === 'th' ? 'ตั้งค่า' : 'Settings'}
           >
             <Bell className="w-4 h-4" />
-            <span>{lang === 'th' ? 'ตั้งค่า' : 'Settings'}</span>
           </button>
 
           {/* Refresh */}
           <button
             onClick={fetchOrders}
-            className="flex items-center gap-2 px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors text-sm"
+            className="flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors text-xs md:text-sm"
           >
-            <RefreshCw className="w-4 h-4" />
+            <RefreshCw className="w-3.5 h-3.5 md:w-4 md:h-4" />
             <span>{lang === 'th' ? 'รีเฟรช' : 'Refresh'}</span>
           </button>
         </div>
@@ -880,29 +880,28 @@ export default function KitchenDisplayPage() {
                 className={`bg-slate-800 rounded-xl border-l-4 ${getUrgencyColor(order.created_at)} overflow-hidden`}
               >
                 {/* Order Header */}
-                <div className="p-4 bg-slate-700/50 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className={`text-2xl font-bold ${themeClasses.textPrimary}`}>
+                <div className="p-2.5 md:p-4 bg-slate-700/50 flex items-center justify-between">
+                  <div className="flex items-center gap-2 md:gap-3">
+                    <div className={`text-lg md:text-2xl font-bold ${themeClasses.textPrimary}`}>
                       {order.table_no ? `T${order.table_no}` : '#'}
                     </div>
                     <div>
-                      <span className={`px-2 py-1 rounded text-xs font-semibold ${getStatusColor(order.status)} text-white`}>
+                      <span className={`px-1.5 md:px-2 py-0.5 md:py-1 rounded text-[10px] md:text-xs font-semibold ${getStatusColor(order.status)} text-white`}>
                         {getStatusText(order.status)}
                       </span>
-                      <p className="text-xs text-slate-400 mt-1">
+                      <p className="text-[10px] md:text-xs text-slate-400 mt-0.5">
                         {order.service_type === 'dine_in' ? (lang === 'th' ? 'ทานที่ร้าน' : 'Dine-in') :
                          order.service_type === 'pickup' ? t('kitchen', 'pickup', lang) : t('kitchen', 'delivery', lang)}
                       </p>
                     </div>
                   </div>
-                  <div className="flex flex-col items-end gap-1">
-                    <div className="flex items-center gap-2 text-slate-400">
-                      <Timer className="w-4 h-4" />
-                      <span className="text-sm">{getTimeSince(order.created_at)}</span>
+                  <div className="flex flex-col items-end gap-0.5">
+                    <div className="flex items-center gap-1.5 text-slate-400">
+                      <Timer className="w-3.5 h-3.5" />
+                      <span className="text-xs md:text-sm">{getTimeSince(order.created_at)}</span>
                     </div>
-                    {/* Estimated time display */}
                     {order.estimated_minutes && order.cooking_started_at && (
-                      <div className={`flex items-center gap-1 text-xs px-2 py-1 rounded ${
+                      <div className={`flex items-center gap-1 text-[10px] md:text-xs px-1.5 py-0.5 rounded ${
                         getRemainingTime(order)?.includes('!') ? 'bg-red-500/30 text-red-400' : 'bg-green-500/30 text-green-400'
                       }`}>
                         <Clock className="w-3 h-3" />
@@ -913,29 +912,29 @@ export default function KitchenDisplayPage() {
                 </div>
 
                 {/* Order Items */}
-                <div className="p-3 md:p-4 space-y-3 max-h-64 md:max-h-80 overflow-y-auto">
+                <div className="p-2.5 md:p-4 space-y-2 md:space-y-3 max-h-48 md:max-h-80 overflow-y-auto">
                   {order.items.map((item, idx) => (
                     <div key={idx} className="flex items-start justify-between">
                       <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className={`w-7 h-7 ${themeClasses.bgPrimary} rounded-full flex items-center justify-center text-sm md:text-base font-bold`}>
+                        <div className="flex items-center gap-1.5 md:gap-2">
+                          <span className={`w-6 h-6 md:w-7 md:h-7 ${themeClasses.bgPrimary} rounded-full flex items-center justify-center text-xs md:text-sm font-bold shrink-0`}>
                             {item.quantity}
                           </span>
-                          <span className="font-medium">{item.name}</span>
+                          <span className="font-medium text-sm md:text-base">{item.name}</span>
                         </div>
                         {item.selectedMeat && (
-                          <p className="text-sm text-slate-400 ml-8">• {item.selectedMeat}</p>
+                          <p className="text-xs md:text-sm text-slate-400 ml-7 md:ml-9">• {item.selectedMeat}</p>
                         )}
                         {item.selectedAddOns && item.selectedAddOns.length > 0 && (
-                          <p className="text-sm text-slate-400 ml-8">
+                          <p className="text-xs md:text-sm text-slate-400 ml-7 md:ml-9">
                             + {item.selectedAddOns.join(', ')}
                           </p>
                         )}
                         {item.notes && (
-                          <p className="text-sm text-yellow-500 ml-8">
+                          <p className="text-xs md:text-sm text-yellow-500 ml-7 md:ml-9">
                             📝 {translatedTexts[`order_${order.id}_item_${idx}_notes`] || item.notes}
                             {translatedTexts[`order_${order.id}_item_${idx}_notes`] && translatedTexts[`order_${order.id}_item_${idx}_notes`] !== item.notes && (
-                              <span className="text-xs text-gray-500 ml-2">({item.notes})</span>
+                              <span className="text-[10px] md:text-xs text-gray-500 ml-2">({item.notes})</span>
                             )}
                           </p>
                         )}
@@ -960,38 +959,37 @@ export default function KitchenDisplayPage() {
                 )}
 
                 {/* Action Buttons */}
-                <div className="p-3 bg-slate-700/30 flex gap-2">
-                  {/* Void Button - always visible for pending/confirmed orders */}
+                <div className="p-2 md:p-3 bg-slate-700/30 flex gap-1.5 md:gap-2">
                   {/* Print Kitchen Ticket Button */}
                   <button
                     onClick={() => printKitchenTicket(order)}
-                    className="px-3 py-2 bg-slate-600 hover:bg-slate-500 rounded-lg font-semibold transition-colors flex items-center justify-center"
+                    className="px-2.5 md:px-3 py-1.5 md:py-2 bg-slate-600 hover:bg-slate-500 rounded-lg font-semibold transition-colors flex items-center justify-center"
                     title={lang === 'th' ? 'พิมพ์ใบสั่งครัว' : 'Print Ticket'}
                   >
-                    <Printer className="w-5 h-5" />
+                    <Printer className="w-4 h-4 md:w-5 md:h-5" />
                   </button>
                   {(order.status === 'verifying_payment' || order.status === 'pending' || order.status === 'confirmed') && (
                     <button
                       onClick={() => openVoidModal(order)}
-                      className="px-3 py-2 bg-red-500 hover:bg-red-600 rounded-lg font-semibold transition-colors flex items-center justify-center"
+                      className="px-2.5 md:px-3 py-1.5 md:py-2 bg-red-500 hover:bg-red-600 rounded-lg font-semibold transition-colors flex items-center justify-center"
                       title={lang === 'th' ? 'ยกเลิกออเดอร์' : 'Void Order'}
                     >
-                      <XCircle className="w-5 h-5" />
+                      <XCircle className="w-4 h-4 md:w-5 md:h-5" />
                     </button>
                   )}
                   {order.status === 'verifying_payment' && (
                     <button
                       onClick={() => updateOrderStatus(order.id, 'confirmed')}
-                      className="flex-1 py-2 bg-purple-500 hover:bg-purple-600 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+                      className="flex-1 py-1.5 md:py-2 bg-purple-500 hover:bg-purple-600 rounded-lg font-semibold transition-colors flex items-center justify-center gap-1.5 text-sm md:text-base"
                     >
-                      <CheckCircle className="w-5 h-5" />
+                      <CheckCircle className="w-4 h-4 md:w-5 md:h-5" />
                       <span>{lang === 'th' ? 'ยืนยันชำระเงิน' : 'Verify Payment'}</span>
                     </button>
                   )}
                   {order.status === 'pending' && (
                     <button
                       onClick={() => updateOrderStatus(order.id, 'confirmed')}
-                      className="flex-1 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg font-semibold transition-colors flex items-center justify-center"
+                      className="flex-1 py-1.5 md:py-2 bg-blue-500 hover:bg-blue-600 rounded-lg font-semibold transition-colors flex items-center justify-center text-sm md:text-base"
                     >
                       <BilingualTextInline
                         category="common"
@@ -1004,7 +1002,7 @@ export default function KitchenDisplayPage() {
                   {order.status === 'confirmed' && (
                     <button
                       onClick={() => updateOrderStatus(order.id, 'preparing')}
-                      className={`flex-1 py-2 ${themeClasses.primaryButton} rounded-lg font-semibold transition-colors flex items-center justify-center`}
+                      className={`flex-1 py-1.5 md:py-2 ${themeClasses.primaryButton} rounded-lg font-semibold transition-colors flex items-center justify-center text-sm md:text-base`}
                     >
                       <BilingualTextInline
                         category="kitchen"
@@ -1019,17 +1017,17 @@ export default function KitchenDisplayPage() {
                       {/* Time estimate button */}
                       <button
                         onClick={() => openTimeModal(order)}
-                        className={`px-3 py-2 ${order.estimated_minutes ? 'bg-cyan-500 hover:bg-cyan-600' : 'bg-slate-600 hover:bg-slate-500'} rounded-lg font-semibold transition-colors flex items-center justify-center`}
+                        className={`px-2.5 md:px-3 py-1.5 md:py-2 ${order.estimated_minutes ? 'bg-cyan-500 hover:bg-cyan-600' : 'bg-slate-600 hover:bg-slate-500'} rounded-lg font-semibold transition-colors flex items-center justify-center`}
                         title={lang === 'th' ? 'ตั้งเวลาประมาณ' : 'Set Time'}
                       >
-                        <Clock className="w-5 h-5" />
-                        {order.estimated_minutes && <span className="ml-1 text-sm">{order.estimated_minutes}m</span>}
+                        <Clock className="w-4 h-4 md:w-5 md:h-5" />
+                        {order.estimated_minutes && <span className="ml-1 text-xs md:text-sm">{order.estimated_minutes}m</span>}
                       </button>
                       <button
                         onClick={() => updateOrderStatus(order.id, 'ready')}
-                        className="flex-1 py-2 bg-green-500 hover:bg-green-600 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+                        className="flex-1 py-1.5 md:py-2 bg-green-500 hover:bg-green-600 rounded-lg font-semibold transition-colors flex items-center justify-center gap-1.5 text-sm md:text-base"
                       >
-                        <CheckCircle className="w-5 h-5" />
+                        <CheckCircle className="w-4 h-4 md:w-5 md:h-5" />
                         <BilingualTextInline
                           category="kitchen"
                           textKey="markReady"
@@ -1042,7 +1040,7 @@ export default function KitchenDisplayPage() {
                   {order.status === 'ready' && (
                     <button
                       onClick={() => updateOrderStatus(order.id, 'completed')}
-                      className="flex-1 py-2 bg-slate-600 hover:bg-slate-500 rounded-lg font-semibold transition-colors flex items-center justify-center"
+                      className="flex-1 py-1.5 md:py-2 bg-slate-600 hover:bg-slate-500 rounded-lg font-semibold transition-colors flex items-center justify-center text-sm md:text-base"
                     >
                       <BilingualTextInline
                         category="kitchen"
