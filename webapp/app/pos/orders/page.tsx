@@ -1177,54 +1177,54 @@ export default function StaffOrdersPage() {
       />
 
       {/* Toolbar */}
-      <div className="bg-slate-800 px-4 py-2 flex items-center justify-between border-b border-slate-700">
+      <div className="bg-slate-800 px-2 md:px-4 py-1.5 md:py-2 flex items-center justify-between border-b border-slate-700">
         {/* Print Method Selector */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5 md:gap-1">
           <button
             onClick={() => { setPrintMethod('system'); setCurrentPrintMethod('system'); }}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors text-xs font-medium ${
+            className={`flex items-center gap-1 px-2 md:px-2.5 py-1.5 rounded-lg transition-colors text-xs font-medium ${
               currentPrintMethod === 'system'
                 ? 'bg-green-600 text-white'
                 : 'bg-slate-700 hover:bg-slate-600 text-slate-400'
             }`}
             title="System Print"
           >
-            <Printer className="w-3.5 h-3.5" />
+            <Printer className="w-3.5 h-3.5 shrink-0" />
             <span className="hidden sm:inline">{lang === 'th' ? 'ปริ้นปกติ' : 'System'}</span>
           </button>
           {showMobilePrintToggle && (
             <button
               onClick={() => { setPrintMethod('rawbt'); setCurrentPrintMethod('rawbt'); }}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors text-xs font-medium ${
+              className={`flex items-center gap-1 px-2 md:px-2.5 py-1.5 rounded-lg transition-colors text-xs font-medium ${
                 currentPrintMethod === 'rawbt'
                   ? 'bg-blue-600 text-white'
                   : 'bg-slate-700 hover:bg-slate-600 text-slate-400'
               }`}
               title="Bluetooth (RawBT)"
             >
-              <Bluetooth className="w-3.5 h-3.5" />
+              <Bluetooth className="w-3.5 h-3.5 shrink-0" />
               <span className="hidden sm:inline">BT</span>
             </button>
           )}
           <button
             onClick={() => { setPrintMethod('cloud'); setCurrentPrintMethod('cloud'); }}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors text-xs font-medium ${
+            className={`flex items-center gap-1 px-2 md:px-2.5 py-1.5 rounded-lg transition-colors text-xs font-medium ${
               currentPrintMethod === 'cloud'
                 ? 'bg-purple-600 text-white'
                 : 'bg-slate-700 hover:bg-slate-600 text-slate-400'
             }`}
             title="Cloud Print Queue"
           >
-            <Cloud className="w-3.5 h-3.5" />
+            <Cloud className="w-3.5 h-3.5 shrink-0" />
             <span className="hidden sm:inline">{lang === 'th' ? 'คลาวด์' : 'Cloud'}</span>
           </button>
         </div>
 
         <button
           onClick={() => { fetchOrders(); fetchServiceRequests(); }}
-          className="flex items-center gap-2 px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors text-sm"
+          className="flex items-center gap-1.5 px-2.5 md:px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors text-xs md:text-sm"
         >
-          <RefreshCw className="w-4 h-4" />
+          <RefreshCw className="w-3.5 h-3.5 md:w-4 md:h-4 shrink-0" />
           <span>{lang === 'th' ? 'รีเฟรช' : 'Refresh'}</span>
         </button>
       </div>

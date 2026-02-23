@@ -83,19 +83,19 @@ export default function POSNavbar({
 
   return (
     <nav className="bg-slate-800 border-b border-slate-700">
-      <div className="flex items-center justify-between px-4 py-2">
+      <div className="flex items-center justify-between px-2 md:px-4 py-2 gap-1 md:gap-2">
         {/* Left side - Restaurant info */}
-        <div className="flex items-center gap-3">
-          <div className={`${themeClasses.textPrimary} font-bold text-lg`}>
+        <div className="flex items-center gap-1.5 md:gap-3 shrink-0">
+          <div className={`${themeClasses.textPrimary} font-bold text-sm md:text-lg truncate max-w-[100px] md:max-w-none`}>
             {session.restaurantName}
           </div>
-          <span className="text-slate-400 text-sm hidden sm:inline">
+          <span className="text-slate-400 text-xs md:text-sm hidden sm:inline whitespace-nowrap">
             {session.staffName} ({session.role})
           </span>
         </div>
 
         {/* Center - Navigation */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5 md:gap-1">
           {visibleNavItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
@@ -104,13 +104,13 @@ export default function POSNavbar({
               <button
                 key={item.href}
                 onClick={() => router.push(item.href)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
+                className={`flex items-center gap-1 md:gap-2 px-2 md:px-4 py-1.5 md:py-2 rounded-lg transition-all text-xs md:text-sm whitespace-nowrap ${
                   isActive
                     ? `${themeClasses.bgPrimary} text-white`
                     : 'text-slate-400 hover:bg-slate-700 hover:text-white'
                 }`}
               >
-                <Icon className="w-5 h-5" />
+                <Icon className="w-4 h-4 md:w-5 md:h-5 shrink-0" />
                 <span className="hidden sm:inline">
                   {lang === 'th' ? item.labelTh : item.labelEn}
                 </span>
@@ -120,9 +120,9 @@ export default function POSNavbar({
         </div>
 
         {/* Right side - Controls */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1.5 md:gap-3 shrink-0">
           {/* Clock */}
-          <div className={`text-xl font-mono ${themeClasses.textPrimary} hidden sm:block`}>
+          <div className={`text-base md:text-xl font-mono ${themeClasses.textPrimary} hidden sm:block whitespace-nowrap`}>
             {currentTime.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}
           </div>
 
@@ -131,11 +131,11 @@ export default function POSNavbar({
             <>
               <button
                 onClick={onSoundToggle}
-                className={`p-2 rounded-lg transition-colors ${
+                className={`p-1.5 md:p-2 rounded-lg transition-colors ${
                   soundEnabled ? 'bg-green-500/20 text-green-500' : 'bg-slate-700 text-slate-400'
                 }`}
               >
-                {soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
+                {soundEnabled ? <Volume2 className="w-4 h-4 md:w-5 md:h-5" /> : <VolumeX className="w-4 h-4 md:w-5 md:h-5" />}
               </button>
 
               {soundEnabled && onVolumeChange && (
@@ -145,7 +145,7 @@ export default function POSNavbar({
                   max="100"
                   value={volume || 70}
                   onChange={(e) => onVolumeChange(Number(e.target.value))}
-                  className="w-20 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-orange-500 hidden sm:block"
+                  className="w-16 md:w-20 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-orange-500 hidden md:block"
                 />
               )}
             </>
@@ -154,10 +154,10 @@ export default function POSNavbar({
           {/* Logout */}
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 px-3 py-2 bg-red-500/20 text-red-500 hover:bg-red-500/30 rounded-lg transition-colors"
+            className="flex items-center gap-1 md:gap-2 px-2 md:px-3 py-1.5 md:py-2 bg-red-500/20 text-red-500 hover:bg-red-500/30 rounded-lg transition-colors"
           >
-            <LogOut className="w-5 h-5" />
-            <span className="hidden sm:inline text-sm">
+            <LogOut className="w-4 h-4 md:w-5 md:h-5" />
+            <span className="hidden md:inline text-sm">
               {lang === 'th' ? 'ออก' : 'Logout'}
             </span>
           </button>
