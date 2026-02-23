@@ -1274,7 +1274,7 @@ export default function StaffOrdersPage() {
       </div>
 
       {/* Content */}
-      <main className="p-4">
+      <main className="p-3 md:p-4">
         {loading ? (
           <div className="flex items-center justify-center h-64">
             <Loader2 className="w-12 h-12 animate-spin text-orange-500" />
@@ -1294,7 +1294,7 @@ export default function StaffOrdersPage() {
               />
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
               {orders.map((order) => (
                 <div key={order.id} className="bg-slate-800 rounded-xl overflow-hidden">
                   {/* Order Header */}
@@ -1338,14 +1338,14 @@ export default function StaffOrdersPage() {
                   </div>
 
                   {/* Items */}
-                  <div className="p-4 space-y-2 max-h-48 overflow-y-auto">
+                  <div className="p-3 md:p-4 space-y-2 max-h-48 md:max-h-60 overflow-y-auto">
                     {order.items.map((item, idx) => (
                       <div key={idx}>
                         <div className="flex items-center gap-2">
-                          <span className="w-6 h-6 bg-slate-700 rounded flex items-center justify-center text-sm">
+                          <span className="w-7 h-7 bg-slate-700 rounded flex items-center justify-center text-sm md:text-base font-semibold">
                             {item.quantity}
                           </span>
-                          <span className="flex-1 text-sm">{item.name}</span>
+                          <span className="flex-1 text-sm md:text-base">{item.name}</span>
                         </div>
                         {item.notes && (
                           <p className="text-xs text-yellow-500 ml-8 mt-1">
@@ -1479,7 +1479,7 @@ export default function StaffOrdersPage() {
               />
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
               {serviceRequests.map((request) => {
                 const typeInfo = getRequestTypeInfo(request.request_type);
                 const Icon = typeInfo.icon;
@@ -1615,9 +1615,9 @@ export default function StaffOrdersPage() {
       {/* Print Preview Modal */}
       {showPrintPreview && printPreviewOrder && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white rounded-xl max-w-md w-full text-black my-4">
+          <div className="bg-white rounded-xl max-w-md md:max-w-lg w-full text-black my-4">
             <div className="p-4 border-b flex items-center justify-between bg-slate-100 rounded-t-xl">
-              <h3 className="text-lg font-bold">
+              <h3 className="text-lg md:text-xl font-bold">
                 {lang === 'th' ? 'ตัวอย่างก่อนพิมพ์' : 'Print Preview'}
               </h3>
               <button
@@ -1629,9 +1629,9 @@ export default function StaffOrdersPage() {
             </div>
 
             {/* Receipt Preview */}
-            <div className="p-6 font-sans text-sm">
+            <div className="p-5 md:p-6 font-sans text-sm md:text-base">
               <div className="text-center border-b-2 border-dashed border-gray-400 pb-4 mb-4">
-                <h1 className="text-xl font-bold">{restaurantDetails.name || session?.restaurantName || 'Restaurant'}</h1>
+                <h1 className="text-xl md:text-2xl font-bold">{restaurantDetails.name || session?.restaurantName || 'Restaurant'}</h1>
                 {restaurantDetails.address && (
                   <p className="text-xs text-gray-500">{restaurantDetails.address}</p>
                 )}
@@ -1698,7 +1698,7 @@ export default function StaffOrdersPage() {
                     printOrder(printPreviewOrder, false);
                     setShowPrintPreview(false);
                   }}
-                  className="flex-1 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold flex items-center justify-center gap-2"
+                  className="flex-1 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold flex items-center justify-center gap-2 text-sm md:text-base"
                 >
                   <Printer className="w-5 h-5" />
                   {lang === 'th' ? 'พิมพ์ต้นฉบับ' : 'Print Original'}
@@ -1708,7 +1708,7 @@ export default function StaffOrdersPage() {
                     printOrder(printPreviewOrder, true);
                     setShowPrintPreview(false);
                   }}
-                  className="flex-1 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold flex items-center justify-center gap-2"
+                  className="flex-1 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold flex items-center justify-center gap-2 text-sm md:text-base"
                 >
                   <Printer className="w-5 h-5" />
                   {lang === 'th' ? 'พิมพ์สำเนา' : 'Print Copy'}
@@ -1716,7 +1716,7 @@ export default function StaffOrdersPage() {
               </div>
               <button
                 onClick={() => setShowPrintPreview(false)}
-                className="w-full py-2 bg-slate-300 hover:bg-slate-400 rounded-lg font-semibold text-black"
+                className="w-full py-3 bg-slate-300 hover:bg-slate-400 rounded-lg font-semibold text-black text-sm md:text-base"
               >
                 {lang === 'th' ? 'ปิด' : 'Close'}
               </button>

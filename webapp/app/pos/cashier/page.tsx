@@ -553,7 +553,7 @@ export default function CashierDashboardPage() {
       </div>
 
       {/* Main Content */}
-      <main className="p-6">
+      <main className="p-4 md:p-6">
         {error && (
           <div className="bg-red-500/20 border border-red-500 rounded-lg p-4 mb-6">
             <p className="text-red-400">{error}</p>
@@ -875,9 +875,9 @@ export default function CashierDashboardPage() {
       {/* Print Preview Modal */}
       {showPrintPreview && summary && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white rounded-xl max-w-md w-full text-black my-4">
+          <div className="bg-white rounded-xl max-w-md md:max-w-lg w-full text-black my-4">
             <div className="p-4 border-b flex items-center justify-between bg-slate-100 rounded-t-xl">
-              <h3 className="text-lg font-bold">
+              <h3 className="text-lg md:text-xl font-bold">
                 <BilingualText category="cashier" textKey="printPreview" lang={lang} primaryClassName="text-black" englishClassName="text-xs opacity-60" />
               </h3>
               <button
@@ -889,9 +889,9 @@ export default function CashierDashboardPage() {
             </div>
 
             {/* Report Preview */}
-            <div className="p-6 font-sans text-sm">
+            <div className="p-5 md:p-6 font-sans text-sm md:text-base">
               <div className="text-center border-b-2 border-dashed border-gray-400 pb-4 mb-4">
-                <h1 className="text-lg font-bold">{session?.restaurantName}</h1>
+                <h1 className="text-lg md:text-xl font-bold">{session?.restaurantName}</h1>
                 {restaurantInfo.address && (
                   <p className="text-xs text-gray-500">{restaurantInfo.address}</p>
                 )}

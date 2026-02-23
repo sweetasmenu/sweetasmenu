@@ -847,7 +847,7 @@ export default function KitchenDisplayPage() {
       )}
 
       {/* Orders Grid */}
-      <main className="p-4">
+      <main className="p-3 md:p-4">
         {loading ? (
           <div className="flex items-center justify-center h-64">
             <Loader2 className="w-12 h-12 animate-spin text-orange-500" />
@@ -873,7 +873,7 @@ export default function KitchenDisplayPage() {
             />
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
             {orders.map((order) => (
               <div
                 key={order.id}
@@ -913,12 +913,12 @@ export default function KitchenDisplayPage() {
                 </div>
 
                 {/* Order Items */}
-                <div className="p-4 space-y-3 max-h-64 overflow-y-auto">
+                <div className="p-3 md:p-4 space-y-3 max-h-64 md:max-h-80 overflow-y-auto">
                   {order.items.map((item, idx) => (
                     <div key={idx} className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
-                          <span className={`w-6 h-6 ${themeClasses.bgPrimary} rounded-full flex items-center justify-center text-sm font-bold`}>
+                          <span className={`w-7 h-7 ${themeClasses.bgPrimary} rounded-full flex items-center justify-center text-sm md:text-base font-bold`}>
                             {item.quantity}
                           </span>
                           <span className="font-medium">{item.name}</span>
