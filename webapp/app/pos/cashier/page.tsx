@@ -500,60 +500,54 @@ export default function CashierDashboardPage() {
       />
 
       {/* Sub Header - Date and Controls */}
-      <div className="bg-slate-800 px-4 py-2 flex items-center justify-between border-b border-slate-700">
-        <h2 className={`text-lg font-semibold ${themeClasses.textPrimary}`}>
+      <div className="bg-slate-800 px-2 md:px-4 py-1.5 md:py-2 flex items-center justify-between border-b border-slate-700">
+        <h2 className={`text-sm md:text-lg font-semibold ${themeClasses.textPrimary} shrink-0`}>
           <BilingualText category="cashier" textKey="dailyReport" lang={lang} />
         </h2>
 
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 bg-slate-700 rounded-lg px-3 py-2">
-            <Calendar className="w-4 h-4 text-slate-400" />
+        <div className="flex items-center gap-1 md:gap-3">
+          <div className="flex items-center gap-1 md:gap-2 bg-slate-700 rounded-lg px-2 md:px-3 py-1.5 md:py-2">
+            <Calendar className="w-3.5 h-3.5 md:w-4 md:h-4 text-slate-400 shrink-0" />
             <input
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
               max={new Date().toISOString().split('T')[0]}
-              className="bg-transparent text-white text-sm outline-none"
+              className="bg-transparent text-white text-xs md:text-sm outline-none w-[105px] md:w-auto"
             />
           </div>
 
           <button
             onClick={fetchSummary}
             disabled={refreshing}
-            className="flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg disabled:opacity-50 text-sm"
+            className="p-1.5 md:p-2 bg-blue-600 hover:bg-blue-700 rounded-lg disabled:opacity-50"
+            title="Refresh"
           >
             <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
-            <span className="hidden sm:inline">
-              <BilingualTextInline category="cashier" textKey="refresh" lang={lang} />
-            </span>
           </button>
 
           <button
             onClick={openPrintPreview}
             disabled={!summary}
-            className="flex items-center gap-2 px-3 py-2 bg-green-600 hover:bg-green-700 rounded-lg disabled:opacity-50 text-sm"
+            className="p-1.5 md:p-2 bg-green-600 hover:bg-green-700 rounded-lg disabled:opacity-50"
+            title="Preview"
           >
             <Eye className="w-4 h-4" />
-            <span className="hidden sm:inline">
-              <BilingualTextInline category="cashier" textKey="preview" lang={lang} />
-            </span>
           </button>
 
           <button
             onClick={printReport}
             disabled={!summary}
-            className="flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg disabled:opacity-50 text-sm"
+            className="p-1.5 md:p-2 bg-blue-600 hover:bg-blue-700 rounded-lg disabled:opacity-50"
+            title="Print"
           >
             <Printer className="w-4 h-4" />
-            <span className="hidden sm:inline">
-              <BilingualTextInline category="cashier" textKey="print" lang={lang} />
-            </span>
           </button>
         </div>
       </div>
 
       {/* Main Content */}
-      <main className="p-4 md:p-6">
+      <main className="p-2.5 md:p-6">
         {error && (
           <div className="bg-red-500/20 border border-red-500 rounded-lg p-4 mb-6">
             <p className="text-red-400">{error}</p>
@@ -567,141 +561,141 @@ export default function CashierDashboardPage() {
         ) : summary ? (
           <div className="space-y-6">
             {/* Stats Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 md:gap-4">
               <div
-                className="bg-slate-800 rounded-xl p-6 cursor-pointer hover:bg-slate-700 transition-colors group"
+                className="bg-slate-800 rounded-xl p-3 md:p-6 cursor-pointer hover:bg-slate-700 transition-colors group"
                 onClick={() => fetchOrderDetails('total')}
               >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-3">
-                    <Receipt className="w-6 h-6 text-blue-400" />
-                    <span className="text-slate-400">
+                <div className="flex items-center justify-between mb-1 md:mb-2">
+                  <div className="flex items-center gap-1.5 md:gap-3">
+                    <Receipt className="w-4 h-4 md:w-6 md:h-6 text-blue-400 shrink-0" />
+                    <span className="text-slate-400 text-xs md:text-base">
                       <BilingualText category="cashier" textKey="totalOrders" lang={lang} englishClassName="text-[10px] opacity-50" />
                     </span>
                   </div>
-                  <Eye className="w-5 h-5 text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <Eye className="w-4 h-4 md:w-5 md:h-5 text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity hidden md:block" />
                 </div>
-                <p className="text-3xl font-bold">{summary.total_orders}</p>
+                <p className="text-2xl md:text-3xl font-bold">{summary.total_orders}</p>
               </div>
 
               <div
-                className="bg-slate-800 rounded-xl p-6 cursor-pointer hover:bg-slate-700 transition-colors group"
+                className="bg-slate-800 rounded-xl p-3 md:p-6 cursor-pointer hover:bg-slate-700 transition-colors group"
                 onClick={() => fetchOrderDetails('completed')}
               >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-3">
-                    <CheckCircle className="w-6 h-6 text-green-400" />
-                    <span className="text-slate-400">
+                <div className="flex items-center justify-between mb-1 md:mb-2">
+                  <div className="flex items-center gap-1.5 md:gap-3">
+                    <CheckCircle className="w-4 h-4 md:w-6 md:h-6 text-green-400 shrink-0" />
+                    <span className="text-slate-400 text-xs md:text-base">
                       <BilingualText category="cashier" textKey="completed" lang={lang} englishClassName="text-[10px] opacity-50" />
                     </span>
                   </div>
-                  <Eye className="w-5 h-5 text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <Eye className="w-4 h-4 md:w-5 md:h-5 text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity hidden md:block" />
                 </div>
-                <p className="text-3xl font-bold text-green-400">{summary.completed_orders}</p>
+                <p className="text-2xl md:text-3xl font-bold text-green-400">{summary.completed_orders}</p>
               </div>
 
               <div
-                className="bg-slate-800 rounded-xl p-6 cursor-pointer hover:bg-slate-700 transition-colors group"
+                className="bg-slate-800 rounded-xl p-3 md:p-6 cursor-pointer hover:bg-slate-700 transition-colors group"
                 onClick={() => fetchOrderDetails('voided')}
               >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-3">
-                    <XCircle className="w-6 h-6 text-red-400" />
-                    <span className="text-slate-400">
+                <div className="flex items-center justify-between mb-1 md:mb-2">
+                  <div className="flex items-center gap-1.5 md:gap-3">
+                    <XCircle className="w-4 h-4 md:w-6 md:h-6 text-red-400 shrink-0" />
+                    <span className="text-slate-400 text-xs md:text-base">
                       <BilingualText category="cashier" textKey="voided" lang={lang} englishClassName="text-[10px] opacity-50" />
                     </span>
                   </div>
-                  <Eye className="w-5 h-5 text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <Eye className="w-4 h-4 md:w-5 md:h-5 text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity hidden md:block" />
                 </div>
-                <p className="text-3xl font-bold text-red-400">{summary.voided_orders}</p>
+                <p className="text-2xl md:text-3xl font-bold text-red-400">{summary.voided_orders}</p>
               </div>
 
               <div
-                className="bg-slate-800 rounded-xl p-6 cursor-pointer hover:bg-slate-700 transition-colors group"
+                className="bg-slate-800 rounded-xl p-3 md:p-6 cursor-pointer hover:bg-slate-700 transition-colors group"
                 onClick={() => fetchOrderDetails('pending')}
               >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-3">
-                    <Clock className="w-6 h-6 text-yellow-400" />
-                    <span className="text-slate-400">
+                <div className="flex items-center justify-between mb-1 md:mb-2">
+                  <div className="flex items-center gap-1.5 md:gap-3">
+                    <Clock className="w-4 h-4 md:w-6 md:h-6 text-yellow-400 shrink-0" />
+                    <span className="text-slate-400 text-xs md:text-base">
                       <BilingualText category="cashier" textKey="pendingPayment" lang={lang} englishClassName="text-[10px] opacity-50" />
                     </span>
                   </div>
-                  <Eye className="w-5 h-5 text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <Eye className="w-4 h-4 md:w-5 md:h-5 text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity hidden md:block" />
                 </div>
-                <p className="text-3xl font-bold text-yellow-400">{summary.pending_payment}</p>
+                <p className="text-2xl md:text-3xl font-bold text-yellow-400">{summary.pending_payment}</p>
               </div>
             </div>
 
             {/* Total Revenue */}
-            <div className={`bg-gradient-to-r ${themeClasses.bgGradient} rounded-xl p-6`}>
+            <div className={`bg-gradient-to-r ${themeClasses.bgGradient} rounded-xl p-4 md:p-6`}>
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="flex items-center gap-3 mb-2">
-                    <TrendingUp className="w-8 h-8" />
-                    <span className="text-lg opacity-90">
+                  <div className="flex items-center gap-2 md:gap-3 mb-1 md:mb-2">
+                    <TrendingUp className="w-5 h-5 md:w-8 md:h-8" />
+                    <span className="text-sm md:text-lg opacity-90">
                       <BilingualText category="cashier" textKey="totalRevenue" lang={lang} englishClassName="text-xs opacity-70" />
                     </span>
                   </div>
-                  <p className="text-5xl font-bold">${summary.total_revenue.toFixed(2)}</p>
-                  <p className="text-lg opacity-75 mt-1">NZD</p>
+                  <p className="text-3xl md:text-5xl font-bold">${summary.total_revenue.toFixed(2)}</p>
+                  <p className="text-sm md:text-lg opacity-75 mt-0.5">NZD</p>
                 </div>
-                <DollarSign className="w-24 h-24 opacity-20" />
+                <DollarSign className="w-14 h-14 md:w-24 md:h-24 opacity-20" />
               </div>
             </div>
 
             {/* Revenue by Payment Method */}
-            <div className="bg-slate-800 rounded-xl p-6">
-              <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                <CreditCard className="w-6 h-6 text-blue-400" />
+            <div className="bg-slate-800 rounded-xl p-3 md:p-6">
+              <h2 className="text-base md:text-xl font-bold mb-3 md:mb-4 flex items-center gap-2">
+                <CreditCard className="w-5 h-5 md:w-6 md:h-6 text-blue-400" />
                 <BilingualText category="cashier" textKey="revenueByPayment" lang={lang} englishClassName="text-xs opacity-60" />
               </h2>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-blue-500/20 border border-blue-500/30 rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <CreditCard className="w-5 h-5 text-blue-400" />
-                    <span className="text-blue-300 text-sm">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 md:gap-4">
+                <div className="bg-blue-500/20 border border-blue-500/30 rounded-lg p-2.5 md:p-4">
+                  <div className="flex items-center gap-1.5 md:gap-2 mb-1 md:mb-2">
+                    <CreditCard className="w-4 h-4 md:w-5 md:h-5 text-blue-400 shrink-0" />
+                    <span className="text-blue-300 text-xs md:text-sm">
                       <BilingualText category="cashier" textKey="creditDebit" lang={lang} englishClassName="text-[10px] opacity-60" />
                     </span>
                   </div>
-                  <p className="text-2xl font-bold text-blue-400">
+                  <p className="text-lg md:text-2xl font-bold text-blue-400">
                     ${summary.revenue_by_method.card.toFixed(2)}
                   </p>
                 </div>
 
-                <div className="bg-green-500/20 border border-green-500/30 rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Building2 className="w-5 h-5 text-green-400" />
-                    <span className="text-green-300 text-sm">
+                <div className="bg-green-500/20 border border-green-500/30 rounded-lg p-2.5 md:p-4">
+                  <div className="flex items-center gap-1.5 md:gap-2 mb-1 md:mb-2">
+                    <Building2 className="w-4 h-4 md:w-5 md:h-5 text-green-400 shrink-0" />
+                    <span className="text-green-300 text-xs md:text-sm">
                       <BilingualText category="cashier" textKey="bankTransfer" lang={lang} englishClassName="text-[10px] opacity-60" />
                     </span>
                   </div>
-                  <p className="text-2xl font-bold text-green-400">
+                  <p className="text-lg md:text-2xl font-bold text-green-400">
                     ${summary.revenue_by_method.bank_transfer.toFixed(2)}
                   </p>
                 </div>
 
-                <div className="bg-orange-500/20 border border-orange-500/30 rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Banknote className="w-5 h-5 text-orange-400" />
-                    <span className="text-orange-300 text-sm">
+                <div className="bg-orange-500/20 border border-orange-500/30 rounded-lg p-2.5 md:p-4">
+                  <div className="flex items-center gap-1.5 md:gap-2 mb-1 md:mb-2">
+                    <Banknote className="w-4 h-4 md:w-5 md:h-5 text-orange-400 shrink-0" />
+                    <span className="text-orange-300 text-xs md:text-sm">
                       <BilingualText category="cashier" textKey="cashAtCounter" lang={lang} englishClassName="text-[10px] opacity-60" />
                     </span>
                   </div>
-                  <p className="text-2xl font-bold text-orange-400">
+                  <p className="text-lg md:text-2xl font-bold text-orange-400">
                     ${summary.revenue_by_method.cash_at_counter.toFixed(2)}
                   </p>
                 </div>
 
-                <div className="bg-yellow-500/20 border border-yellow-500/30 rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Clock className="w-5 h-5 text-yellow-400" />
-                    <span className="text-yellow-300 text-sm">
+                <div className="bg-yellow-500/20 border border-yellow-500/30 rounded-lg p-2.5 md:p-4">
+                  <div className="flex items-center gap-1.5 md:gap-2 mb-1 md:mb-2">
+                    <Clock className="w-4 h-4 md:w-5 md:h-5 text-yellow-400 shrink-0" />
+                    <span className="text-yellow-300 text-xs md:text-sm">
                       <BilingualText category="cashier" textKey="unpaid" lang={lang} englishClassName="text-[10px] opacity-60" />
                     </span>
                   </div>
-                  <p className="text-2xl font-bold text-yellow-400">
+                  <p className="text-lg md:text-2xl font-bold text-yellow-400">
                     ${summary.revenue_by_method.unpaid.toFixed(2)}
                   </p>
                 </div>
@@ -710,18 +704,18 @@ export default function CashierDashboardPage() {
 
             {/* Void Reasons */}
             {summary.void_reasons.length > 0 && (
-              <div className="bg-slate-800 rounded-xl p-6">
-                <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                  <AlertTriangle className="w-6 h-6 text-red-400" />
+              <div className="bg-slate-800 rounded-xl p-3 md:p-6">
+                <h2 className="text-base md:text-xl font-bold mb-3 md:mb-4 flex items-center gap-2">
+                  <AlertTriangle className="w-5 h-5 md:w-6 md:h-6 text-red-400" />
                   <BilingualText category="cashier" textKey="voidedOrders" lang={lang} englishClassName="text-xs opacity-60" />
                   <span className="text-slate-400">({summary.void_reasons.length})</span>
                 </h2>
 
-                <div className="space-y-3">
+                <div className="space-y-2 md:space-y-3">
                   {summary.void_reasons.map((item, idx) => (
                     <div
                       key={idx}
-                      className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 flex items-center justify-between"
+                      className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 md:p-4 flex items-center justify-between"
                     >
                       <div>
                         <p className="text-sm text-slate-400">
