@@ -83,13 +83,13 @@ export default function POSNavbar({
 
   return (
     <nav className="bg-slate-800 border-b border-slate-700">
-      <div className="flex items-center justify-between px-2 md:px-4 py-2 gap-1 md:gap-2">
-        {/* Left side - Restaurant info */}
-        <div className="flex items-center gap-1.5 md:gap-3 shrink-0">
-          <div className={`${themeClasses.textPrimary} font-bold text-sm md:text-lg truncate max-w-[100px] md:max-w-none`}>
+      <div className="flex items-center justify-between px-2 md:px-4 py-1.5 md:py-2 gap-1 md:gap-2 overflow-hidden">
+        {/* Left side - Restaurant info (stacked on tablet) */}
+        <div className="shrink-0 min-w-0">
+          <div className={`${themeClasses.textPrimary} font-bold text-sm md:text-lg truncate`}>
             {session.restaurantName}
           </div>
-          <span className="text-slate-400 text-xs md:text-sm hidden sm:inline whitespace-nowrap">
+          <span className="text-slate-400 text-[10px] md:text-xs whitespace-nowrap">
             {session.staffName} ({session.role})
           </span>
         </div>
@@ -104,7 +104,7 @@ export default function POSNavbar({
               <button
                 key={item.href}
                 onClick={() => router.push(item.href)}
-                className={`flex items-center gap-1 md:gap-2 px-2 md:px-4 py-1.5 md:py-2 rounded-lg transition-all text-xs md:text-sm whitespace-nowrap ${
+                className={`flex items-center gap-1 md:gap-2 px-2.5 md:px-4 py-1.5 md:py-2 rounded-lg transition-all text-xs md:text-sm whitespace-nowrap ${
                   isActive
                     ? `${themeClasses.bgPrimary} text-white`
                     : 'text-slate-400 hover:bg-slate-700 hover:text-white'
@@ -120,9 +120,9 @@ export default function POSNavbar({
         </div>
 
         {/* Right side - Controls */}
-        <div className="flex items-center gap-1.5 md:gap-3 shrink-0">
+        <div className="flex items-center gap-1 md:gap-3 shrink-0">
           {/* Clock */}
-          <div className={`text-base md:text-xl font-mono ${themeClasses.textPrimary} hidden sm:block whitespace-nowrap`}>
+          <div className={`text-sm md:text-xl font-mono ${themeClasses.textPrimary} hidden sm:block whitespace-nowrap`}>
             {currentTime.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}
           </div>
 
@@ -154,12 +154,10 @@ export default function POSNavbar({
           {/* Logout */}
           <button
             onClick={handleLogout}
-            className="flex items-center gap-1 md:gap-2 px-2 md:px-3 py-1.5 md:py-2 bg-red-500/20 text-red-500 hover:bg-red-500/30 rounded-lg transition-colors"
+            className="p-1.5 md:p-2 bg-red-500/20 text-red-500 hover:bg-red-500/30 rounded-lg transition-colors"
+            title={lang === 'th' ? 'ออก' : 'Logout'}
           >
             <LogOut className="w-4 h-4 md:w-5 md:h-5" />
-            <span className="hidden md:inline text-sm">
-              {lang === 'th' ? 'ออก' : 'Logout'}
-            </span>
           </button>
         </div>
       </div>
