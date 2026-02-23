@@ -921,7 +921,13 @@ export default function StaffOrdersPage() {
     `;
 
     if (currentPrintMethod === 'cloud' && session?.restaurantId) {
-      printViaCloud(html, 'receipt', session.restaurantId, order.id);
+      printViaCloud(html, 'receipt', session.restaurantId, order.id).then(ok => {
+        if (ok) {
+          alert(lang === 'th' ? 'ส่งงานปริ้นไปยัง Cloud Queue แล้ว' : 'Print job sent to Cloud Queue');
+        } else {
+          alert(lang === 'th' ? 'ส่งงานปริ้นไม่สำเร็จ — ตรวจสอบตาราง print_queue ใน Supabase' : 'Cloud print failed — check print_queue table in Supabase');
+        }
+      });
     } else {
       printViaIframe(html);
     }
@@ -1071,7 +1077,13 @@ export default function StaffOrdersPage() {
     `;
 
     if (currentPrintMethod === 'cloud' && session?.restaurantId) {
-      printViaCloud(html, 'kitchen_ticket', session.restaurantId, order.id);
+      printViaCloud(html, 'kitchen_ticket', session.restaurantId, order.id).then(ok => {
+        if (ok) {
+          alert(lang === 'th' ? 'ส่งงานปริ้นไปยัง Cloud Queue แล้ว' : 'Print job sent to Cloud Queue');
+        } else {
+          alert(lang === 'th' ? 'ส่งงานปริ้นไม่สำเร็จ — ตรวจสอบตาราง print_queue ใน Supabase' : 'Cloud print failed — check print_queue table in Supabase');
+        }
+      });
     } else {
       printViaIframe(html);
     }

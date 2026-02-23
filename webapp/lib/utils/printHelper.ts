@@ -116,7 +116,8 @@ export async function printViaCloud(
   orderId?: string
 ): Promise<boolean> {
   try {
-    const { error } = await supabase
+    console.log('[CloudPrint] Inserting job:', { jobType, restaurantId, orderId });
+    const { data, error } = await supabase
       .from('print_queue')
       .insert({
         restaurant_id: restaurantId,
@@ -124,15 +125,17 @@ export async function printViaCloud(
         job_type: jobType,
         html_content: htmlContent,
         status: 'pending',
-      });
+      })
+      .select();
 
     if (error) {
-      console.error('Cloud print queue insert failed:', error);
+      console.error('[CloudPrint] Insert failed:', error.message, error.details, error.hint);
       return false;
     }
+    console.log('[CloudPrint] Job inserted successfully:', data);
     return true;
   } catch (e) {
-    console.error('Cloud print failed:', e);
+    console.error('[CloudPrint] Exception:', e);
     return false;
   }
 }
