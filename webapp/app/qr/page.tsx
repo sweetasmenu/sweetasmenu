@@ -144,6 +144,131 @@ export default function RestaurantQRCodePage() {
     }
   };
 
+  // Helper: draw rounded rectangle on canvas
+  const roundRect = (ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) => {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+  };
+
+  // Draw sticker directly on canvas (bypasses html2canvas which hangs on iPad)
+  const drawStickerOnCanvas = async (): Promise<string> => {
+    const scale = 3;
+    const stickerWidth = 320 * scale;
+    const borderWidth = 8 * scale;
+    const padding = 24 * scale; // p-6
+    const qrSize = 220 * scale;
+    const qrPadding = 12 * scale; // p-3
+    const bottomSectionHeight = 80 * scale;
+    const bottomRadius = 16 * scale;
+    const cornerRadius = 24 * scale; // rounded-3xl
+
+    const totalWidth = stickerWidth + borderWidth * 2;
+    const contentHeight = padding + qrPadding * 2 + qrSize + 16 * scale + bottomSectionHeight + padding;
+    const totalHeight = contentHeight + borderWidth * 2;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = totalWidth;
+    canvas.height = totalHeight;
+    const ctx = canvas.getContext('2d')!;
+
+    // Fill background with theme color (acts as border)
+    ctx.fillStyle = themeColor;
+    roundRect(ctx, 0, 0, totalWidth, totalHeight, cornerRadius);
+    ctx.fill();
+
+    // White inner area
+    ctx.fillStyle = '#ffffff';
+    roundRect(ctx, borderWidth, borderWidth, stickerWidth, contentHeight, cornerRadius - borderWidth);
+    ctx.fill();
+
+    // Draw QR code from SVG
+    const svgElement = qrRef.current?.querySelector('svg');
+    if (svgElement) {
+      const svgData = new XMLSerializer().serializeToString(svgElement);
+      const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+      const svgUrl = URL.createObjectURL(svgBlob);
+
+      const qrImg = await new Promise<HTMLImageElement>((resolve, reject) => {
+        const img = new window.Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = svgUrl;
+      });
+
+      const qrX = borderWidth + (stickerWidth - qrSize) / 2;
+      const qrY = borderWidth + padding;
+      ctx.drawImage(qrImg, qrX, qrY, qrSize, qrSize);
+      URL.revokeObjectURL(svgUrl);
+    }
+
+    // Draw colored bottom section
+    const bottomY = borderWidth + padding + qrSize + qrPadding * 2 + 4 * scale;
+    const bottomX = borderWidth + padding;
+    const bottomWidth = stickerWidth - padding * 2;
+
+    ctx.fillStyle = themeColor;
+    roundRect(ctx, bottomX, bottomY, bottomWidth, bottomSectionHeight, bottomRadius);
+    ctx.fill();
+
+    // Draw logo circle
+    const logoSize = 56 * scale;
+    const logoCenterX = bottomX + 12 * scale + logoSize / 2;
+    const logoCenterY = bottomY + (bottomSectionHeight - logoSize) / 2 + logoSize / 2;
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(logoCenterX, logoCenterY, logoSize / 2, 0, Math.PI * 2);
+    ctx.fillStyle = '#ffffff';
+    ctx.fill();
+
+    if (restaurant?.logo_url) {
+      try {
+        const logoImg = await new Promise<HTMLImageElement>((resolve, reject) => {
+          const img = new window.Image();
+          img.crossOrigin = 'anonymous';
+          img.onload = () => resolve(img);
+          img.onerror = reject;
+          img.src = restaurant.logo_url!;
+        });
+        ctx.clip();
+        ctx.drawImage(logoImg, logoCenterX - logoSize / 2, logoCenterY - logoSize / 2, logoSize, logoSize);
+      } catch {
+        // Logo failed to load — leave white circle
+      }
+    }
+    ctx.restore();
+
+    // Draw text
+    const textX = bottomX + 12 * scale + logoSize + 12 * scale;
+    const textMaxWidth = bottomWidth - 12 * scale - logoSize - 24 * scale;
+    ctx.fillStyle = '#ffffff';
+
+    if (showEnglishFallback) {
+      // Small English text
+      ctx.font = `${14 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
+      ctx.globalAlpha = 0.9;
+      ctx.fillText('Scan to Order', textX, bottomY + 30 * scale, textMaxWidth);
+      ctx.globalAlpha = 1;
+      // Larger translated text
+      ctx.font = `bold ${18 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
+      ctx.fillText(scanToOrderText, textX, bottomY + 55 * scale, textMaxWidth);
+    } else {
+      ctx.font = `bold ${20 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
+      ctx.fillText(scanToOrderText, textX, bottomY + 48 * scale, textMaxWidth);
+    }
+
+    return canvas.toDataURL('image/png');
+  };
+
   const handleDownload = async () => {
     if (!stickerRef.current) return;
 
@@ -154,21 +279,26 @@ export default function RestaurantQRCodePage() {
       (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
     try {
-      // Use html2canvas — lower scale on iOS to avoid canvas memory limits
-      // @ts-ignore - html2canvas types are incomplete
-      const canvas = await html2canvas(stickerRef.current, {
-        scale: isIOS ? 2 : 3,
-        backgroundColor: '#ffffff',
-        useCORS: true,
-        allowTaint: true,
-        logging: false,
-      } as any);
+      let dataUrl: string;
+
+      if (isIOS) {
+        // iOS/iPadOS: bypass html2canvas (it hangs on iPad) — draw manually on canvas
+        dataUrl = await drawStickerOnCanvas();
+      } else {
+        // Desktop/Android: use html2canvas
+        // @ts-ignore - html2canvas types are incomplete
+        const canvas = await html2canvas(stickerRef.current, {
+          scale: 3,
+          backgroundColor: '#ffffff',
+          useCORS: true,
+          allowTaint: true,
+          logging: false,
+        } as any);
+        dataUrl = canvas.toDataURL('image/png');
+      }
 
       const restaurantName = restaurant?.name?.replace(/\s+/g, '-').toLowerCase() || 'restaurant';
       const fileName = `${restaurantName}-qr-sticker.png`;
-
-      // Use toDataURL (synchronous) — toBlob callback can fail silently on iOS
-      const dataUrl = canvas.toDataURL('image/png');
 
       if (isIOS) {
         // iOS/iPadOS: open image in new tab — user long-presses to "Save Image"
@@ -177,7 +307,6 @@ export default function RestaurantQRCodePage() {
           newTab.document.write(`<html><head><title>${fileName}</title><style>body{margin:0;display:flex;justify-content:center;align-items:center;min-height:100vh;background:#f3f4f6;}img{max-width:100%;height:auto;}</style></head><body><img src="${dataUrl}" alt="QR Sticker"/></body></html>`);
           newTab.document.close();
         } else {
-          // Popup blocked — open in same window
           window.location.href = dataUrl;
         }
       } else {
