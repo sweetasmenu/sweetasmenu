@@ -160,36 +160,38 @@ export default function RestaurantQRCodePage() {
         logging: false,
       } as any);
 
-      const link = document.createElement('a');
       const restaurantName = restaurant?.name?.replace(/\s+/g, '-').toLowerCase() || 'restaurant';
-      link.download = `${restaurantName}-qr-sticker.png`;
-      link.href = canvas.toDataURL('image/png', 1.0);
-      link.click();
+      const fileName = `${restaurantName}-qr-sticker.png`;
+
+      // Convert canvas to blob for better iOS/Safari compatibility
+      canvas.toBlob((blob: Blob | null) => {
+        if (!blob) return;
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+        if (isIOS) {
+          // iOS Safari: open image in new tab (user can long-press to save)
+          const url = URL.createObjectURL(blob);
+          const newTab = window.open(url, '_blank');
+          if (!newTab) {
+            // Popup blocked — fallback to same-window
+            window.location.href = url;
+          }
+          setTimeout(() => URL.revokeObjectURL(url), 60000);
+        } else {
+          // Desktop/Android: standard download
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.download = fileName;
+          link.href = url;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+        }
+      }, 'image/png', 1.0);
     } catch (err) {
       console.error('Failed to download QR sticker:', err);
-      // Fallback to simple QR download
-      if (qrRef.current) {
-        const svg = qrRef.current.querySelector('svg');
-        if (svg) {
-          const svgData = new XMLSerializer().serializeToString(svg);
-          const canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d');
-          const img = new window.Image();
-
-          img.onload = () => {
-            canvas.width = img.width;
-            canvas.height = img.height;
-            ctx?.drawImage(img, 0, 0);
-
-            const link = document.createElement('a');
-            link.download = 'restaurant-menu-qr.png';
-            link.href = canvas.toDataURL('image/png');
-            link.click();
-          };
-
-          img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
-        }
-      }
+      alert('Failed to download sticker. Please try again.');
     } finally {
       setDownloading(false);
     }
