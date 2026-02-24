@@ -163,17 +163,23 @@ export default function RestaurantQRCodePage() {
       const restaurantName = restaurant?.name?.replace(/\s+/g, '-').toLowerCase() || 'restaurant';
       const fileName = `${restaurantName}-qr-sticker.png`;
 
+      // Detect iOS/iPadOS (iPadOS 13+ reports as "Macintosh")
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
       // Convert canvas to blob for better iOS/Safari compatibility
       canvas.toBlob((blob: Blob | null) => {
-        if (!blob) return;
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        if (!blob) {
+          setDownloading(false);
+          alert('Failed to generate image. Please try again.');
+          return;
+        }
 
         if (isIOS) {
-          // iOS Safari: open image in new tab (user can long-press to save)
+          // iOS/iPadOS (Safari + Chrome): open image in new tab — long-press to save
           const url = URL.createObjectURL(blob);
           const newTab = window.open(url, '_blank');
           if (!newTab) {
-            // Popup blocked — fallback to same-window
             window.location.href = url;
           }
           setTimeout(() => URL.revokeObjectURL(url), 60000);
@@ -188,11 +194,11 @@ export default function RestaurantQRCodePage() {
           document.body.removeChild(link);
           URL.revokeObjectURL(url);
         }
+        setDownloading(false);
       }, 'image/png', 1.0);
     } catch (err) {
       console.error('Failed to download QR sticker:', err);
       alert('Failed to download sticker. Please try again.');
-    } finally {
       setDownloading(false);
     }
   };
