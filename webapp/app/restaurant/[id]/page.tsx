@@ -2070,14 +2070,6 @@ export default function RestaurantMenuPage() {
                   </div>
 
                   <div className="border-t border-gray-200 pt-4 mb-6">
-                    {/* Subtotal */}
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-gray-600">{dt('customer', 'subtotal', getCustomerLang())}:</span>
-                      <span className="text-gray-900 font-medium">
-                        ${getSubtotal().toFixed(2)}
-                      </span>
-                    </div>
-
                     {/* Delivery Fee (only show when delivery is selected) */}
                     {serviceType === 'delivery' && (
                       <div className="mb-2">
@@ -2096,24 +2088,6 @@ export default function RestaurantMenuPage() {
                       </div>
                     )}
 
-                    {/* Food/Holiday Surcharge (if enabled) */}
-                    {hasFoodSurcharge() && (
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-gray-600">
-                          {foodSurchargeSettings.food_surcharge_name} ({foodSurchargeSettings.food_surcharge_rate}%):
-                        </span>
-                        <span className="text-gray-900 font-medium">
-                          ${getFoodSurchargeAmount().toFixed(2)}
-                        </span>
-                      </div>
-                    )}
-
-                    {/* Service Fee Notice (if card surcharge is enabled) */}
-                    {hasPotentialSurcharge() && (
-                      <div className="text-xs text-gray-500 bg-gray-50 p-2 rounded mb-2">
-                        💳 Card payment: +{surchargeSettings.credit_card_surcharge_rate}% service fee
-                      </div>
-                    )}
 
                     {/* Grand Total */}
                     <div className="flex justify-between items-center pt-2 border-t border-gray-100">
