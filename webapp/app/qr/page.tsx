@@ -149,13 +149,17 @@ export default function RestaurantQRCodePage() {
 
     setDownloading(true);
 
+    // Detect iOS/iPadOS (iPadOS 13+ reports as "Macintosh")
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
     try {
-      // Use html2canvas to capture the sticker element
+      // Use html2canvas — lower scale on iOS to avoid canvas memory limits
       // @ts-ignore - html2canvas types are incomplete
       const canvas = await html2canvas(stickerRef.current, {
-        scale: 3, // High quality for printing
+        scale: isIOS ? 2 : 3,
         backgroundColor: '#ffffff',
-        useCORS: true, // Allow cross-origin images (for logo)
+        useCORS: true,
         allowTaint: true,
         logging: false,
       } as any);
@@ -163,42 +167,32 @@ export default function RestaurantQRCodePage() {
       const restaurantName = restaurant?.name?.replace(/\s+/g, '-').toLowerCase() || 'restaurant';
       const fileName = `${restaurantName}-qr-sticker.png`;
 
-      // Detect iOS/iPadOS (iPadOS 13+ reports as "Macintosh")
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      // Use toDataURL (synchronous) — toBlob callback can fail silently on iOS
+      const dataUrl = canvas.toDataURL('image/png');
 
-      // Convert canvas to blob for better iOS/Safari compatibility
-      canvas.toBlob((blob: Blob | null) => {
-        if (!blob) {
-          setDownloading(false);
-          alert('Failed to generate image. Please try again.');
-          return;
-        }
-
-        if (isIOS) {
-          // iOS/iPadOS (Safari + Chrome): open image in new tab — long-press to save
-          const url = URL.createObjectURL(blob);
-          const newTab = window.open(url, '_blank');
-          if (!newTab) {
-            window.location.href = url;
-          }
-          setTimeout(() => URL.revokeObjectURL(url), 60000);
+      if (isIOS) {
+        // iOS/iPadOS: open image in new tab — user long-presses to "Save Image"
+        const newTab = window.open();
+        if (newTab) {
+          newTab.document.write(`<html><head><title>${fileName}</title><style>body{margin:0;display:flex;justify-content:center;align-items:center;min-height:100vh;background:#f3f4f6;}img{max-width:100%;height:auto;}</style></head><body><img src="${dataUrl}" alt="QR Sticker"/></body></html>`);
+          newTab.document.close();
         } else {
-          // Desktop/Android: standard download
-          const url = URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.download = fileName;
-          link.href = url;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          URL.revokeObjectURL(url);
+          // Popup blocked — open in same window
+          window.location.href = dataUrl;
         }
-        setDownloading(false);
-      }, 'image/png', 1.0);
+      } else {
+        // Desktop/Android: standard download via link click
+        const link = document.createElement('a');
+        link.download = fileName;
+        link.href = dataUrl;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
     } catch (err) {
       console.error('Failed to download QR sticker:', err);
       alert('Failed to download sticker. Please try again.');
+    } finally {
       setDownloading(false);
     }
   };
