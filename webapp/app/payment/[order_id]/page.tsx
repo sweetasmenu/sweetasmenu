@@ -5,6 +5,7 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { CreditCard, Building2, Loader2, CheckCircle, AlertCircle, ArrowLeft, QrCode, Upload, Copy, Check, Banknote } from 'lucide-react';
 import Link from 'next/link';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { loadStripe, Stripe } from '@stripe/stripe-js';
 import { getStripe } from '@/lib/stripe/config';
 import QRCode from 'react-qr-code';
 
@@ -402,6 +403,7 @@ export default function PaymentPage() {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
 
   // Surcharge confirmation popup
   const [showSurchargeConfirm, setShowSurchargeConfirm] = useState(false);
@@ -462,6 +464,14 @@ export default function PaymentPage() {
 
         if (settingsData.success) {
           setPaymentSettings(settingsData.payment_settings);
+
+          // Load restaurant's Stripe publishable key for card payments
+          if (settingsData.stripe_publishable_key) {
+            setStripePromise(loadStripe(settingsData.stripe_publishable_key));
+          } else {
+            // Fallback to platform key
+            setStripePromise(getStripe());
+          }
 
           // Auto-select if only one method available
           if (settingsData.payment_settings.accept_card && !settingsData.payment_settings.accept_bank_transfer) {
@@ -894,10 +904,10 @@ export default function PaymentPage() {
         </div>
 
         {/* Payment Form */}
-        {selectedMethod === 'card' && clientSecret && (
+        {selectedMethod === 'card' && clientSecret && stripePromise && (
           <div className="bg-white rounded-xl shadow-lg p-6">
             <Elements
-              stripe={getStripe()}
+              stripe={stripePromise}
               options={{
                 clientSecret,
                 appearance: {

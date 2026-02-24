@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Shield, Users, Utensils, Truck, Store, Plus, Trash2, Edit2, Save, X, Loader2, Globe, ExternalLink, MapPin, Navigation, CreditCard, Building2, QrCode, Key, Eye, EyeOff, CheckCircle, AlertCircle, ArrowUpRight, Printer, Clock, Calendar } from 'lucide-react';
+import { Shield, Users, Utensils, Truck, Store, Plus, Trash2, Edit2, Save, X, Loader2, Globe, ExternalLink, MapPin, Navigation, CreditCard, Building2, QrCode, Key, Eye, EyeOff, CheckCircle, AlertCircle, ArrowUpRight, Printer, Clock, Calendar, XCircle } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { printViaIframe } from '@/lib/utils/printHelper';
 
@@ -272,20 +272,17 @@ function SettingsContent() {
   const [savingFoodSurcharge, setSavingFoodSurcharge] = useState(false);
 
   // Stripe Connect state (for restaurant to receive payments)
-  const [stripeConnectStatus, setStripeConnectStatus] = useState<{
-    connected: boolean;
-    status: 'not_connected' | 'pending' | 'active' | 'incomplete';
-    account_id?: string;
-    charges_enabled?: boolean;
-    payouts_enabled?: boolean;
-    business_name?: string;
-    pending_requirements?: string[];
-  }>({
+  const [stripeKeys, setStripeKeys] = useState({
+    publishable_key: '',
+    secret_key: '',
     connected: false,
-    status: 'not_connected'
+    account_name: '',
+    masked_secret: '',
   });
-  const [loadingStripeConnect, setLoadingStripeConnect] = useState(false);
-  const [connectingStripe, setConnectingStripe] = useState(false);
+  const [loadingStripeKeys, setLoadingStripeKeys] = useState(false);
+  const [savingStripeKeys, setSavingStripeKeys] = useState(false);
+  const [showSecretKey, setShowSecretKey] = useState(false);
+  const [disconnectingStripe, setDisconnectingStripe] = useState(false);
 
   // Password Change state
   const [passwordData, setPasswordData] = useState({
@@ -547,26 +544,10 @@ function SettingsContent() {
       loadSurchargeSettings(profile.restaurant.restaurant_id);
       loadFoodSurchargeSettings(profile.restaurant.restaurant_id);
 
-      // Load Stripe Connect status
-      loadStripeConnectStatus(profile.restaurant.restaurant_id);
+      // Load Stripe API keys status
+      loadStripeKeys(profile.restaurant.restaurant_id);
     }
   }, [profile]);
-
-  // Check for Stripe Connect callback
-  useEffect(() => {
-    const stripeConnected = searchParams.get('stripe_connected');
-    const stripeRefresh = searchParams.get('stripe_refresh');
-
-    if (stripeConnected === 'true' && profile?.restaurant?.restaurant_id) {
-      // User returned from Stripe onboarding - refresh status
-      loadStripeConnectStatus(profile.restaurant.restaurant_id);
-      setActiveTab('payments');
-    }
-    if (stripeRefresh === 'true' && profile?.restaurant?.restaurant_id) {
-      // Onboarding link expired - show payments tab
-      setActiveTab('payments');
-    }
-  }, [searchParams, profile]);
 
   // ============================================================
   // Restaurant Location Functions (for Delivery Distance Calculation)
@@ -651,69 +632,89 @@ function SettingsContent() {
   };
 
   // Load Stripe Connect status
-  const loadStripeConnectStatus = async (restaurantId: string) => {
+  const loadStripeKeys = async (restaurantId: string) => {
     if (!restaurantId) return;
-    setLoadingStripeConnect(true);
+    setLoadingStripeKeys(true);
     try {
-      const response = await fetch(`${BACKEND_URL}/api/stripe/connect/status/${restaurantId}`);
+      const response = await fetch(`${BACKEND_URL}/api/restaurant/${restaurantId}/stripe-keys`);
       const data = await response.json();
       if (data.success) {
-        setStripeConnectStatus({
+        setStripeKeys({
+          publishable_key: data.stripe_publishable_key || '',
+          secret_key: '',
           connected: data.connected,
-          status: data.status,
-          account_id: data.account_id,
-          charges_enabled: data.charges_enabled,
-          payouts_enabled: data.payouts_enabled,
-          business_name: data.business_name,
-          pending_requirements: data.pending_requirements,
+          account_name: '',
+          masked_secret: data.stripe_secret_key_masked || '',
         });
       }
     } catch (error) {
-      console.error('Failed to load Stripe Connect status:', error);
+      console.error('Failed to load Stripe keys:', error);
     } finally {
-      setLoadingStripeConnect(false);
+      setLoadingStripeKeys(false);
     }
   };
 
-  // Connect Stripe account (redirect to Stripe onboarding)
-  const connectStripeAccount = async () => {
+  const saveStripeKeys = async () => {
     if (!profile?.restaurant?.restaurant_id) return;
-    setConnectingStripe(true);
+    if (!stripeKeys.publishable_key.trim() || !stripeKeys.secret_key.trim()) {
+      alert('Please enter both Publishable Key and Secret Key');
+      return;
+    }
+    setSavingStripeKeys(true);
     try {
-      const response = await fetch(`${BACKEND_URL}/api/stripe/connect/onboarding-link/${profile.restaurant.restaurant_id}`, {
-        method: 'POST',
+      const response = await fetch(`${BACKEND_URL}/api/restaurant/${profile.restaurant.restaurant_id}/stripe-keys`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          stripe_publishable_key: stripeKeys.publishable_key.trim(),
+          stripe_secret_key: stripeKeys.secret_key.trim(),
+        }),
       });
       const data = await response.json();
-      if (data.success && data.onboarding_url) {
-        // Redirect to Stripe onboarding
-        window.location.href = data.onboarding_url;
+      if (data.success) {
+        setStripeKeys(prev => ({
+          ...prev,
+          connected: true,
+          account_name: data.account_name || '',
+          secret_key: '',
+        }));
+        loadStripeKeys(profile.restaurant.restaurant_id);
+        alert('Stripe connected successfully!');
       } else {
-        const errorMsg = data.detail || data.message || 'Failed to connect Stripe. Please try again.';
-        alert(errorMsg);
+        alert(data.detail || 'Failed to save Stripe keys');
       }
     } catch (error) {
-      console.error('Failed to connect Stripe:', error);
+      console.error('Failed to save Stripe keys:', error);
       alert('An error occurred. Please try again.');
     } finally {
-      setConnectingStripe(false);
+      setSavingStripeKeys(false);
     }
   };
 
-  // Open Stripe Dashboard
-  const openStripeDashboard = async () => {
+  const disconnectStripe = async () => {
     if (!profile?.restaurant?.restaurant_id) return;
+    if (!confirm('Are you sure you want to disconnect Stripe? Customers will not be able to pay by card.')) return;
+    setDisconnectingStripe(true);
     try {
-      const response = await fetch(`${BACKEND_URL}/api/stripe/connect/dashboard-link/${profile.restaurant.restaurant_id}`);
+      const response = await fetch(`${BACKEND_URL}/api/restaurant/${profile.restaurant.restaurant_id}/stripe-keys`, {
+        method: 'DELETE',
+      });
       const data = await response.json();
-      if (data.success && data.dashboard_url) {
-        window.open(data.dashboard_url, '_blank');
-      } else {
-        const errorMsg = data.detail || data.message || 'Failed to open Stripe Dashboard';
-        alert(errorMsg);
+      if (data.success) {
+        setStripeKeys({
+          publishable_key: '',
+          secret_key: '',
+          connected: false,
+          account_name: '',
+          masked_secret: '',
+        });
+        setShowSecretKey(false);
       }
     } catch (error) {
-      console.error('Failed to get Stripe dashboard link:', error);
+      console.error('Failed to disconnect Stripe:', error);
       alert('An error occurred');
+    } finally {
+      setDisconnectingStripe(false);
     }
   };
 
@@ -3068,85 +3069,124 @@ function SettingsContent() {
                 </label>
               </div>
 
-              {/* Stripe Connect Status */}
+              {/* Stripe API Keys */}
               {paymentSettings.accept_card && (
                 <div className="mt-4 sm:ml-13 space-y-3">
-                  {loadingStripeConnect ? (
+                  {loadingStripeKeys ? (
                     <div className="p-3 bg-gray-50 rounded-lg flex items-center gap-2">
                       <Loader2 className="w-4 h-4 animate-spin text-gray-500" />
                       <span className="text-sm text-gray-600">Loading Stripe status...</span>
                     </div>
-                  ) : stripeConnectStatus.status === 'active' ? (
-                    // Connected and active
+                  ) : stripeKeys.connected ? (
                     <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
                       <div className="flex items-center gap-2 mb-2">
                         <CheckCircle className="w-5 h-5 text-green-600" />
                         <span className="font-semibold text-green-800">Stripe Connected</span>
                       </div>
-                      <p className="text-sm text-green-700 mb-3">
+                      <p className="text-sm text-green-700 mb-1">
                         Your restaurant is ready to accept card payments.
-                        {stripeConnectStatus.business_name && (
-                          <span className="block mt-1">Business name: {stripeConnectStatus.business_name}</span>
-                        )}
                       </p>
-                      <button
-                        onClick={openStripeDashboard}
-                        className="flex items-center gap-2 text-sm text-green-700 hover:text-green-800 font-medium"
-                      >
-                        <ArrowUpRight className="w-4 h-4" />
-                        Open Stripe Dashboard
-                      </button>
-                    </div>
-                  ) : stripeConnectStatus.status === 'pending' || stripeConnectStatus.status === 'incomplete' ? (
-                    // Pending or incomplete
-                    <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                      <div className="flex items-center gap-2 mb-2">
-                        <AlertCircle className="w-5 h-5 text-yellow-600" />
-                        <span className="font-semibold text-yellow-800">Pending Verification</span>
+                      <div className="text-xs text-green-600 space-y-1 mb-3">
+                        <p>Publishable Key: <span className="font-mono">{stripeKeys.publishable_key.substring(0, 20)}...</span></p>
+                        <p>Secret Key: <span className="font-mono">{stripeKeys.masked_secret}</span></p>
                       </div>
-                      <p className="text-sm text-yellow-700 mb-3">
-                        Please complete the Stripe onboarding process to start receiving payments.
-                      </p>
-                      <button
-                        onClick={connectStripeAccount}
-                        disabled={connectingStripe}
-                        className="flex items-center gap-2 px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 disabled:opacity-50"
-                      >
-                        {connectingStripe ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
+                      <div className="flex gap-2">
+                        <a
+                          href="https://dashboard.stripe.com"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1 text-sm text-green-700 hover:text-green-800 font-medium"
+                        >
                           <ArrowUpRight className="w-4 h-4" />
-                        )}
-                        Continue
-                      </button>
+                          Open Stripe Dashboard
+                        </a>
+                        <button
+                          onClick={disconnectStripe}
+                          disabled={disconnectingStripe}
+                          className="flex items-center gap-1 text-sm text-red-500 hover:text-red-600 font-medium ml-4"
+                        >
+                          {disconnectingStripe ? <Loader2 className="w-3 h-3 animate-spin" /> : <XCircle className="w-4 h-4" />}
+                          Disconnect
+                        </button>
+                      </div>
                     </div>
                   ) : (
-                    // Not connected
                     <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
                       <div className="flex items-center gap-2 mb-2">
                         <Building2 className="w-5 h-5 text-blue-600" />
                         <span className="font-semibold text-blue-800">Connect your Stripe account</span>
                       </div>
-                      <p className="text-sm text-blue-700 mb-3">
-                        Connect your Stripe account to receive payments directly. Funds will be deposited to your bank automatically.
+                      <p className="text-sm text-blue-700 mb-4">
+                        Enter your Stripe API keys to start accepting card payments. Funds go directly to your Stripe account.
                       </p>
-                      <button
-                        onClick={connectStripeAccount}
-                        disabled={connectingStripe}
-                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-                      >
-                        {connectingStripe ? (
-                          <>
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                            Connecting...
-                          </>
-                        ) : (
-                          <>
-                            <ArrowUpRight className="w-4 h-4" />
-                            Connect Stripe
-                          </>
-                        )}
-                      </button>
+
+                      <div className="space-y-3">
+                        <div>
+                          <label className="block text-sm text-gray-700 mb-1">Publishable Key</label>
+                          <input
+                            type="text"
+                            value={stripeKeys.publishable_key}
+                            onChange={(e) => setStripeKeys(prev => ({ ...prev, publishable_key: e.target.value }))}
+                            placeholder="pk_live_... or pk_test_..."
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white font-mono text-sm focus:ring-blue-500 focus:border-blue-500"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm text-gray-700 mb-1">Secret Key</label>
+                          <div className="relative">
+                            <input
+                              type={showSecretKey ? 'text' : 'password'}
+                              value={stripeKeys.secret_key}
+                              onChange={(e) => setStripeKeys(prev => ({ ...prev, secret_key: e.target.value }))}
+                              placeholder="sk_live_... or sk_test_..."
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white font-mono text-sm focus:ring-blue-500 focus:border-blue-500 pr-16"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowSecretKey(!showSecretKey)}
+                              className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-500 hover:text-gray-700"
+                            >
+                              {showSecretKey ? 'Hide' : 'Show'}
+                            </button>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={saveStripeKeys}
+                            disabled={savingStripeKeys}
+                            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm font-medium"
+                          >
+                            {savingStripeKeys ? (
+                              <>
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                Testing & Saving...
+                              </>
+                            ) : (
+                              <>
+                                <CheckCircle className="w-4 h-4" />
+                                Save & Test Connection
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 p-3 bg-white/60 rounded-lg border border-blue-100">
+                        <p className="text-sm text-blue-800 font-medium mb-1">How to find your Stripe API keys:</p>
+                        <ol className="text-xs text-blue-700 space-y-1 list-decimal list-inside">
+                          <li>Go to <a href="https://dashboard.stripe.com/apikeys" target="_blank" rel="noopener noreferrer" className="underline font-medium">dashboard.stripe.com/apikeys</a></li>
+                          <li>Copy your <strong>Publishable key</strong> (starts with pk_)</li>
+                          <li>Click "Reveal" on <strong>Secret key</strong> and copy it (starts with sk_)</li>
+                          <li>Paste both keys above and click "Save & Test"</li>
+                        </ol>
+                        <a
+                          href="/guide/stripe-setup"
+                          target="_blank"
+                          className="inline-block mt-2 text-xs text-blue-600 hover:text-blue-800 underline font-medium"
+                        >
+                          View full setup guide →
+                        </a>
+                      </div>
                     </div>
                   )}
                 </div>
