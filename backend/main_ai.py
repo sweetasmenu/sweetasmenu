@@ -612,23 +612,12 @@ async def translate_batch(request: BatchTranslateRequest):
 
         print(f"📝 Batch Translation Request: {len(request.texts)} texts → {target_lang_name}")
 
-        # Translate each text
-        translations = []
-        for i, text in enumerate(request.texts):
-            if not text or not text.strip():
-                translations.append('')
-                continue
-
-            try:
-                translated = await ai_service.translate(
-                    text=text,
-                    source_lang=request.source_lang if request.source_lang != 'auto' else 'auto-detect',
-                    target_lang=target_lang_name
-                )
-                translations.append(translated or text)
-            except Exception as e:
-                print(f"⚠️ Translation failed for text {i}: {str(e)}")
-                translations.append(text)  # Fallback to original
+        # Translate all texts in a single Gemini API call (much faster)
+        translations = await ai_service.translate_batch(
+            texts=request.texts,
+            target_lang=target_lang_name,
+            source_lang=request.source_lang if request.source_lang != 'auto' else 'auto'
+        )
 
         print(f"✅ Batch Translation Complete: {len(translations)} texts translated")
 

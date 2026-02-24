@@ -448,10 +448,151 @@ Text to translate:
             traceback.print_exc()
             return None
     
+    def translate_batch_texts(self, texts: list[str], target_lang: str, source_lang: str = "auto") -> list[str]:
+        """
+        Translate multiple texts in a SINGLE Gemini API call.
+        Much faster than translating one-by-one (1 call vs N calls).
+        """
+        if not self.ready:
+            print("⚠️ AI Service not ready, returning original texts")
+            return texts
+
+        if not texts:
+            return texts
+
+        # Normalize target language
+        lang_normalize = {
+            "English": "English", "en": "English", "EN": "English",
+            "Japanese": "Japanese", "日本語": "Japanese", "ja": "Japanese", "JP": "Japanese",
+            "Thai": "Thai", "ไทย": "Thai", "th": "Thai",
+            "Chinese": "Chinese", "中文": "Chinese", "zh": "Chinese",
+            "Korean": "Korean", "한국어": "Korean", "ko": "Korean",
+            "Vietnamese": "Vietnamese", "Tiếng Việt": "Vietnamese", "vi": "Vietnamese",
+            "Hindi": "Hindi", "हिंदी": "Hindi", "hi": "Hindi",
+            "Spanish": "Spanish", "Español": "Spanish", "es": "Spanish",
+            "French": "French", "Français": "French", "fr": "French",
+            "German": "German", "Deutsch": "German", "de": "German",
+            "Indonesian": "Indonesian", "Bahasa Indonesia": "Indonesian", "id": "Indonesian",
+            "Malay": "Malay", "Bahasa Melayu": "Malay", "ms": "Malay",
+        }
+        target_lang_normalized = lang_normalize.get(target_lang.strip(), target_lang.strip())
+
+        # Build numbered list of texts (skip empty ones, track indices)
+        numbered_items = []
+        index_map = {}  # maps numbered position -> original index
+        for i, text in enumerate(texts):
+            if text and text.strip():
+                pos = len(numbered_items) + 1
+                numbered_items.append(f"{pos}. {text.strip()}")
+                index_map[pos] = i
+
+        if not numbered_items:
+            return texts
+
+        items_text = "\n".join(numbered_items)
+
+        try:
+            model_name = TRANSLATION_MODEL_NAME or TEXT_MODEL_NAME
+            generation_config = {
+                "temperature": 0.1,
+                "top_p": 0.9,
+                "top_k": 40,
+                "max_output_tokens": 4096,
+            }
+
+            system_instruction = (
+                f"You are a professional translator specializing in restaurant menu translation. "
+                f"You MUST translate ALL text to {target_lang_normalized}. "
+                f"Never leave any text in the original language."
+            )
+
+            prompt = f"""Translate ALL the following restaurant menu texts to {target_lang_normalized}.
+
+CRITICAL RULES:
+- You MUST translate EVERY item to {target_lang_normalized}
+- Do NOT leave any text in the original language
+- Use natural, appetizing {target_lang_normalized} names
+- Professional restaurant style
+- Return ONLY the numbered translations, one per line
+- Keep the same numbering (1. 2. 3. etc.)
+- NO extra explanations, NO parentheses, NO original text
+
+Texts to translate:
+{items_text}
+
+{target_lang_normalized} translations (numbered, one per line):"""
+
+            print(f"🔄 Batch translating {len(numbered_items)} texts to {target_lang_normalized} in single call...")
+
+            def run_translation(selected_model: str):
+                model = genai.GenerativeModel(
+                    selected_model,
+                    system_instruction=system_instruction,
+                    generation_config=generation_config,
+                )
+                return model.generate_content(prompt)
+
+            try:
+                response = run_translation(model_name)
+            except Exception as primary_error:
+                print(f"⚠️ Primary model failed, falling back: {primary_error}")
+                response = run_translation(TEXT_MODEL_NAME)
+
+            # Parse numbered response
+            result = list(texts)  # Start with originals as fallback
+            response_text = response.text.strip()
+            lines = response_text.split('\n')
+
+            for line in lines:
+                line = line.strip()
+                if not line:
+                    continue
+                # Match "1. translated text" or "1) translated text"
+                import re
+                match = re.match(r'^(\d+)[.)]\s*(.+)$', line)
+                if match:
+                    num = int(match.group(1))
+                    translated = match.group(2).strip()
+                    # Clean up quotes
+                    if (translated.startswith('"') and translated.endswith('"')) or \
+                       (translated.startswith("'") and translated.endswith("'")):
+                        translated = translated[1:-1].strip()
+                    if num in index_map and translated:
+                        result[index_map[num]] = translated
+
+            # Count how many were successfully translated
+            translated_count = sum(1 for i in index_map.values() if result[i] != texts[i])
+            print(f"✅ Batch translation complete: {translated_count}/{len(numbered_items)} texts translated")
+
+            # If less than half were translated, something went wrong - fall back to one-by-one
+            if translated_count < len(numbered_items) * 0.5 and len(numbered_items) > 1:
+                print(f"⚠️ Low translation rate ({translated_count}/{len(numbered_items)}), falling back to individual translation")
+                for pos, orig_idx in index_map.items():
+                    if result[orig_idx] == texts[orig_idx]:
+                        try:
+                            translated = self.translate_text(texts[orig_idx], target_lang_normalized, source_lang)
+                            if translated:
+                                result[orig_idx] = translated
+                        except Exception:
+                            pass  # Keep original
+
+            return result
+
+        except Exception as e:
+            print(f"❌ Batch translation failed: {e}")
+            import traceback
+            traceback.print_exc()
+            # Fall back to original texts
+            return texts
+
     # Compatibility methods for existing code
     async def translate(self, text: str, source_lang: str, target_lang: str = "English") -> str:
         """Async wrapper for translate_text (for backward compatibility)"""
         return self.translate_text(text, target_lang, source_lang)
+
+    async def translate_batch(self, texts: list[str], target_lang: str, source_lang: str = "auto") -> list[str]:
+        """Async wrapper for translate_batch_texts"""
+        return self.translate_batch_texts(texts, target_lang, source_lang)
     
     async def detect_language(self, text: str) -> str:
         """
