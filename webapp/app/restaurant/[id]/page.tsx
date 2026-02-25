@@ -1222,15 +1222,18 @@ export default function RestaurantMenuPage() {
     const groups: Record<string, MenuItem[]> = {};
 
     // Add Bestseller category first if there are bestsellers
+    const bestSellerMenuIds = new Set<string>();
     if (bestSellers.length > 0) {
       // Convert bestSellers to MenuItem format with full details from menus
       const bestSellerItems = bestSellers.map(bs => {
         // Find full menu item details from menus array
         const fullMenu = menus.find(m => m.menu_id === bs.menu_id);
         if (fullMenu) {
+          bestSellerMenuIds.add(fullMenu.menu_id);
           return { ...fullMenu, is_best_seller: true };
         }
         // Fallback to bestseller data if not found in menus
+        bestSellerMenuIds.add(bs.menu_id);
         return {
           ...bs,
           is_best_seller: true,
@@ -1240,8 +1243,9 @@ export default function RestaurantMenuPage() {
       groups['Bestseller'] = bestSellerItems;
     }
 
-    // Add other categories
+    // Add other categories (exclude items already in Bestseller to avoid duplicates)
     menus.forEach(menu => {
+      if (bestSellerMenuIds.has(menu.menu_id)) return;
       const category = menu.category || 'Other';
       if (!groups[category]) {
         groups[category] = [];
@@ -1400,39 +1404,6 @@ export default function RestaurantMenuPage() {
                 </span>
                 <Languages className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500" />
               </button>
-
-              {showLanguageSelector && (
-                <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-200 z-50 overflow-hidden">
-                  <div className="py-2">
-                    {AVAILABLE_LANGUAGES.map((lang) => (
-                      <button
-                        key={lang.code}
-                        onClick={() => handleLanguageChange(lang.code)}
-                        className={`w-full flex items-center gap-3 px-4 py-2 hover:bg-orange-50 transition-colors ${
-                          selectedLanguage === lang.code ? 'bg-orange-100 text-orange-700' : 'text-gray-700'
-                        }`}
-                      >
-                        <span className="text-lg">{lang.flag}</span>
-                        <span className="font-medium">{lang.name}</span>
-                        {selectedLanguage === lang.code && (
-                          <CheckCircle className="w-4 h-4 ml-auto text-orange-500" />
-                        )}
-                      </button>
-                    ))}
-                    {/* Enterprise upgrade message for non-enterprise plans */}
-                    {!isEnterprise && (
-                      <div className="px-4 py-3 bg-gray-50 border-t border-gray-200">
-                        <p className="text-xs text-gray-500">
-                          🌟 Need more languages?
-                        </p>
-                        <p className="text-xs text-indigo-600 font-medium mt-1">
-                          Upgrade to Enterprise
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -1536,6 +1507,49 @@ export default function RestaurantMenuPage() {
           </>
         )}
       </div>
+
+      {/* Language Selector Overlay - Fixed position to avoid z-index/stacking issues on mobile */}
+      {showLanguageSelector && (
+        <div className="fixed inset-0 z-[60]" onClick={() => setShowLanguageSelector(false)}>
+          <div className="absolute inset-0 bg-black/30" />
+          <div
+            className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-2xl overflow-hidden transition-transform"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mt-3" />
+            <div className="px-4 pt-3 pb-2">
+              <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <Globe className="w-5 h-5 text-gray-500" />
+                Language
+              </h3>
+            </div>
+            <div className="pb-6">
+              {AVAILABLE_LANGUAGES.map((lang) => (
+                <button
+                  key={lang.code}
+                  onClick={() => handleLanguageChange(lang.code)}
+                  className={`w-full flex items-center gap-3 px-5 py-3.5 active:bg-orange-50 transition-colors ${
+                    selectedLanguage === lang.code ? 'bg-orange-50 text-orange-700' : 'text-gray-700'
+                  }`}
+                >
+                  <span className="text-2xl">{lang.flag}</span>
+                  <span className="font-medium text-base">{lang.name}</span>
+                  {selectedLanguage === lang.code && (
+                    <CheckCircle className="w-5 h-5 ml-auto text-orange-500" />
+                  )}
+                </button>
+              ))}
+              {!isEnterprise && (
+                <div className="px-5 py-3 bg-gray-50 border-t border-gray-200 mt-2">
+                  <p className="text-xs text-gray-500">
+                    Need more languages? <span className="text-indigo-600 font-medium">Upgrade to Enterprise</span>
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Call Waiter Button (Floating) - Only for Dine-in */}
       {serviceOptions.dine_in && (
@@ -2788,5 +2802,6 @@ function EditCartItemModal({
         </div>
       </div>
     </div>
+
   );
 }
