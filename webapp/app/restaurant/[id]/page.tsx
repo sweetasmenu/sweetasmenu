@@ -1265,8 +1265,19 @@ export default function RestaurantMenuPage() {
     });
 
     // Sort categories based on category_order from branding
+    // category_order stores ORIGINAL language names (e.g. "อาหารจานหลัก")
+    // but after translation, groups use translated names (e.g. "Main Dishes")
+    // Build a mapping: original category -> translated category
     const categoryOrder: string[] = branding.category_order || [];
     if (categoryOrder.length > 0) {
+      const originalToTranslated: Record<string, string> = {};
+      originalMenus.forEach((origMenu, idx) => {
+        const translatedMenu = menus[idx];
+        if (origMenu && translatedMenu && origMenu.category && translatedMenu.category) {
+          originalToTranslated[origMenu.category] = translatedMenu.category;
+        }
+      });
+
       const sortedGroups: Record<string, MenuItem[]> = {};
 
       // Always keep Bestseller at the top if it exists
@@ -1274,10 +1285,11 @@ export default function RestaurantMenuPage() {
         sortedGroups['Bestseller'] = groups['Bestseller'];
       }
 
-      // Add categories in the specified order
+      // Add categories in the specified order (map original name to translated name)
       categoryOrder.forEach(cat => {
-        if (groups[cat] && cat !== 'Bestseller') {
-          sortedGroups[cat] = groups[cat];
+        const translatedCat = originalToTranslated[cat] || cat;
+        if (groups[translatedCat] && translatedCat !== 'Bestseller') {
+          sortedGroups[translatedCat] = groups[translatedCat];
         }
       });
 
