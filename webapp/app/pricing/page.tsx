@@ -1,11 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Check, ChefHat, Sparkles, Zap, Crown, ArrowLeft, X, Languages, Wand2, QrCode, Smartphone } from 'lucide-react';
 import { SUBSCRIPTION_PLANS } from '@/lib/subscription/plans';
 
 export default function PricingPage() {
+  const router = useRouter();
   const [interval, setInterval] = useState<'month' | 'year'>('month');
 
   const getIconForPlan = (planId: string) => {
@@ -106,13 +108,13 @@ export default function PricingPage() {
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-red-50">
       {/* Header */}
       <div className="container mx-auto px-4 py-8">
-        <Link
-          href="/"
+        <button
+          onClick={() => router.back()}
           className="inline-flex items-center text-gray-600 hover:text-orange-500 transition-colors mb-8"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Home
-        </Link>
+          Back
+        </button>
 
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent leading-tight pb-2">
