@@ -184,20 +184,35 @@ export default function RestaurantMenuPage() {
 
   // All available languages (Enterprise gets all, others get only Original + English)
   const ALL_LANGUAGES = [
-    { code: 'original', name: 'Original', flag: '📝' },
-    { code: 'en', name: 'English', flag: '🇬🇧' },
-    { code: 'th', name: 'ไทย', flag: '🇹🇭' },
-    { code: 'zh', name: '中文', flag: '🇨🇳' },
-    { code: 'ja', name: '日本語', flag: '🇯🇵' },
-    { code: 'ko', name: '한국어', flag: '🇰🇷' },
-    { code: 'vi', name: 'Tiếng Việt', flag: '🇻🇳' },
-    { code: 'hi', name: 'हिंदी', flag: '🇮🇳' },
-    { code: 'es', name: 'Español', flag: '🇪🇸' },
-    { code: 'fr', name: 'Français', flag: '🇫🇷' },
-    { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
-    { code: 'id', name: 'Bahasa Indonesia', flag: '🇮🇩' },
-    { code: 'ms', name: 'Bahasa Melayu', flag: '🇲🇾' },
+    { code: 'original', name: 'Original', flag: '📝', countryCode: '' },
+    { code: 'en', name: 'English', flag: '🇬🇧', countryCode: 'gb' },
+    { code: 'th', name: 'ไทย', flag: '🇹🇭', countryCode: 'th' },
+    { code: 'zh', name: '中文', flag: '🇨🇳', countryCode: 'cn' },
+    { code: 'ja', name: '日本語', flag: '🇯🇵', countryCode: 'jp' },
+    { code: 'ko', name: '한국어', flag: '🇰🇷', countryCode: 'kr' },
+    { code: 'vi', name: 'Tiếng Việt', flag: '🇻🇳', countryCode: 'vn' },
+    { code: 'hi', name: 'हिंदी', flag: '🇮🇳', countryCode: 'in' },
+    { code: 'es', name: 'Español', flag: '🇪🇸', countryCode: 'es' },
+    { code: 'fr', name: 'Français', flag: '🇫🇷', countryCode: 'fr' },
+    { code: 'de', name: 'Deutsch', flag: '🇩🇪', countryCode: 'de' },
+    { code: 'id', name: 'Bahasa Indonesia', flag: '🇮🇩', countryCode: 'id' },
+    { code: 'ms', name: 'Bahasa Melayu', flag: '🇲🇾', countryCode: 'my' },
   ];
+
+  // Render flag as image (works on Windows) or emoji fallback
+  const FlagIcon = ({ lang, size = 'md' }: { lang: typeof ALL_LANGUAGES[0]; size?: 'sm' | 'md' }) => {
+    const sizeClass = size === 'sm' ? 'w-5 h-4' : 'w-7 h-5';
+    if (!lang.countryCode) return <span className={size === 'sm' ? 'text-base' : 'text-xl'}>{lang.flag}</span>;
+    return (
+      <img
+        src={`https://flagcdn.com/w40/${lang.countryCode}.png`}
+        srcSet={`https://flagcdn.com/w80/${lang.countryCode}.png 2x`}
+        alt={lang.name}
+        className={`${sizeClass} object-cover rounded-sm inline-block`}
+        loading="lazy"
+      />
+    );
+  };
 
   // Enterprise = all languages, others = Original + English only
   const isEnterprise = ['enterprise', 'admin', 'premium'].includes(restaurantPlan);
@@ -1392,9 +1407,10 @@ export default function RestaurantMenuPage() {
                 onClick={() => setShowLanguageSelector(!showLanguageSelector)}
                 className="flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-white rounded-lg shadow-md border border-gray-200 hover:bg-gray-50 transition-colors"
               >
-                <span className="text-base sm:text-lg">
-                  {AVAILABLE_LANGUAGES.find(l => l.code === selectedLanguage)?.flag || '📝'}
-                </span>
+                {(() => {
+                  const currentLang = AVAILABLE_LANGUAGES.find(l => l.code === selectedLanguage);
+                  return currentLang ? <FlagIcon lang={currentLang} size="sm" /> : <span>📝</span>;
+                })()}
                 <span className="text-xs sm:text-sm font-medium text-gray-900">
                   {AVAILABLE_LANGUAGES.find(l => l.code === selectedLanguage)?.name || 'Original'}
                 </span>
@@ -1547,7 +1563,7 @@ export default function RestaurantMenuPage() {
                           : 'border-gray-100 bg-gray-50 hover:border-gray-200'
                       }`}
                     >
-                      <span className="text-xl">{lang.flag}</span>
+                      <FlagIcon lang={lang} />
                       <span className={`font-medium text-sm truncate ${isSelected ? 'text-orange-700' : 'text-gray-700'}`}>
                         {lang.name}
                       </span>
