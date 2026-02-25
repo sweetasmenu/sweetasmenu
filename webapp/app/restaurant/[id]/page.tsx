@@ -598,12 +598,20 @@ export default function RestaurantMenuPage() {
 
     if (targetLang === 'en') {
       // English is already available as nameEn/descriptionEn/categoryEn
-      // Map to use English versions
+      // Build category translation map from items that have categoryEn
+      // so items missing categoryEn can still show English category
+      const categoryEnMap: Record<string, string> = {};
+      originalMenus.forEach(menu => {
+        if (menu.category && menu.categoryEn) {
+          categoryEnMap[menu.category] = menu.categoryEn;
+        }
+      });
+
       const englishMenus = originalMenus.map(menu => ({
         ...menu,
         name: menu.nameEn || menu.name,
         description: menu.descriptionEn || menu.description,
-        category: menu.categoryEn || menu.category,
+        category: menu.categoryEn || categoryEnMap[menu.category] || menu.category,
         meats: menu.meats?.map(meat => ({
           ...meat,
           name: meat.nameEn || meat.name,

@@ -31,7 +31,7 @@ import {
 import RestaurantSelector from '@/components/RestaurantSelector';
 import ImageGallery from '@/components/ImageGallery';
 import ProtectedImage from '@/components/ProtectedImage';
-import { generateFoodImage, enhanceImage, applyLogoOnly } from '@/lib/api-client';
+import { generateFoodImage, enhanceImage, applyLogoOnly, translateText as translateTextAPI, detectLanguage } from '@/lib/api-client';
 import { createClient } from '@/lib/supabase/client';
 
 interface MenuItem {
@@ -76,6 +76,7 @@ export default function MenusPage() {
     descriptionEn: '',
     price: '',
     category: '',
+    categoryEn: '',
     photo_url: '',
     meats: [] as Array<{name: string; nameEn?: string; price: string; is_available?: boolean}>,
     addOns: [] as Array<{name: string; nameEn?: string; price: string; is_available?: boolean}>,
@@ -478,6 +479,7 @@ export default function MenusPage() {
       descriptionEn: menu.descriptionEn || '',
       price: menu.price || '',
       category: menu.category || '',
+      categoryEn: menu.categoryEn || '',
       photo_url: imageUrl,
       meats: (menu as any).meats || [],
       addOns: (menu as any).addOns || [],
@@ -671,9 +673,25 @@ export default function MenusPage() {
         setUploadingImage(false);
       }
 
-      // Debug: Log the request data
+      // Auto-translate category to English if missing
+      let categoryEn = editForm.categoryEn;
+      if (editForm.category && !categoryEn) {
+        try {
+          const sourceLang = detectLanguage(editForm.category);
+          if (sourceLang !== 'English') {
+            categoryEn = await translateTextAPI(editForm.category, sourceLang, 'English');
+          } else {
+            categoryEn = editForm.category;
+          }
+        } catch (err) {
+          console.error('Category auto-translate failed:', err);
+          categoryEn = editForm.category; // fallback to original
+        }
+      }
+
       const requestData = {
         ...editForm,
+        categoryEn,
         photo_url: imageUrl,
         restaurant_id: editing.restaurant_id || 'default',
         meats: editForm.meats,
@@ -1201,11 +1219,25 @@ export default function MenusPage() {
                   <input
                     type="text"
                     value={editForm.category}
-                    onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
+                    onChange={(e) => setEditForm({ ...editForm, category: e.target.value, categoryEn: '' })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                     placeholder="Main Course"
                   />
                 </div>
+              </div>
+              {/* Category English */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Category (English)
+                  <span className="text-xs text-gray-400 ml-1">Auto-translated if empty</span>
+                </label>
+                <input
+                  type="text"
+                  value={editForm.categoryEn}
+                  onChange={(e) => setEditForm({ ...editForm, categoryEn: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  placeholder="Auto-translate on save"
+                />
               </div>
 
               {/* Best Seller Checkbox */}
