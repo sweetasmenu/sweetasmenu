@@ -1508,48 +1508,82 @@ export default function RestaurantMenuPage() {
         )}
       </div>
 
-      {/* Language Selector Overlay - Fixed position to avoid z-index/stacking issues on mobile */}
+      {/* Language Selector Bottom Sheet */}
       {showLanguageSelector && (
-        <div className="fixed inset-0 z-[60]" onClick={() => setShowLanguageSelector(false)}>
-          <div className="absolute inset-0 bg-black/30" />
+        <div className="fixed inset-0 z-[60] flex items-end justify-center" onClick={() => setShowLanguageSelector(false)}>
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
           <div
-            className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-2xl overflow-hidden transition-transform"
+            className="relative w-full max-w-lg bg-white rounded-t-3xl shadow-2xl overflow-hidden"
+            style={{ animation: 'lang-sheet-up 0.3s cubic-bezier(0.32,0.72,0,1)' }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mt-3" />
-            <div className="px-4 pt-3 pb-2">
-              <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                <Globe className="w-5 h-5 text-gray-500" />
-                Language
-              </h3>
+            {/* Drag Handle */}
+            <div className="flex justify-center pt-3 pb-1">
+              <div className="w-10 h-1 bg-gray-300 rounded-full" />
             </div>
-            <div className="pb-6">
-              {AVAILABLE_LANGUAGES.map((lang) => (
-                <button
-                  key={lang.code}
-                  onClick={() => handleLanguageChange(lang.code)}
-                  className={`w-full flex items-center gap-3 px-5 py-3.5 active:bg-orange-50 transition-colors ${
-                    selectedLanguage === lang.code ? 'bg-orange-50 text-orange-700' : 'text-gray-700'
-                  }`}
-                >
-                  <span className="text-2xl">{lang.flag}</span>
-                  <span className="font-medium text-base">{lang.name}</span>
-                  {selectedLanguage === lang.code && (
-                    <CheckCircle className="w-5 h-5 ml-auto text-orange-500" />
-                  )}
-                </button>
-              ))}
+
+            {/* Header */}
+            <div className="px-5 pt-2 pb-3 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <Globe className="w-5 h-5" style={{ color: themeColor }} />
+                Select Language
+              </h3>
+              <button
+                onClick={() => setShowLanguageSelector(false)}
+                className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center"
+              >
+                <X className="w-4 h-4 text-gray-500" />
+              </button>
+            </div>
+
+            {/* Language Grid - scrollable */}
+            <div className="px-4 pb-6 overflow-y-auto" style={{ maxHeight: '55vh' }}>
+              <div className="grid grid-cols-2 gap-2">
+                {AVAILABLE_LANGUAGES.map((lang) => {
+                  const isSelected = selectedLanguage === lang.code;
+                  return (
+                    <button
+                      key={lang.code}
+                      onClick={() => handleLanguageChange(lang.code)}
+                      className={`flex items-center gap-2.5 px-3.5 py-3 rounded-xl border-2 transition-all active:scale-95 ${
+                        isSelected
+                          ? 'border-orange-400 bg-orange-50 shadow-sm'
+                          : 'border-gray-100 bg-gray-50 hover:border-gray-200'
+                      }`}
+                    >
+                      <span className="text-xl">{lang.flag}</span>
+                      <span className={`font-medium text-sm truncate ${isSelected ? 'text-orange-700' : 'text-gray-700'}`}>
+                        {lang.name}
+                      </span>
+                      {isSelected && (
+                        <CheckCircle className="w-4 h-4 ml-auto flex-shrink-0 text-orange-500" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
               {!isEnterprise && (
-                <div className="px-5 py-3 bg-gray-50 border-t border-gray-200 mt-2">
-                  <p className="text-xs text-gray-500">
-                    Need more languages? <span className="text-indigo-600 font-medium">Upgrade to Enterprise</span>
+                <div className="mt-4 px-1 py-2.5 text-center">
+                  <p className="text-xs text-gray-400">
+                    Need more languages? <span className="text-indigo-500 font-medium">Upgrade to Enterprise</span>
                   </p>
                 </div>
               )}
             </div>
+
+            {/* Safe area padding for iPhone home indicator */}
+            <div className="h-[env(safe-area-inset-bottom,0px)]" />
           </div>
         </div>
       )}
+
+      {/* Bottom sheet animation */}
+      <style jsx global>{`
+        @keyframes lang-sheet-up {
+          from { transform: translateY(100%); }
+          to { transform: translateY(0); }
+        }
+      `}</style>
 
       {/* Call Waiter Button (Floating) - Only for Dine-in */}
       {serviceOptions.dine_in && (
