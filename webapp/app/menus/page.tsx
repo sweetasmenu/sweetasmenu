@@ -1039,7 +1039,7 @@ export default function MenusPage() {
                       className="flex-1 inline-flex items-center justify-center px-3 sm:px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-xs sm:text-sm font-semibold transition-colors"
                     >
                       <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                      View
+                      View on menu
                     </Link>
                     {(userRole === 'enterprise' || userRole === 'premium' || userRole === 'admin') && userRestaurants.length > 1 && (
                       <button
