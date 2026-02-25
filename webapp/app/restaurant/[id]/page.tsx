@@ -1222,18 +1222,15 @@ export default function RestaurantMenuPage() {
     const groups: Record<string, MenuItem[]> = {};
 
     // Add Bestseller category first if there are bestsellers
-    const bestSellerMenuIds = new Set<string>();
     if (bestSellers.length > 0) {
       // Convert bestSellers to MenuItem format with full details from menus
       const bestSellerItems = bestSellers.map(bs => {
         // Find full menu item details from menus array
         const fullMenu = menus.find(m => m.menu_id === bs.menu_id);
         if (fullMenu) {
-          bestSellerMenuIds.add(fullMenu.menu_id);
           return { ...fullMenu, is_best_seller: true };
         }
         // Fallback to bestseller data if not found in menus
-        bestSellerMenuIds.add(bs.menu_id);
         return {
           ...bs,
           is_best_seller: true,
@@ -1243,9 +1240,8 @@ export default function RestaurantMenuPage() {
       groups['Bestseller'] = bestSellerItems;
     }
 
-    // Add other categories (exclude items already in Bestseller to avoid duplicates)
+    // Add ALL menus to their original categories (bestseller items stay in both)
     menus.forEach(menu => {
-      if (bestSellerMenuIds.has(menu.menu_id)) return;
       const category = menu.category || 'Other';
       if (!groups[category]) {
         groups[category] = [];
