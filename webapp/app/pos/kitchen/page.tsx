@@ -645,7 +645,7 @@ export default function KitchenDisplayPage() {
         <div class="items">
           ${order.items.map(item => `
             <div class="item">
-              <span class="item-qty">${item.quantity}x</span> ${item.name}
+              <span class="item-qty">${item.quantity}x</span> ${item.name}${item.nameEn && item.nameEn !== item.name ? ` <span style="color:#94a3b8;font-size:0.85em">(${item.nameEn})</span>` : ''}
               ${item.selectedMeat ? `<div class="modifier">+ ${item.selectedMeat}</div>` : ''}
               ${item.selectedAddOns?.length ? `<div class="modifier">+ ${item.selectedAddOns.join(', ')}</div>` : ''}
               ${item.notes ? `<div class="modifier">"${item.notes}"</div>` : ''}
@@ -920,7 +920,12 @@ export default function KitchenDisplayPage() {
                           <span className={`w-6 h-6 md:w-7 md:h-7 ${themeClasses.bgPrimary} rounded-full flex items-center justify-center text-xs md:text-sm font-bold shrink-0`}>
                             {item.quantity}
                           </span>
-                          <span className="font-medium text-sm md:text-base">{item.name}</span>
+                          <span className="font-medium text-sm md:text-base">
+                            {item.name}
+                            {item.nameEn && item.nameEn !== item.name && (
+                              <span className="text-slate-400 text-xs font-normal ml-1">({item.nameEn})</span>
+                            )}
+                          </span>
                         </div>
                         {item.selectedMeat && (
                           <p className="text-xs md:text-sm text-slate-400 ml-7 md:ml-9">• {item.selectedMeat}</p>

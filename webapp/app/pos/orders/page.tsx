@@ -1041,7 +1041,7 @@ export default function StaffOrdersPage() {
         <div class="items">
           ${order.items.map(item => `
             <div class="item">
-              <span class="item-qty">${item.quantity}x</span> ${item.name}
+              <span class="item-qty">${item.quantity}x</span> ${item.name}${item.nameEn && item.nameEn !== item.name ? ` <span style="color:#666;font-size:0.85em">(${item.nameEn})</span>` : ''}
               ${item.selectedMeat ? `<div class="modifier">+ ${item.selectedMeat}</div>` : ''}
               ${item.selectedAddOns?.length ? `<div class="modifier">+ ${item.selectedAddOns.join(', ')}</div>` : ''}
               ${item.notes ? `<div class="modifier">"${item.notes}"</div>` : ''}
@@ -1345,7 +1345,12 @@ export default function StaffOrdersPage() {
                           <span className="w-7 h-7 bg-slate-700 rounded flex items-center justify-center text-sm md:text-base font-semibold">
                             {item.quantity}
                           </span>
-                          <span className="flex-1 text-sm md:text-base">{item.name}</span>
+                          <span className="flex-1 text-sm md:text-base">
+                            {item.name}
+                            {item.nameEn && item.nameEn !== item.name && (
+                              <span className="text-slate-400 text-xs ml-1">({item.nameEn})</span>
+                            )}
+                          </span>
                         </div>
                         {item.notes && (
                           <p className="text-xs text-yellow-500 ml-8 mt-1">

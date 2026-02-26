@@ -67,6 +67,7 @@ interface OrderDetail {
   created_at: string;
   items: Array<{
     name: string;
+    nameEn?: string;
     quantity: number;
     price: number;
   }>;
@@ -817,7 +818,12 @@ export default function CashierDashboardPage() {
                       <div className="bg-slate-800 rounded p-2 mb-2">
                         {order.items.map((item, idx) => (
                           <div key={idx} className="flex justify-between text-sm py-1">
-                            <span>{item.quantity}x {item.name}</span>
+                            <span>
+                              {item.quantity}x {item.name}
+                              {item.nameEn && item.nameEn !== item.name && (
+                                <span className="text-slate-400 text-xs ml-1">({item.nameEn})</span>
+                              )}
+                            </span>
                             <span className="text-slate-400">${(item.price * item.quantity).toFixed(2)}</span>
                           </div>
                         ))}
