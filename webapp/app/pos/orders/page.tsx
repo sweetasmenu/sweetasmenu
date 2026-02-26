@@ -338,9 +338,9 @@ export default function StaffOrdersPage() {
     }
   }, [primaryLanguage, translatedTexts]);
 
-  // Auto-translate order notes, instructions, and service request messages
+  // Auto-translate order notes, instructions, item names, and service request messages
   useEffect(() => {
-    // Translate order notes and instructions
+    // Translate order notes, instructions, and item names
     orders.forEach(order => {
       if (order.special_instructions) {
         const key = `order_${order.id}_instructions`;
@@ -353,6 +353,13 @@ export default function StaffOrdersPage() {
           const key = `order_${order.id}_item_${idx}_notes`;
           if (!translatedTexts[key]) {
             translateText(item.notes, key);
+          }
+        }
+        // Translate item name to primary language
+        if (item.name) {
+          const nameKey = `item_name_${item.menu_id || `${order.id}_${idx}`}`;
+          if (!translatedTexts[nameKey]) {
+            translateText(item.name, nameKey);
           }
         }
       });
@@ -1041,7 +1048,7 @@ export default function StaffOrdersPage() {
         <div class="items">
           ${order.items.map(item => `
             <div class="item">
-              <span class="item-qty">${item.quantity}x</span> ${item.name}${item.nameEn && item.nameEn !== item.name ? ` <span style="color:#666;font-size:0.85em">(${item.nameEn})</span>` : ''}
+              <span class="item-qty">${item.quantity}x</span> ${translatedTexts[`item_name_${item.menu_id || ''}`] || item.name}${item.nameEn ? ` <span style="color:#666;font-size:0.85em">(${item.nameEn})</span>` : ''}
               ${item.selectedMeat ? `<div class="modifier">+ ${item.selectedMeat}</div>` : ''}
               ${item.selectedAddOns?.length ? `<div class="modifier">+ ${item.selectedAddOns.join(', ')}</div>` : ''}
               ${item.notes ? `<div class="modifier">"${item.notes}"</div>` : ''}
@@ -1346,8 +1353,8 @@ export default function StaffOrdersPage() {
                             {item.quantity}
                           </span>
                           <span className="flex-1 text-sm md:text-base">
-                            {item.name}
-                            {item.nameEn && item.nameEn !== item.name && (
+                            {translatedTexts[`item_name_${item.menu_id || `${order.id}_${idx}`}`] || item.name}
+                            {item.nameEn && (
                               <span className="text-slate-400 text-xs ml-1">({item.nameEn})</span>
                             )}
                           </span>
@@ -1667,7 +1674,7 @@ export default function StaffOrdersPage() {
                 {printPreviewOrder.items.map((item, idx) => (
                   <div key={idx} className="mb-2">
                     <div className="flex justify-between">
-                      <span>{item.quantity}x {item.nameEn || item.name}</span>
+                      <span>{item.quantity}x {translatedTexts[`item_name_${item.menu_id || ''}`] || item.name}{item.nameEn ? ` (${item.nameEn})` : ''}</span>
                       <span>${(item.price * item.quantity).toFixed(2)}</span>
                     </div>
                     {item.selectedMeat && (

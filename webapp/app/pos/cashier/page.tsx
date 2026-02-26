@@ -98,6 +98,8 @@ export default function CashierDashboardPage() {
 
   // Language state
   const [lang, setLang] = useState<POSLanguage>('th');
+  const [primaryLanguage, setPrimaryLanguage] = useState<string>('th');
+  const [translatedTexts, setTranslatedTexts] = useState<Record<string, string>>({});
 
   // Theme state - load from localStorage first for instant display
   const [posTheme, setPosTheme] = useState<POSTheme>(() => {
@@ -135,6 +137,7 @@ export default function CashierDashboardPage() {
         .single();
 
       if (data?.primary_language) {
+        setPrimaryLanguage(data.primary_language);
         const posLang = mapToPOSLanguage(data.primary_language);
         setLang(posLang);
       }
@@ -153,6 +156,40 @@ export default function CashierDashboardPage() {
       console.error('Failed to fetch restaurant settings:', error);
     }
   }, [session?.restaurantId]);
+
+  // Translate text to restaurant's primary language
+  const translateText = useCallback(async (text: string, cacheKey: string) => {
+    if (!text || translatedTexts[cacheKey]) return;
+    try {
+      const response = await fetch(`${API_URL}/api/translate/batch`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ texts: [text], source_lang: 'auto', target_lang: primaryLanguage }),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (data.translations && data.translations[0]) {
+          setTranslatedTexts(prev => ({ ...prev, [cacheKey]: data.translations[0] }));
+        }
+      }
+    } catch (error) {
+      console.error('Translation failed:', error);
+    }
+  }, [primaryLanguage, translatedTexts]);
+
+  // Auto-translate item names when order details change
+  useEffect(() => {
+    orderDetails.forEach(order => {
+      order.items.forEach((item, idx) => {
+        if (item.name) {
+          const nameKey = `item_name_${order.id}_${idx}`;
+          if (!translatedTexts[nameKey]) {
+            translateText(item.name, nameKey);
+          }
+        }
+      });
+    });
+  }, [orderDetails, translateText, translatedTexts]);
 
   // Plan access denied state
   const [planDenied, setPlanDenied] = useState(false);
@@ -819,8 +856,8 @@ export default function CashierDashboardPage() {
                         {order.items.map((item, idx) => (
                           <div key={idx} className="flex justify-between text-sm py-1">
                             <span>
-                              {item.quantity}x {item.name}
-                              {item.nameEn && item.nameEn !== item.name && (
+                              {item.quantity}x {translatedTexts[`item_name_${order.id}_${idx}`] || item.name}
+                              {item.nameEn && (
                                 <span className="text-slate-400 text-xs ml-1">({item.nameEn})</span>
                               )}
                             </span>

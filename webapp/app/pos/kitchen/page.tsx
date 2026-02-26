@@ -288,7 +288,7 @@ export default function KitchenDisplayPage() {
     }
   }, [primaryLanguage, translatedTexts]);
 
-  // Auto-translate order notes and instructions when orders change
+  // Auto-translate order notes, instructions, and item names when orders change
   useEffect(() => {
     orders.forEach(order => {
       if (order.special_instructions) {
@@ -302,6 +302,13 @@ export default function KitchenDisplayPage() {
           const key = `order_${order.id}_item_${idx}_notes`;
           if (!translatedTexts[key]) {
             translateText(item.notes, key);
+          }
+        }
+        // Translate item name to primary language
+        if (item.name) {
+          const nameKey = `item_name_${item.menu_id || `${order.id}_${idx}`}`;
+          if (!translatedTexts[nameKey]) {
+            translateText(item.name, nameKey);
           }
         }
       });
@@ -645,7 +652,7 @@ export default function KitchenDisplayPage() {
         <div class="items">
           ${order.items.map(item => `
             <div class="item">
-              <span class="item-qty">${item.quantity}x</span> ${item.name}${item.nameEn && item.nameEn !== item.name ? ` <span style="color:#94a3b8;font-size:0.85em">(${item.nameEn})</span>` : ''}
+              <span class="item-qty">${item.quantity}x</span> ${translatedTexts[`item_name_${item.menu_id || ''}`] || item.name}${item.nameEn ? ` <span style="color:#94a3b8;font-size:0.85em">(${item.nameEn})</span>` : ''}
               ${item.selectedMeat ? `<div class="modifier">+ ${item.selectedMeat}</div>` : ''}
               ${item.selectedAddOns?.length ? `<div class="modifier">+ ${item.selectedAddOns.join(', ')}</div>` : ''}
               ${item.notes ? `<div class="modifier">"${item.notes}"</div>` : ''}
@@ -921,8 +928,8 @@ export default function KitchenDisplayPage() {
                             {item.quantity}
                           </span>
                           <span className="font-medium text-sm md:text-base">
-                            {item.name}
-                            {item.nameEn && item.nameEn !== item.name && (
+                            {translatedTexts[`item_name_${item.menu_id || `${order.id}_${idx}`}`] || item.name}
+                            {item.nameEn && (
                               <span className="text-slate-400 text-xs font-normal ml-1">({item.nameEn})</span>
                             )}
                           </span>
