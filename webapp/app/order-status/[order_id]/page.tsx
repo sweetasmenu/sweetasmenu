@@ -467,7 +467,7 @@ export default function OrderStatusPage() {
           </p>
           
           {/* Estimated Time */}
-          {estimatedTime && order.status !== 'completed' && order.status !== 'cancelled' && (
+          {estimatedTime && order.status !== 'ready' && order.status !== 'completed' && order.status !== 'cancelled' && (
             <div className={`flex items-center justify-center gap-2 mb-4 p-3 rounded-lg ${
               order.estimated_minutes ? 'bg-green-50 border border-green-200' : 'bg-blue-50'
             }`}>
