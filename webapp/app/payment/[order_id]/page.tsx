@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { CreditCard, Building2, Loader2, CheckCircle, AlertCircle, ArrowLeft, QrCode, Upload, Copy, Check, Banknote } from 'lucide-react';
 import Link from 'next/link';
@@ -14,6 +14,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 interface OrderItem {
   id: string;
   name: string;
+  nameEn?: string;
   price: number;
   quantity: number;
 }
@@ -417,6 +418,64 @@ export default function PaymentPage() {
     credit_card_surcharge_rate: 0
   });
 
+  // Translated item names for customer's selected language
+  const [translatedItemNames, setTranslatedItemNames] = useState<Record<string, string>>({});
+
+  // Translate item names to the customer's selected language
+  const translateItemNames = useCallback(async (items: OrderItem[]) => {
+    // English: use nameEn directly, no API call needed
+    if (selectedLanguage === 'en' || selectedLanguage === 'original') return;
+
+    const textsToTranslate: { key: string; text: string }[] = [];
+    items.forEach((item, idx) => {
+      const key = `item_${idx}`;
+      if (item.name && !translatedItemNames[key]) {
+        textsToTranslate.push({ key, text: item.name });
+      }
+    });
+
+    if (textsToTranslate.length === 0) return;
+
+    try {
+      const response = await fetch(`${API_URL}/api/translate/batch`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          texts: textsToTranslate.map(t => t.text),
+          source_lang: 'auto',
+          target_lang: selectedLanguage,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.translations) {
+          const newTranslations: Record<string, string> = {};
+          textsToTranslate.forEach((t, i) => {
+            if (data.translations[i]) {
+              newTranslations[t.key] = data.translations[i];
+            }
+          });
+          setTranslatedItemNames(prev => ({ ...prev, ...newTranslations }));
+        }
+      }
+    } catch (error) {
+      console.error('Translation failed:', error);
+    }
+  }, [selectedLanguage, translatedItemNames]);
+
+  // Get display name for an item based on selected language
+  const getItemDisplayName = (item: OrderItem, idx: number) => {
+    if (selectedLanguage === 'en') {
+      return item.nameEn || item.name;
+    }
+    if (selectedLanguage === 'original') {
+      return item.name;
+    }
+    // Other languages: use translated name, fall back to original
+    return translatedItemNames[`item_${idx}`] || item.name;
+  };
+
   // Calculate surcharge amount (only applies to card payments)
   const getSurchargeAmount = () => {
     if (selectedMethod !== 'card' || !surchargeSettings.credit_card_surcharge_enabled) {
@@ -433,6 +492,13 @@ export default function PaymentPage() {
     if (!order) return 0;
     return order.total_price + getSurchargeAmount();
   };
+
+  // Translate item names when order is loaded
+  useEffect(() => {
+    if (order?.items) {
+      translateItemNames(order.items);
+    }
+  }, [order, translateItemNames]);
 
   // Fetch order and payment settings
   useEffect(() => {
@@ -782,7 +848,7 @@ export default function PaymentPage() {
             {order.items.map((item, idx) => (
               <div key={idx} className="flex justify-between text-sm">
                 <span className="text-gray-800">
-                  {item.quantity}x {item.name}
+                  {item.quantity}x {getItemDisplayName(item, idx)}
                 </span>
                 <span className="font-medium text-gray-900">${(item.price * item.quantity).toFixed(2)}</span>
               </div>
