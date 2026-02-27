@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import TabBar from "@/components/TabBar";
+import CookieConsentBanner from "@/components/CookieConsentBanner";
 
 export const metadata: Metadata = {
   title: "SweetAsMenu - AI-Powered Digital Menus for NZ Restaurants",
@@ -32,6 +33,7 @@ export default function RootLayout({
         <div>
           {children}
         </div>
+        <CookieConsentBanner />
       </body>
     </html>
   );
