@@ -278,6 +278,15 @@ export default function RestaurantQRCodePage() {
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
       (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
+    // iOS/iPadOS: open tab SYNCHRONOUSLY (before any async work) to avoid Safari popup blocker
+    let newTab: Window | null = null;
+    if (isIOS) {
+      newTab = window.open('about:blank');
+      if (newTab) {
+        newTab.document.write('<html><head><title>Generating sticker...</title></head><body style="margin:0;display:flex;justify-content:center;align-items:center;min-height:100vh;background:#f3f4f6;font-family:system-ui;color:#666;"><p>Generating sticker...</p></body></html>');
+      }
+    }
+
     try {
       let dataUrl: string;
 
@@ -301,12 +310,13 @@ export default function RestaurantQRCodePage() {
       const fileName = `${restaurantName}-qr-sticker.png`;
 
       if (isIOS) {
-        // iOS/iPadOS: open image in new tab — user long-presses to "Save Image"
-        const newTab = window.open();
+        // iOS/iPadOS: write image to the already-opened tab
         if (newTab) {
-          newTab.document.write(`<html><head><title>${fileName}</title><style>body{margin:0;display:flex;justify-content:center;align-items:center;min-height:100vh;background:#f3f4f6;}img{max-width:100%;height:auto;}</style></head><body><img src="${dataUrl}" alt="QR Sticker"/></body></html>`);
+          newTab.document.open();
+          newTab.document.write(`<html><head><title>${fileName}</title><style>body{margin:0;display:flex;justify-content:center;align-items:center;min-height:100vh;background:#f3f4f6;}img{max-width:100%;height:auto;}</style></head><body><img src="${dataUrl}" alt="QR Sticker"/><p style="position:fixed;bottom:20px;left:0;right:0;text-align:center;font-family:system-ui;color:#666;font-size:14px;">Long press the image to save</p></body></html>`);
           newTab.document.close();
         } else {
+          // Fallback: navigate current page to image
           window.location.href = dataUrl;
         }
       } else {
@@ -320,6 +330,7 @@ export default function RestaurantQRCodePage() {
       }
     } catch (err) {
       console.error('Failed to download QR sticker:', err);
+      if (newTab) newTab.close();
       alert('Failed to download sticker. Please try again.');
     } finally {
       setDownloading(false);
