@@ -10,8 +10,9 @@ import confetti from 'canvas-confetti';
 function CheckoutSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const sessionId = searchParams.get('session_id');
-  const paymentMethod = searchParams.get('method'); // 'bank_transfer' or null (stripe)
+  const paymentMethod = searchParams.get('method'); // 'bank_transfer' or null (open banking)
+  const planIdParam = searchParams.get('plan');
+  const intervalParam = searchParams.get('interval');
 
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
@@ -38,7 +39,6 @@ function CheckoutSuccessContent() {
           setIsBankTransfer(true);
           setLoading(false);
 
-          // Trigger confetti celebration! 🎉
           confetti({
             particleCount: 100,
             spread: 70,
@@ -48,42 +48,58 @@ function CheckoutSuccessContent() {
           return;
         }
 
-        // Handle Stripe session verification
-        if (sessionId) {
-          // Verify payment with backend
+        // Handle BlinkPay consent verification
+        const consentId = localStorage.getItem('pending_consent_id');
+        const planId = planIdParam || localStorage.getItem('pending_plan_id') || 'pro';
+        const interval = intervalParam || localStorage.getItem('pending_interval') || 'monthly';
+
+        if (consentId) {
           const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-          const response = await fetch(`${API_URL}/api/stripe/verify-session`, {
+          const response = await fetch(`${API_URL}/api/billing/verify`, {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              session_id: sessionId,
+              consent_id: consentId,
               user_id: session.user.id,
+              plan_id: planId,
+              interval: interval,
             }),
           });
 
           if (response.ok) {
             const data = await response.json();
-            setSubscription(data.subscription);
 
-            // Save selected plan to localStorage
-            if (data.subscription?.plan_id) {
-              localStorage.setItem('selected_plan', data.subscription.plan_id);
-              localStorage.setItem('selected_interval', data.subscription.interval || 'monthly');
+            if (data.success) {
+              setSubscription({
+                plan_name: planId === 'basic' ? 'Starter' : planId === 'enterprise' ? 'Enterprise' : 'Professional',
+                interval: interval,
+                plan_id: planId,
+              });
+
+              // Save selected plan to localStorage
+              localStorage.setItem('selected_plan', planId);
+              localStorage.setItem('selected_interval', interval);
+
+              // Clean up pending data
+              localStorage.removeItem('pending_consent_id');
+              localStorage.removeItem('pending_plan_id');
+              localStorage.removeItem('pending_interval');
+
+              confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#f97316', '#ef4444', '#ec4899'],
+              });
+            } else {
+              setError(data.message || 'Payment consent not yet authorised. Please try again.');
             }
-
-            // Trigger confetti celebration! 🎉
-            confetti({
-              particleCount: 100,
-              spread: 70,
-              origin: { y: 0.6 },
-              colors: ['#f97316', '#ef4444', '#ec4899'],
-            });
           } else {
             const errorData = await response.json();
             setError(errorData.detail || 'Failed to verify payment');
           }
+        } else {
+          setError('No payment session found. Please try again from the pricing page.');
         }
 
         setLoading(false);
@@ -95,7 +111,7 @@ function CheckoutSuccessContent() {
     };
 
     verifyPayment();
-  }, [sessionId, paymentMethod]);
+  }, [paymentMethod, planIdParam, intervalParam]);
 
   if (loading) {
     return (
@@ -230,7 +246,7 @@ function CheckoutSuccessContent() {
     );
   }
 
-  // Stripe Success UI
+  // Open Banking Success UI
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 py-12 px-4">
       <div className="max-w-3xl mx-auto">
@@ -252,7 +268,7 @@ function CheckoutSuccessContent() {
           {/* Subscription Details */}
           {subscription && (
             <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-xl p-6 mb-8">
-              <div className="grid md:grid-cols-3 gap-4 text-center">
+              <div className="grid md:grid-cols-2 gap-4 text-center">
                 <div>
                   <p className="text-sm text-gray-600 mb-1">Plan</p>
                   <p className="font-bold text-gray-900">{subscription.plan_name}</p>
@@ -263,10 +279,6 @@ function CheckoutSuccessContent() {
                     {subscription.interval === 'yearly' ? 'Annual' : 'Monthly'}
                   </p>
                 </div>
-                <div>
-                  <p className="text-sm text-gray-600 mb-1">Amount</p>
-                  <p className="font-bold text-gray-900">${subscription.amount} NZD</p>
-                </div>
               </div>
             </div>
           )}
@@ -274,7 +286,7 @@ function CheckoutSuccessContent() {
           {/* Email Confirmation */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">
             <p className="text-sm text-blue-800">
-              📧 A confirmation email has been sent to{' '}
+              A confirmation email has been sent to{' '}
               <span className="font-semibold">{user?.email}</span>
             </p>
           </div>
@@ -350,21 +362,11 @@ function CheckoutSuccessContent() {
             </a>
           </p>
           <div className="flex items-center justify-center space-x-4 text-sm text-gray-500">
-            <span>📧 Email Support</span>
-            <span>•</span>
-            <span>📚 Knowledge Base</span>
+            <span>Email Support</span>
+            <span>-</span>
+            <span>Knowledge Base</span>
           </div>
         </div>
-
-        {/* Download Invoice (Optional) */}
-        {subscription && (
-          <div className="mt-6 text-center">
-            <button className="inline-flex items-center text-gray-600 hover:text-gray-900 transition-colors">
-              <Download className="w-4 h-4 mr-2" />
-              Download Invoice
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );

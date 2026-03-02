@@ -91,30 +91,22 @@ export async function updateUserProfile(
 }
 
 /**
- * Create Stripe Customer Portal session
+ * Cancel BlinkPay subscription
  */
-export async function createPortalSession(
-  userId: string,
-  customerId: string,
-  returnUrl?: string
-): Promise<string> {
-  const response = await fetch(`${BACKEND_URL}/api/billing/create-portal-session`, {
+export async function cancelSubscription(userId: string): Promise<{ success: boolean }> {
+  const response = await fetch(`${BACKEND_URL}/api/billing/cancel`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      user_id: userId,
-      customer_id: customerId,
-      return_url: returnUrl,
-    }),
+    body: JSON.stringify({ user_id: userId }),
   });
 
   const data = await response.json();
 
   if (!response.ok || !data.success) {
-    throw new Error(data.detail?.message || data.message || 'Failed to create portal session');
+    throw new Error(data.detail?.message || data.message || 'Failed to cancel subscription');
   }
 
-  return data.portal_url;
+  return data;
 }
 
 /**

@@ -88,8 +88,8 @@ interface Subscription {
   next_billing_date: string | null;
   cancel_at_period_end: boolean;
   role?: string; // User role from some API responses
-  stripe_customer_id?: string | null;
-  stripe_subscription_id?: string | null;
+  blinkpay_consent_id?: string | null;
+  billing_provider?: string | null;
   payment_method?: PaymentMethodInfo | null;
 }
 
@@ -1289,45 +1289,31 @@ function SettingsContent() {
     }
   };
 
-  const handleManageBilling = async () => {
+  const handleCancelSubscription = async () => {
     try {
-      // Get user_id from Supabase auth
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         alert('Please login first');
         return;
       }
-      const userId = session.user.id;
 
-      // Get stripe_customer_id from profile subscription data
-      const customerId = profile?.subscription?.stripe_customer_id;
-
-      if (!customerId) {
-        // If no Stripe customer yet, redirect to pricing page to subscribe
-        alert('No active subscription found. Please subscribe to manage billing.');
-        window.location.href = '/pricing';
-        return;
-      }
-
-      const response = await fetch(`${BACKEND_URL}/api/billing/create-portal-session`, {
+      const response = await fetch(`${BACKEND_URL}/api/billing/cancel`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          user_id: userId,
-          customer_id: customerId,
-        }),
+        body: JSON.stringify({ user_id: session.user.id }),
       });
 
       const data = await response.json();
 
-      if (data.success && data.portal_url) {
-        window.location.href = data.portal_url;
+      if (data.success) {
+        alert('Your subscription has been cancelled. You can re-subscribe anytime from the Pricing page.');
+        window.location.reload();
       } else {
-        alert(data.detail || 'Failed to create portal session. Please try again.');
+        alert(data.detail || 'Failed to cancel subscription. Please try again.');
       }
     } catch (error) {
-      console.error('Failed to create portal session:', error);
-      alert('Failed to open billing portal. Please try again.');
+      console.error('Failed to cancel subscription:', error);
+      alert('Failed to cancel subscription. Please try again.');
     }
   };
 
@@ -3715,57 +3701,46 @@ function SettingsContent() {
 
             {/* Action Buttons */}
             <div className="pt-6 border-t border-gray-200 space-y-4">
-              {/* Show "Manage Subscription" if status is active AND plan is not free */}
+              {/* Upgrade button - show when free/cancelled */}
+              {(profile.subscription.plan?.toLowerCase() === 'free' ||
+                profile.subscription.status === 'canceled' ||
+                profile.subscription.status === 'cancelled') && (
+                <a
+                  href="/pricing"
+                  className="w-full px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 font-medium flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg"
+                >
+                  <ArrowUpRight className="w-5 h-5" />
+                  Upgrade Plan
+                </a>
+              )}
+
+              {/* Change plan button - show when active paid */}
               {profile.subscription.status === 'active' &&
-               profile.subscription.plan?.toLowerCase() !== 'free' &&
-               profile.subscription.stripe_customer_id ? (
-                <button
-                  onClick={handleManageBilling}
+               profile.subscription.plan?.toLowerCase() !== 'free' && (
+                <a
+                  href="/pricing"
                   className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium flex items-center justify-center gap-2 transition-colors"
                 >
                   <CreditCard className="w-5 h-5" />
-                  Manage Subscription
-                </button>
-              ) : (
-                /* Show "Upgrade to Pro" if plan is free OR status is canceled */
-                (profile.subscription.plan?.toLowerCase() === 'free' ||
-                 profile.subscription.status === 'canceled' ||
-                 !profile.subscription.stripe_customer_id) && (
-                  <a
-                    href="/pricing"
-                    className="w-full px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 font-medium flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg"
-                  >
-                    <ArrowUpRight className="w-5 h-5" />
-                    Upgrade Plan
-                  </a>
-                )
+                  Change Plan
+                </a>
               )}
 
-              {/* Unsubscribe Button - only show for active paid subscriptions */}
+              {/* Cancel subscription button - only for active paid */}
               {profile.subscription.status === 'active' &&
                profile.subscription.plan?.toLowerCase() !== 'free' &&
-               profile.subscription.is_subscribed &&
-               !profile.subscription.cancel_at_period_end && (
+               profile.subscription.is_subscribed && (
                 <button
                   onClick={() => {
-                    if (confirm('Are you sure you want to cancel your subscription? You will continue to have access until the end of your current billing period.')) {
-                      handleManageBilling();
+                    if (confirm('Are you sure you want to cancel your subscription? Your access will continue until the end of your current billing period.')) {
+                      handleCancelSubscription();
                     }
                   }}
                   className="w-full px-6 py-3 bg-white text-red-600 border-2 border-red-200 rounded-lg hover:bg-red-50 font-medium flex items-center justify-center gap-2 transition-colors"
                 >
                   <X className="w-5 h-5" />
-                  Unsubscribe Plan
+                  Cancel Subscription
                 </button>
-              )}
-
-              {/* Additional info for Stripe Customer Portal */}
-              {profile.subscription.status === 'active' &&
-               profile.subscription.plan?.toLowerCase() !== 'free' &&
-               profile.subscription.stripe_customer_id && (
-                <p className="text-xs text-gray-500 text-center">
-                  Manage your payment methods, view invoices, and cancel subscription via Stripe Customer Portal
-                </p>
               )}
             </div>
           </div>
