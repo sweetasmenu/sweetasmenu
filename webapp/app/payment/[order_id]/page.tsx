@@ -47,7 +47,7 @@ interface PaymentSettings {
   accept_card: boolean;
   accept_bank_transfer: boolean;
   accept_qr_code?: boolean;  // Show QR code for bank transfer
-  accept_cash_at_counter?: boolean;  // Pay at cashier for dine-in
+  accept_pay_at_cashier?: boolean;  // Pay at cashier for dine-in and pickup
   bank_accounts: BankAccount[];
 }
 
@@ -947,8 +947,8 @@ export default function PaymentPage() {
               </button>
             )}
 
-            {/* Pay at Cashier - Only for Dine-in orders */}
-            {order.service_type === 'dine_in' && (
+            {/* Pay at Cashier - For Dine-in and Pickup orders */}
+            {(order.service_type === 'dine_in' || order.service_type === 'pickup') && paymentSettings?.accept_pay_at_cashier && (
               <button
                 onClick={() => setSelectedMethod('cash_at_cashier')}
                 className={`w-full p-4 rounded-lg border-2 text-left transition-all flex items-center gap-4 ${

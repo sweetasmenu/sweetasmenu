@@ -260,6 +260,7 @@ class UpdatePaymentSettingsRequest(BaseModel):
     accept_card: Optional[bool] = None
     accept_bank_transfer: Optional[bool] = None
     accept_qr_code: Optional[bool] = None
+    accept_pay_at_cashier: Optional[bool] = None
     bank_accounts: Optional[List[BankAccount]] = None
 
 class UpdateStripeKeysRequest(BaseModel):
@@ -2307,11 +2308,14 @@ async def get_payment_settings(restaurant_id: str):
             "accept_card": True,
             "accept_bank_transfer": False,
             "accept_qr_code": True,
+            "accept_pay_at_cashier": True,
             "bank_accounts": []
         })
-        # Ensure accept_qr_code has a default value for existing restaurants
+        # Ensure defaults for existing restaurants
         if "accept_qr_code" not in payment_settings:
             payment_settings["accept_qr_code"] = True
+        if "accept_pay_at_cashier" not in payment_settings:
+            payment_settings["accept_pay_at_cashier"] = True
 
         # Include Stripe connection status and publishable key for payment page
         stripe_pub_key = restaurant.get("stripe_publishable_key") or ""
@@ -2352,11 +2356,14 @@ async def update_payment_settings(restaurant_id: str, request: UpdatePaymentSett
             "accept_card": True,
             "accept_bank_transfer": False,
             "accept_qr_code": True,
+            "accept_pay_at_cashier": True,
             "bank_accounts": []
         })
-        # Ensure accept_qr_code has a default value
+        # Ensure defaults for existing restaurants
         if "accept_qr_code" not in current_settings:
             current_settings["accept_qr_code"] = True
+        if "accept_pay_at_cashier" not in current_settings:
+            current_settings["accept_pay_at_cashier"] = True
 
         # Update only provided fields
         if request.accept_card is not None:
@@ -2365,6 +2372,8 @@ async def update_payment_settings(restaurant_id: str, request: UpdatePaymentSett
             current_settings["accept_bank_transfer"] = request.accept_bank_transfer
         if request.accept_qr_code is not None:
             current_settings["accept_qr_code"] = request.accept_qr_code
+        if request.accept_pay_at_cashier is not None:
+            current_settings["accept_pay_at_cashier"] = request.accept_pay_at_cashier
         if request.bank_accounts is not None:
             current_settings["bank_accounts"] = [acc.dict() for acc in request.bank_accounts]
 
@@ -3959,7 +3968,7 @@ async def update_order_estimated_time(order_id: str, request: UpdateEstimatedTim
 
 
 # ============================================================
-# Pay at Cashier API (for Dine-in orders)
+# Pay at Cashier API (for Dine-in and Pickup orders)
 # ============================================================
 
 class PayAtCashierRequest(BaseModel):
@@ -3986,9 +3995,9 @@ async def pay_at_cashier(order_id: str, request: PayAtCashierRequest):
         if not order:
             raise HTTPException(status_code=404, detail="Order not found")
 
-        # Verify it's a dine-in order
-        if order.get("service_type") != "dine_in":
-            raise HTTPException(status_code=400, detail="Pay at cashier is only available for dine-in orders")
+        # Verify it's a dine-in or pickup order
+        if order.get("service_type") not in ("dine_in", "pickup"):
+            raise HTTPException(status_code=400, detail="Pay at cashier is only available for dine-in and pickup orders")
 
         # Update order with payment method - status stays awaiting cashier payment
         # Order will NOT go to kitchen until staff confirms payment

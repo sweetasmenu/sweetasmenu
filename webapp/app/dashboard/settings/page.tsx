@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Shield, Users, Utensils, Truck, Store, Plus, Trash2, Edit2, Save, X, Loader2, Globe, ExternalLink, MapPin, Navigation, CreditCard, Building2, QrCode, Key, Eye, EyeOff, CheckCircle, AlertCircle, ArrowUpRight, Printer, Clock, Calendar, XCircle } from 'lucide-react';
+import { Shield, Users, Utensils, Truck, Store, Plus, Trash2, Edit2, Save, X, Loader2, Globe, ExternalLink, MapPin, Navigation, CreditCard, Building2, QrCode, Key, Eye, EyeOff, CheckCircle, AlertCircle, ArrowUpRight, Printer, Clock, Calendar, XCircle, Banknote } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { printViaIframe } from '@/lib/utils/printHelper';
 
@@ -22,6 +22,7 @@ interface PaymentSettings {
   accept_card: boolean;
   accept_bank_transfer: boolean;
   accept_qr_code: boolean;
+  accept_pay_at_cashier: boolean;
   bank_accounts: BankAccount[];
 }
 
@@ -250,6 +251,7 @@ function SettingsContent() {
     accept_card: true,
     accept_bank_transfer: false,
     accept_qr_code: true,
+    accept_pay_at_cashier: true,
     bank_accounts: []
   });
   const [savingPayment, setSavingPayment] = useState(false);
@@ -3336,6 +3338,33 @@ function SettingsContent() {
               <p className="text-xs text-gray-500 mt-2 ml-12 sm:ml-14">
                 Note: QR Code feature may not be available in all regions. Disable if not supported in your area.
               </p>
+            </div>
+
+            {/* Pay at Cashier */}
+            <div className="border border-gray-200 rounded-lg p-3 sm:p-4 mb-4">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Banknote className="w-5 h-5 text-orange-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900">Pay at Cashier</h3>
+                    <p className="text-sm text-gray-600">Allow customers to pay at the cashier for dine-in and pickup orders</p>
+                  </div>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
+                  <input
+                    type="checkbox"
+                    checked={paymentSettings.accept_pay_at_cashier}
+                    onChange={(e) => setPaymentSettings({
+                      ...paymentSettings,
+                      accept_pay_at_cashier: e.target.checked
+                    })}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-400 border-2 border-gray-500 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-600 peer-checked:border-orange-600"></div>
+                </label>
+              </div>
             </div>
 
             {/* Credit Card Surcharge */}
