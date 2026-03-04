@@ -151,7 +151,7 @@ export default function GridView({ menus, groupedMenus, themeColor, onItemClick,
 
   return (
     <div className="space-y-8 sm:space-y-12">
-      {Object.entries(groupedMenus).map(([category, items]) => {
+      {Object.entries(groupedMenus).map(([category, items], catIdx) => {
         const isExpanded = expandedCategories.has(category);
         const showScrollView = !isExpanded && items.length > 3;
 
@@ -202,7 +202,7 @@ export default function GridView({ menus, groupedMenus, themeColor, onItemClick,
                   className="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-hide pb-4 scroll-smooth"
                   style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                 >
-                  {items.map((menu) => (
+                  {items.map((menu, menuIdx) => (
                     <div
                       key={menu.menu_id}
                       className="flex-shrink-0 w-[280px] sm:w-[300px] md:w-[320px] bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all cursor-pointer transform hover:-translate-y-1"
@@ -216,6 +216,7 @@ export default function GridView({ menus, groupedMenus, themeColor, onItemClick,
                             alt={menu.nameEn || menu.name}
                             className="w-full h-full object-cover"
                             containerClassName="w-full h-full"
+                            priority={catIdx === 0 && menuIdx < 4}
                           />
                         ) : (
                           <div
@@ -279,7 +280,7 @@ export default function GridView({ menus, groupedMenus, themeColor, onItemClick,
             ) : (
               /* Grid View - When expanded or <= 3 items */
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                {items.map((menu) => (
+                {items.map((menu, menuIdx) => (
                   <div
                     key={menu.menu_id}
                     className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all cursor-pointer transform hover:-translate-y-1"
@@ -293,6 +294,7 @@ export default function GridView({ menus, groupedMenus, themeColor, onItemClick,
                           alt={menu.nameEn || menu.name}
                           className="w-full h-full object-cover"
                           containerClassName="w-full h-full"
+                          priority={catIdx === 0 && menuIdx < 4}
                         />
                       ) : (
                         <div

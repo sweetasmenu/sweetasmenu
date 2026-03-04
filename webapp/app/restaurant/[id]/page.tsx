@@ -313,104 +313,75 @@ export default function RestaurantMenuPage() {
         if (data.restaurant?.id) {
           setRestaurantId(data.restaurant.id);
 
-          // Fetch restaurant location for delivery calculation
-          try {
-            const locationResponse = await fetch(`${API_URL}/api/restaurant/${data.restaurant.id}/location`);
-            if (locationResponse.ok) {
-              const locationData = await locationResponse.json();
-              if (locationData.success && locationData.location) {
-                setRestaurantLocation({
-                  latitude: locationData.location.latitude,
-                  longitude: locationData.location.longitude
-                });
-              }
-            }
-          } catch (err) {
-            console.log('Could not fetch restaurant location:', err);
+          // Fetch all secondary data in PARALLEL (not sequential)
+          const rid = data.restaurant.id;
+          const [locationResult, surchargeResult, foodSurchargeResult, bestSellersResult] = await Promise.allSettled([
+            fetch(`${API_URL}/api/restaurant/${rid}/location`).then(r => r.ok ? r.json() : null),
+            fetch(`${API_URL}/api/restaurant/${rid}/surcharge-settings`).then(r => r.ok ? r.json() : null),
+            fetch(`${API_URL}/api/restaurant/${rid}/food-surcharge-settings`).then(r => r.ok ? r.json() : null),
+            fetch(`${API_URL}/api/best-sellers?restaurant_id=${rid}&days=7&limit=5`).then(r => r.ok ? r.json() : null),
+          ]);
+
+          // Process location
+          const locationData = locationResult.status === 'fulfilled' ? locationResult.value : null;
+          if (locationData?.success && locationData.location) {
+            setRestaurantLocation({
+              latitude: locationData.location.latitude,
+              longitude: locationData.location.longitude
+            });
           }
 
-          // Fetch credit card surcharge settings
-          try {
-            const surchargeResponse = await fetch(`${API_URL}/api/restaurant/${data.restaurant.id}/surcharge-settings`);
-            if (surchargeResponse.ok) {
-              const surchargeData = await surchargeResponse.json();
-              if (surchargeData.success) {
-                setSurchargeSettings({
-                  credit_card_surcharge_enabled: surchargeData.credit_card_surcharge_enabled || false,
-                  credit_card_surcharge_rate: surchargeData.credit_card_surcharge_rate || 2.50
-                });
-              }
-            }
-          } catch (err) {
-            console.log('Could not fetch surcharge settings:', err);
+          // Process surcharge settings
+          const surchargeData = surchargeResult.status === 'fulfilled' ? surchargeResult.value : null;
+          if (surchargeData?.success) {
+            setSurchargeSettings({
+              credit_card_surcharge_enabled: surchargeData.credit_card_surcharge_enabled || false,
+              credit_card_surcharge_rate: surchargeData.credit_card_surcharge_rate || 2.50
+            });
           }
 
-          // Fetch food/holiday surcharge settings
-          try {
-            const foodSurchargeResponse = await fetch(`${API_URL}/api/restaurant/${data.restaurant.id}/food-surcharge-settings`);
-            if (foodSurchargeResponse.ok) {
-              const foodSurchargeData = await foodSurchargeResponse.json();
-              if (foodSurchargeData.success) {
-                setFoodSurchargeSettings({
-                  food_surcharge_enabled: foodSurchargeData.food_surcharge_enabled || false,
-                  food_surcharge_rate: foodSurchargeData.food_surcharge_rate || 10.00,
-                  food_surcharge_name: foodSurchargeData.food_surcharge_name || 'Holiday Surcharge'
-                });
-              }
-            }
-          } catch (err) {
-            console.log('Could not fetch food surcharge settings:', err);
+          // Process food surcharge settings
+          const foodSurchargeData = foodSurchargeResult.status === 'fulfilled' ? foodSurchargeResult.value : null;
+          if (foodSurchargeData?.success) {
+            setFoodSurchargeSettings({
+              food_surcharge_enabled: foodSurchargeData.food_surcharge_enabled || false,
+              food_surcharge_rate: foodSurchargeData.food_surcharge_rate || 10.00,
+              food_surcharge_name: foodSurchargeData.food_surcharge_name || 'Holiday Surcharge'
+            });
           }
-        }
 
-        // Fetch best sellers
-        try {
-          const bestSellersResponse = await fetch(`${API_URL}/api/best-sellers?restaurant_id=${data.restaurant.id}&days=7&limit=5`);
-          if (bestSellersResponse.ok) {
-            const bestSellersData = await bestSellersResponse.json();
-            if (bestSellersData.success) {
-              // Get best seller menu IDs
-              const bestSellerIds = new Set(bestSellersData.best_sellers.map((item: any) => item.menu_id));
-              
-              // Merge best seller flag into menu items
-              const menusWithBestSeller = (data.menu_items || []).map((menu: MenuItem) => ({
-                ...menu,
-                is_best_seller: bestSellerIds.has(menu.menu_id)
-              }));
+          // Process best sellers
+          const bestSellersData = bestSellersResult.status === 'fulfilled' ? bestSellersResult.value : null;
+          if (bestSellersData?.success) {
+            const bestSellerIds = new Set(bestSellersData.best_sellers.map((item: any) => item.menu_id));
+            const menusWithBestSeller = (data.menu_items || []).map((menu: MenuItem) => ({
+              ...menu,
+              is_best_seller: bestSellerIds.has(menu.menu_id)
+            }));
+            setMenus(menusWithBestSeller);
+            setOriginalMenus(menusWithBestSeller);
 
-              setMenus(menusWithBestSeller);
-              setOriginalMenus(menusWithBestSeller); // Keep original for kitchen
-              
-              // Convert best sellers format to MenuItem format
-              const bestSellerItems: MenuItem[] = bestSellersData.best_sellers.map((item: any) => ({
-                menu_id: item.menu_id,
-                name: item.name || '',
-                nameEn: item.nameEn || '',
-                description: '',
-                descriptionEn: '',
-                price: item.price || '0',
-                category: item.category || 'Main Course',
-                photo_url: item.image_url,
-                image_url: item.image_url,
-                meats: [],
-                addOns: [],
-              }));
-              setBestSellers(bestSellerItems);
-            } else {
-              // No best sellers data, just set menus without best seller flag
-              setMenus(data.menu_items || []);
-              setOriginalMenus(data.menu_items || []); // Keep original for kitchen
-            }
+            const bestSellerItems: MenuItem[] = bestSellersData.best_sellers.map((item: any) => ({
+              menu_id: item.menu_id,
+              name: item.name || '',
+              nameEn: item.nameEn || '',
+              description: '',
+              descriptionEn: '',
+              price: item.price || '0',
+              category: item.category || 'Main Course',
+              photo_url: item.image_url,
+              image_url: item.image_url,
+              meats: [],
+              addOns: [],
+            }));
+            setBestSellers(bestSellerItems);
           } else {
-            // Best sellers API failed, just set menus without best seller flag
             setMenus(data.menu_items || []);
-            setOriginalMenus(data.menu_items || []); // Keep original for kitchen
+            setOriginalMenus(data.menu_items || []);
           }
-        } catch (err) {
-          console.error('Failed to fetch best sellers:', err);
-          // Don't fail the whole page if best sellers fail
+        } else {
           setMenus(data.menu_items || []);
-          setOriginalMenus(data.menu_items || []); // Keep original for kitchen
+          setOriginalMenus(data.menu_items || []);
         }
       } else {
         throw new Error('Failed to fetch menus');
@@ -1337,15 +1308,21 @@ export default function RestaurantMenuPage() {
           className="py-8 sm:py-16 px-4 relative"
           style={{
             background: branding.cover_image_url
-              ? `url(${branding.cover_image_url})`
+              ? undefined
               : `linear-gradient(135deg, ${themeColor}ee, ${themeColor}bb)`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
           }}
         >
-          {/* Dark overlay for better text readability on cover image */}
+          {/* Cover image as proper img element for better loading */}
           {branding.cover_image_url && (
-            <div className="absolute inset-0 bg-black/40" />
+            <>
+              <img
+                src={branding.cover_image_url}
+                alt=""
+                className="absolute inset-0 w-full h-full object-cover"
+                fetchPriority="high"
+              />
+              <div className="absolute inset-0 bg-black/40" />
+            </>
           )}
           <div className="max-w-4xl mx-auto text-center relative z-10">
             {/* Restaurant Logo */}
@@ -1356,6 +1333,7 @@ export default function RestaurantMenuPage() {
                   alt={branding.name || 'Restaurant Logo'}
                   className="w-32 h-32 md:w-40 md:h-40 mx-auto rounded-full border-4 border-white shadow-2xl object-cover"
                   containerClassName="w-32 h-32 md:w-40 md:h-40 mx-auto"
+                  priority={true}
                 />
               </div>
             )}
