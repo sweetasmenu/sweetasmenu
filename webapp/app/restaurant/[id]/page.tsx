@@ -1433,7 +1433,7 @@ export default function RestaurantMenuPage() {
                       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }
                   }}
-                  className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap transition-all hover:scale-105"
+                  className="px-4 py-2 sm:px-5 sm:py-2.5 rounded-full text-sm sm:text-base font-semibold whitespace-nowrap transition-all hover:scale-105"
                   style={{
                     backgroundColor: themeColor,
                     color: 'white',
