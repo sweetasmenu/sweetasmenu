@@ -231,7 +231,7 @@ export default function ProtectedImage({
             e.preventDefault();
             e.stopPropagation();
             onClick();
-          } : undefined}}
+          } : undefined}
           onContextMenu={(e) => {
             e.preventDefault();
             e.stopPropagation();
