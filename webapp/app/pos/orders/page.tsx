@@ -554,9 +554,9 @@ export default function StaffOrdersPage() {
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
-          // Order will now be 'confirmed' and sent to kitchen
+          // New flow: order completed. Legacy flow: order sent to kitchen.
           // The real-time subscription will update the order list
-          console.log('✅ Cashier payment confirmed, order sent to kitchen');
+          console.log('✅ Cashier payment confirmed');
           setShowCashierPaymentModal(false);
           setCashierPaymentOrder(null);
         }
@@ -1330,6 +1330,11 @@ export default function StaffOrdersPage() {
                            order.status === 'preparing' ? t('orders', 'preparing', lang) :
                            order.status === 'ready' ? t('orders', 'ready', lang) : order.status}
                         </span>
+                        {['cash_at_cashier', 'cashier_cash', 'cashier_eftpos'].includes(order.payment_method || '') && order.payment_status !== 'paid' && order.status !== 'awaiting_cashier_payment' && (
+                          <span className="px-2 py-1 rounded text-xs font-semibold bg-orange-500/20 text-orange-400 ml-1">
+                            {lang === 'th' ? 'ยังไม่จ่าย' : 'Unpaid'}
+                          </span>
+                        )}
                         {order.customer_name && (
                           <p className="text-sm text-slate-400 mt-1">{order.customer_name}</p>
                         )}
@@ -1463,13 +1468,23 @@ export default function StaffOrdersPage() {
                     )}
                     {/* Served Button - for ready orders */}
                     {order.status === 'ready' && (
-                      <button
-                        onClick={() => updateOrderStatus(order.id, 'completed')}
-                        className="flex-1 py-2 bg-green-500 hover:bg-green-600 rounded-lg font-semibold flex items-center justify-center gap-2"
-                      >
-                        <CheckCircle className="w-5 h-5" />
-                        {t('orders', 'served', lang)}
-                      </button>
+                      ['cash_at_cashier', 'cashier_cash', 'cashier_eftpos'].includes(order.payment_method || '') && order.payment_status !== 'paid' ? (
+                        <button
+                          onClick={() => openCashierPaymentModal(order)}
+                          className="flex-1 py-2 bg-orange-500 hover:bg-orange-600 rounded-lg font-semibold flex items-center justify-center gap-2"
+                        >
+                          <CheckCircle className="w-5 h-5" />
+                          {lang === 'th' ? 'รับเงิน & เสิร์ฟ' : 'Collect Payment'}
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => updateOrderStatus(order.id, 'completed')}
+                          className="flex-1 py-2 bg-green-500 hover:bg-green-600 rounded-lg font-semibold flex items-center justify-center gap-2"
+                        >
+                          <CheckCircle className="w-5 h-5" />
+                          {t('orders', 'served', lang)}
+                        </button>
+                      )
                     )}
                   </div>
                 </div>

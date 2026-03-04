@@ -3977,10 +3977,10 @@ class PayAtCashierRequest(BaseModel):
 @app.post("/api/orders/{order_id}/pay-at-cashier", summary="Request Pay at Cashier")
 async def pay_at_cashier(order_id: str, request: PayAtCashierRequest):
     """
-    ขอจ่ายเงินที่แคชเชียร์สำหรับ Dine-in orders
+    ขอจ่ายเงินที่แคชเชียร์สำหรับ Dine-in และ Pickup orders
 
-    Order จะอยู่ในสถานะ awaiting_cashier_payment รอให้พนักงานยืนยันการชำระเงิน
-    หลังจากพนักงานยืนยันแล้ว order จะถูกส่งไปครัว
+    Order จะเข้าไปใน POS เลย (status: pending) แล้วเข้าครัวตามปกติ
+    หลังจากอาหารเสร็จ พนักงานจะเลือกว่าลูกค้าจ่าย Cash หรือ EFTPOS
 
     Args:
         order_id: Order ID
@@ -3999,12 +3999,12 @@ async def pay_at_cashier(order_id: str, request: PayAtCashierRequest):
         if order.get("service_type") not in ("dine_in", "pickup"):
             raise HTTPException(status_code=400, detail="Pay at cashier is only available for dine-in and pickup orders")
 
-        # Update order with payment method - status stays awaiting cashier payment
-        # Order will NOT go to kitchen until staff confirms payment
+        # Update order - goes directly to POS as pending (same as paid orders)
+        # Food will be prepared first, payment collected after serving
         update_data = {
             "payment_method": request.payment_method,
             "payment_status": "pending",
-            "status": "awaiting_cashier_payment"  # New status - waiting for staff to confirm payment
+            "status": "pending"  # Goes to POS immediately, kitchen after staff confirms
         }
 
         updated_order = orders_service.update_order(order_id, update_data)
@@ -4014,7 +4014,7 @@ async def pay_at_cashier(order_id: str, request: PayAtCashierRequest):
 
         return {
             "success": True,
-            "message": "Please pay at the cashier. Your order will be prepared after payment is confirmed.",
+            "message": "Order received! Your food will be prepared shortly. Please pay at the cashier when ready.",
             "order": updated_order
         }
     except HTTPException:
@@ -4041,8 +4041,9 @@ class ConfirmCashierPaymentRequest(BaseModel):
 @app.post("/api/orders/{order_id}/confirm-cashier-payment", summary="Staff Confirm Cashier Payment")
 async def confirm_cashier_payment(order_id: str, request: ConfirmCashierPaymentRequest = None):
     """
-    พนักงานยืนยันว่าลูกค้าจ่ายเงินที่แคชเชียร์แล้ว
-    Order จะถูกส่งไปครัวและสถานะการจ่ายจะเป็น paid
+    พนักงานยืนยันว่าลูกค้าจ่ายเงินที่แคชเชียร์แล้ว (Cash หรือ EFTPOS)
+    - New flow: order อยู่ที่ ready → จ่ายเงิน → completed
+    - Legacy flow: order อยู่ที่ awaiting_cashier_payment → จ่ายเงิน → confirmed (ส่งครัว)
 
     Args:
         order_id: Order ID
@@ -4057,30 +4058,47 @@ async def confirm_cashier_payment(order_id: str, request: ConfirmCashierPaymentR
         if not order:
             raise HTTPException(status_code=404, detail="Order not found")
 
-        # Verify order is awaiting cashier payment
-        if order.get("status") != "awaiting_cashier_payment":
-            raise HTTPException(status_code=400, detail="Order is not awaiting cashier payment")
+        # Verify order is in a valid state for cashier payment confirmation
+        valid_statuses = ["awaiting_cashier_payment", "pending", "confirmed", "preparing", "ready"]
+        current_status = order.get("status")
+        if current_status not in valid_statuses:
+            raise HTTPException(status_code=400, detail="Order is not in a valid state for cashier payment confirmation")
+
+        # Verify this is a cashier payment order
+        if order.get("payment_method") not in ("cash_at_cashier", "cashier_cash", "cashier_eftpos", None):
+            raise HTTPException(status_code=400, detail="Order is not a cashier payment order")
 
         # Get payment type from request or default to cashier_cash
         payment_type = "cashier_cash"
         if request and request.payment_type in ["cashier_cash", "cashier_eftpos"]:
             payment_type = request.payment_type
 
-        # Update order - now send to kitchen with specific payment type
-        update_data = {
-            "payment_method": payment_type,  # Set to cashier_cash or cashier_eftpos
-            "payment_status": "paid",
-            "status": "confirmed"  # Now send to kitchen
-        }
+        # Legacy flow: awaiting_cashier_payment → confirmed (send to kitchen)
+        if current_status == "awaiting_cashier_payment":
+            update_data = {
+                "payment_method": payment_type,
+                "payment_status": "paid",
+                "status": "confirmed"  # Send to kitchen (legacy flow)
+            }
+        else:
+            # New flow: mark as completed with payment
+            update_data = {
+                "payment_method": payment_type,
+                "payment_status": "paid",
+                "status": "completed",
+                "completed_at": datetime.now().isoformat()
+            }
 
         updated_order = orders_service.update_order(order_id, update_data)
 
         if not updated_order:
             raise HTTPException(status_code=500, detail="Failed to update order")
 
+        message = "Payment confirmed. Order sent to kitchen." if current_status == "awaiting_cashier_payment" else "Payment confirmed. Order completed."
+
         return {
             "success": True,
-            "message": "Payment confirmed. Order sent to kitchen.",
+            "message": message,
             "order": updated_order
         }
     except HTTPException:
@@ -4264,7 +4282,8 @@ async def get_cashier_daily_summary(restaurant_id: str, date: Optional[str] = No
         revenue_by_method = {
             "card": 0,
             "bank_transfer": 0,
-            "cash_at_counter": 0,
+            "cashier_cash": 0,
+            "cashier_eftpos": 0,
             "unpaid": 0
         }
 
@@ -4280,9 +4299,11 @@ async def get_cashier_daily_summary(restaurant_id: str, date: Optional[str] = No
 
             if payment_status == "paid":
                 total_revenue += amount
-                # Map cashier payment types to cash_at_counter bucket
-                if payment_method in ("cashier_cash", "cashier_eftpos", "cash_at_cashier"):
-                    revenue_by_method["cash_at_counter"] += amount
+                # Map cashier payment types to separate buckets
+                if payment_method == "cashier_eftpos":
+                    revenue_by_method["cashier_eftpos"] += amount
+                elif payment_method in ("cashier_cash", "cash_at_cashier", "cash_at_counter"):
+                    revenue_by_method["cashier_cash"] += amount
                 elif payment_method in revenue_by_method:
                     revenue_by_method[payment_method] += amount
                 else:

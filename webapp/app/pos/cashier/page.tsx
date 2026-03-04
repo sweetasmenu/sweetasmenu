@@ -42,10 +42,9 @@ interface DailySummary {
   revenue_by_method: {
     card: number;
     bank_transfer: number;
-    cash_at_counter: number;
-    cash_at_cashier?: number; // Legacy
-    cashier_cash?: number;
-    cashier_eftpos?: number;
+    cashier_cash: number;
+    cashier_eftpos: number;
+    cash_at_counter?: number; // Legacy fallback
     unpaid: number;
   };
   void_reasons: Array<{
@@ -438,7 +437,8 @@ export default function CashierDashboardPage() {
           <table>
             <tr><td>Credit/Debit Card:</td><td class="right">$${summary.revenue_by_method.card.toFixed(2)}</td></tr>
             <tr><td>Bank Transfer:</td><td class="right">$${summary.revenue_by_method.bank_transfer.toFixed(2)}</td></tr>
-            <tr><td>Pay at Cashier:</td><td class="right">$${summary.revenue_by_method.cash_at_counter.toFixed(2)}</td></tr>
+            <tr><td>Cash:</td><td class="right">$${(summary.revenue_by_method.cashier_cash || 0).toFixed(2)}</td></tr>
+            <tr><td>EFTPOS:</td><td class="right">$${(summary.revenue_by_method.cashier_eftpos || 0).toFixed(2)}</td></tr>
             <tr><td>Unpaid:</td><td class="right">$${summary.revenue_by_method.unpaid.toFixed(2)}</td></tr>
           </table>
         </div>
@@ -689,7 +689,7 @@ export default function CashierDashboardPage() {
                 <BilingualText category="cashier" textKey="revenueByPayment" lang={lang} englishClassName="text-xs opacity-60" />
               </h2>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 md:gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-2.5 md:gap-4">
                 <div className="bg-blue-500/20 border border-blue-500/30 rounded-lg p-2.5 md:p-4">
                   <div className="flex items-center gap-1.5 md:gap-2 mb-1 md:mb-2">
                     <CreditCard className="w-4 h-4 md:w-5 md:h-5 text-blue-400 shrink-0" />
@@ -718,11 +718,23 @@ export default function CashierDashboardPage() {
                   <div className="flex items-center gap-1.5 md:gap-2 mb-1 md:mb-2">
                     <Banknote className="w-4 h-4 md:w-5 md:h-5 text-orange-400 shrink-0" />
                     <span className="text-orange-300 text-xs md:text-sm">
-                      <BilingualText category="cashier" textKey="cashAtCounter" lang={lang} englishClassName="text-[10px] opacity-60" />
+                      {lang === 'th' ? <><span>เงินสด</span><br /><span className="text-[10px] opacity-60">Cash</span></> : 'Cash'}
                     </span>
                   </div>
                   <p className="text-lg md:text-2xl font-bold text-orange-400">
-                    ${summary.revenue_by_method.cash_at_counter.toFixed(2)}
+                    ${(summary.revenue_by_method.cashier_cash || 0).toFixed(2)}
+                  </p>
+                </div>
+
+                <div className="bg-purple-500/20 border border-purple-500/30 rounded-lg p-2.5 md:p-4">
+                  <div className="flex items-center gap-1.5 md:gap-2 mb-1 md:mb-2">
+                    <CreditCard className="w-4 h-4 md:w-5 md:h-5 text-purple-400 shrink-0" />
+                    <span className="text-purple-300 text-xs md:text-sm">
+                      EFTPOS
+                    </span>
+                  </div>
+                  <p className="text-lg md:text-2xl font-bold text-purple-400">
+                    ${(summary.revenue_by_method.cashier_eftpos || 0).toFixed(2)}
                   </p>
                 </div>
 
@@ -978,8 +990,12 @@ export default function CashierDashboardPage() {
                     <span>${summary.revenue_by_method.bank_transfer.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span><BilingualTextInline category="cashier" textKey="cashAtCounter" lang={lang} />:</span>
-                    <span>${summary.revenue_by_method.cash_at_counter.toFixed(2)}</span>
+                    <span>{lang === 'th' ? 'เงินสด' : 'Cash'}:</span>
+                    <span>${(summary.revenue_by_method.cashier_cash || 0).toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>EFTPOS:</span>
+                    <span>${(summary.revenue_by_method.cashier_eftpos || 0).toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span><BilingualTextInline category="cashier" textKey="unpaid" lang={lang} />:</span>

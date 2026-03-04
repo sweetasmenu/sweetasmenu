@@ -1050,17 +1050,23 @@ export default function KitchenDisplayPage() {
                     </>
                   )}
                   {order.status === 'ready' && (
-                    <button
-                      onClick={() => updateOrderStatus(order.id, 'completed')}
-                      className="flex-1 py-1.5 md:py-2 bg-slate-600 hover:bg-slate-500 rounded-lg font-semibold transition-colors flex items-center justify-center text-sm md:text-base"
-                    >
-                      <BilingualTextInline
-                        category="kitchen"
-                        textKey="served"
-                        lang={lang}
-                        englishClassName="text-[10px] opacity-80 ml-1"
-                      />
-                    </button>
+                    ['cash_at_cashier', 'cashier_cash', 'cashier_eftpos'].includes(order.payment_method || '') && order.payment_status !== 'paid' ? (
+                      <div className="flex-1 py-1.5 md:py-2 bg-orange-500/20 border border-orange-500/50 rounded-lg font-semibold flex items-center justify-center text-sm md:text-base text-orange-400">
+                        {lang === 'th' ? 'รอรับเงินที่แคชเชียร์' : 'Awaiting Payment'}
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => updateOrderStatus(order.id, 'completed')}
+                        className="flex-1 py-1.5 md:py-2 bg-slate-600 hover:bg-slate-500 rounded-lg font-semibold transition-colors flex items-center justify-center text-sm md:text-base"
+                      >
+                        <BilingualTextInline
+                          category="kitchen"
+                          textKey="served"
+                          lang={lang}
+                          englishClassName="text-[10px] opacity-80 ml-1"
+                        />
+                      </button>
+                    )
                   )}
                 </div>
               </div>
