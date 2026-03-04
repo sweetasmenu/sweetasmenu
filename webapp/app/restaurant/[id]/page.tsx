@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Loader2, Utensils, ShoppingCart, Plus, Minus, X, CheckCircle, MapPin, Clock, Store, Globe, Languages, MessageCircle, Bell, UtensilsCrossed, Droplets, Receipt, HelpCircle, Send, Check, Pencil, ClipboardList, Calendar } from 'lucide-react';
 import ClassicList from './templates/ClassicList';
@@ -85,6 +85,24 @@ export default function RestaurantMenuPage() {
   const [bestSellers, setBestSellers] = useState<MenuItem[]>([]);
   const [branding, setBranding] = useState<any>({});
   const [menuTemplate, setMenuTemplate] = useState<string>('grid'); // 'list', 'grid', 'magazine', 'elegant', 'casual'
+
+  // Category nav bar - JS-based sticky (CSS sticky breaks with overflow-x:hidden on html+body)
+  const categoryNavRef = useRef<HTMLDivElement>(null);
+  const categoryPlaceholderRef = useRef<HTMLDivElement>(null);
+  const [isCategoryFixed, setIsCategoryFixed] = useState(false);
+
+  useEffect(() => {
+    const placeholder = categoryPlaceholderRef.current;
+    if (!placeholder) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsCategoryFixed(!entry.isIntersecting);
+      },
+      { threshold: 0, rootMargin: '0px' }
+    );
+    observer.observe(placeholder);
+    return () => observer.disconnect();
+  }, [loading]);
 
   // Service options from restaurant settings
   const [serviceOptions, setServiceOptions] = useState({
@@ -1420,30 +1438,41 @@ export default function RestaurantMenuPage() {
 
       <div className="container mx-auto px-3 sm:px-4 max-w-6xl mt-4 sm:mt-8">
 
-        {/* Category Navigation Bar */}
+        {/* Category Navigation Bar - JS-based fixed positioning */}
         {Object.keys(groupedMenus).length > 0 && (
-          <div className="sticky top-0 z-30 bg-white shadow-md mb-4 sm:mb-6 -mx-3 sm:-mx-4 px-3 sm:px-4 py-2 sm:py-3 overflow-x-auto">
-            <div className="flex gap-2 min-w-max">
-              {Object.keys(groupedMenus).map((category, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => {
-                    const element = document.getElementById(`category-${category.replace(/\s+/g, '-')}`);
-                    if (element) {
-                      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
-                  }}
-                  className="px-4 py-2 sm:px-5 sm:py-2.5 rounded-full text-sm sm:text-base font-semibold whitespace-nowrap transition-all hover:scale-105"
-                  style={{
-                    backgroundColor: themeColor,
-                    color: 'white',
-                  }}
-                >
-                  {category}
-                </button>
-              ))}
+          <>
+            {/* Placeholder to detect when bar should become fixed */}
+            <div ref={categoryPlaceholderRef} className="h-0" />
+            {/* Spacer when bar is fixed to prevent layout jump */}
+            {isCategoryFixed && <div className="mb-4 sm:mb-6" style={{ height: categoryNavRef.current?.offsetHeight || 48 }} />}
+            <div
+              ref={categoryNavRef}
+              className={`${isCategoryFixed ? 'fixed top-0 left-0 right-0 z-30' : '-mx-3 sm:-mx-4 mb-4 sm:mb-6'} bg-white shadow-md overflow-x-auto`}
+            >
+              <div className={`${isCategoryFixed ? 'max-w-6xl mx-auto px-3 sm:px-4' : ''} py-2 sm:py-3 px-3 sm:px-4`}>
+                <div className="flex gap-2 min-w-max">
+                  {Object.keys(groupedMenus).map((category, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => {
+                        const element = document.getElementById(`category-${category.replace(/\s+/g, '-')}`);
+                        if (element) {
+                          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                      }}
+                      className="px-4 py-2 sm:px-5 sm:py-2.5 rounded-full text-sm sm:text-base font-semibold whitespace-nowrap transition-all hover:scale-105"
+                      style={{
+                        backgroundColor: themeColor,
+                        color: 'white',
+                      }}
+                    >
+                      {category}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
-          </div>
+          </>
         )}
 
         {/* Menu by Category - Using Selected Template */}
