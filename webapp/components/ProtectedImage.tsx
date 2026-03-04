@@ -222,16 +222,16 @@ export default function ProtectedImage({
             WebkitTapHighlightColor: 'transparent',
           }}
           onClick={(e) => {
-            e.stopPropagation();
-            if (onClick) onClick();
-          }}
-          onTouchEnd={(e) => {
-            // Handle tap on mobile
             if (onClick) {
-              e.preventDefault();
+              e.stopPropagation();
               onClick();
             }
           }}
+          onTouchEnd={onClick ? (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onClick();
+          } : undefined}}
           onContextMenu={(e) => {
             e.preventDefault();
             e.stopPropagation();
