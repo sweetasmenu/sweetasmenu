@@ -90,7 +90,7 @@ export default function CookieConsentBanner() {
 
   return (
     <div
-      className="fixed bottom-0 left-0 right-0 z-[9999] animate-slide-up"
+      className="fixed bottom-0 left-0 right-0 z-[9999] pointer-events-none animate-slide-up"
       style={{
         animation: 'cookie-slide-up 0.5s ease-out forwards',
       }}
@@ -102,7 +102,7 @@ export default function CookieConsentBanner() {
         }
       `}</style>
 
-      <div className="bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.1)]">
+      <div className="bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.1)] pointer-events-auto">
         <div className="max-w-5xl mx-auto px-4 py-4 sm:py-5">
           {/* Main Banner */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
