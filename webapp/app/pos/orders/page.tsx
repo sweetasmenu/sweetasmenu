@@ -1462,15 +1462,21 @@ export default function StaffOrdersPage() {
                         {lang === 'th' ? 'ยืนยันออเดอร์' : 'Confirm Order'}
                       </button>
                     )}
-                    {/* Mark Ready Button - for confirmed/preparing orders */}
-                    {(order.status === 'confirmed' || order.status === 'preparing') && (
+                    {/* Preparing Button - for confirmed orders */}
+                    {order.status === 'confirmed' && (
                       <button
-                        onClick={() => updateOrderStatus(order.id, 'ready')}
-                        className="flex-1 py-2 bg-emerald-500 hover:bg-emerald-600 rounded-lg font-semibold flex items-center justify-center gap-2"
+                        onClick={() => updateOrderStatus(order.id, 'preparing')}
+                        className="flex-1 py-2 bg-yellow-500 hover:bg-yellow-600 rounded-lg font-semibold flex items-center justify-center gap-2"
                       >
                         <CheckCircle className="w-5 h-5" />
-                        {lang === 'th' ? 'พร้อมเสิร์ฟ' : 'Mark Ready'}
+                        {lang === 'th' ? 'กำลังทำอาหาร' : 'Preparing'}
                       </button>
+                    )}
+                    {/* Preparing indicator - waiting for kitchen to mark ready */}
+                    {order.status === 'preparing' && (
+                      <div className="flex-1 py-2 bg-yellow-500/20 border border-yellow-500/50 rounded-lg font-semibold flex items-center justify-center gap-2 text-yellow-400">
+                        {lang === 'th' ? 'กำลังทำอาหาร...' : 'Preparing...'}
+                      </div>
                     )}
                     {/* Served Button - for ready orders */}
                     {order.status === 'ready' && (
