@@ -927,7 +927,6 @@ export default function RestaurantMenuPage() {
 
     setCart([...cart, cartItem]);
     setShowItemModal(false);
-    setShowCart(true);
   };
 
   const updateQuantity = (menuId: string, delta: number) => {
