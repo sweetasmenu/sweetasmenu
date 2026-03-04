@@ -1397,10 +1397,10 @@ export default function RestaurantMenuPage() {
           {/* My Orders Link */}
           <button
             onClick={() => router.push('/order-status')}
-            className="flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-white rounded-lg shadow-md border border-gray-200 hover:bg-gray-50 transition-colors"
+            className="flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg shadow-md hover:from-orange-600 hover:to-red-600 transition-all hover:scale-105 hover:shadow-lg"
           >
-            <ClipboardList className="w-4 h-4 text-orange-500" />
-            <span className="text-xs sm:text-sm font-medium text-gray-700">My Orders</span>
+            <ClipboardList className="w-4 h-4 text-white" />
+            <span className="text-xs sm:text-sm font-semibold text-white">My Orders</span>
           </button>
 
           {/* Language Selector */}
