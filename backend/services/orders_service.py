@@ -418,8 +418,11 @@ class OrdersService:
                 update_data["cancel_reason"] = cancel_reason
 
             # Auto-update payment_status when order is completed
+            # Exception: cashier-pay orders keep payment_status pending until staff confirms Cash/EFTPOS
             if status == 'completed':
-                update_data["payment_status"] = "paid"
+                current_payment_method = current_order.get("payment_method", "") if current_order else ""
+                if current_payment_method not in ("cash_at_cashier", "cashier_cash", "cashier_eftpos"):
+                    update_data["payment_status"] = "paid"
                 update_data["completed_at"] = datetime.now().isoformat()
 
             # When confirming a verifying_payment order, mark payment as paid

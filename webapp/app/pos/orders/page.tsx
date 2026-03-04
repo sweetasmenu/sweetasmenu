@@ -240,11 +240,15 @@ export default function StaffOrdersPage() {
       const data = await response.json();
       if (data.success) {
         // Filter out completed/cancelled AND pending_payment orders
-        // Orders should only appear on POS after payment is completed
-        // pending_payment = customer hasn't paid yet (stays in My Orders)
-        setOrders((data.orders || []).filter((o: Order) =>
-          !['completed', 'cancelled', 'pending_payment'].includes(o.status)
-        ));
+        // Exception: keep completed cashier-pay orders that are still unpaid
+        setOrders((data.orders || []).filter((o: Order) => {
+          if (['cancelled', 'pending_payment'].includes(o.status)) return false;
+          if (o.status === 'completed') {
+            // Keep completed but unpaid cashier orders visible
+            return ['cash_at_cashier', 'cashier_cash', 'cashier_eftpos'].includes(o.payment_method || '') && o.payment_status !== 'paid';
+          }
+          return true;
+        }));
       }
     } catch (error) {
       console.error('Failed to fetch orders:', error);
@@ -440,20 +444,20 @@ export default function StaffOrdersPage() {
 
           if (payload.eventType === 'INSERT') {
             const newOrder = payload.new as Order;
-            // Only show orders that have been paid (not pending_payment)
-            // Orders appear on POS only after customer completes payment
-            if (!['completed', 'cancelled', 'pending_payment'].includes(newOrder.status)) {
+            const isCashierUnpaid = ['cash_at_cashier', 'cashier_cash', 'cashier_eftpos'].includes(newOrder.payment_method || '') && newOrder.payment_status !== 'paid';
+            if (!['cancelled', 'pending_payment'].includes(newOrder.status) && (newOrder.status !== 'completed' || isCashierUnpaid)) {
               playNotification('order');
               setOrders((prev) => [newOrder, ...prev]);
             }
           } else if (payload.eventType === 'UPDATE') {
             const newOrder = payload.new as Order;
+            const isCashierUnpaid = ['cash_at_cashier', 'cashier_cash', 'cashier_eftpos'].includes(newOrder.payment_method || '') && newOrder.payment_status !== 'paid';
 
-            // Remove completed/cancelled/pending_payment orders from list
-            if (['completed', 'cancelled', 'pending_payment'].includes(newOrder.status)) {
+            // Remove cancelled/pending_payment, and completed orders (unless cashier unpaid)
+            if (['cancelled', 'pending_payment'].includes(newOrder.status) || (newOrder.status === 'completed' && !isCashierUnpaid)) {
               setOrders((prev) => prev.filter((o) => o.id !== newOrder.id));
             }
-            // Otherwise update existing order or add if new (e.g., payment completed → order appears)
+            // Otherwise update existing order or add if new
             else {
               setOrders((prev) => {
                 const exists = prev.some(o => o.id === newOrder.id);
@@ -1154,6 +1158,7 @@ export default function StaffOrdersPage() {
       case 'confirmed': return 'bg-blue-500';
       case 'preparing': return 'bg-orange-500';
       case 'ready': return 'bg-green-500';
+      case 'completed': return 'bg-green-600';
       default: return 'bg-gray-500';
     }
   };
@@ -1328,7 +1333,8 @@ export default function StaffOrdersPage() {
                            order.status === 'pending' ? t('orders', 'pending', lang) :
                            order.status === 'confirmed' ? t('orders', 'confirmed', lang) :
                            order.status === 'preparing' ? t('orders', 'preparing', lang) :
-                           order.status === 'ready' ? t('orders', 'ready', lang) : order.status}
+                           order.status === 'ready' ? t('orders', 'ready', lang) :
+                           order.status === 'completed' ? (lang === 'th' ? 'เสิร์ฟแล้ว' : 'Served') : order.status}
                         </span>
                         {['cash_at_cashier', 'cashier_cash', 'cashier_eftpos'].includes(order.payment_method || '') && order.payment_status !== 'paid' && order.status !== 'awaiting_cashier_payment' && (
                           <span className="px-2 py-1 rounded text-xs font-semibold bg-orange-500/20 text-orange-400 ml-1">
@@ -1468,23 +1474,23 @@ export default function StaffOrdersPage() {
                     )}
                     {/* Served Button - for ready orders */}
                     {order.status === 'ready' && (
-                      ['cash_at_cashier', 'cashier_cash', 'cashier_eftpos'].includes(order.payment_method || '') && order.payment_status !== 'paid' ? (
-                        <button
-                          onClick={() => openCashierPaymentModal(order)}
-                          className="flex-1 py-2 bg-orange-500 hover:bg-orange-600 rounded-lg font-semibold flex items-center justify-center gap-2"
-                        >
-                          <CheckCircle className="w-5 h-5" />
-                          {lang === 'th' ? 'รับเงิน & เสิร์ฟ' : 'Collect Payment'}
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => updateOrderStatus(order.id, 'completed')}
-                          className="flex-1 py-2 bg-green-500 hover:bg-green-600 rounded-lg font-semibold flex items-center justify-center gap-2"
-                        >
-                          <CheckCircle className="w-5 h-5" />
-                          {t('orders', 'served', lang)}
-                        </button>
-                      )
+                      <button
+                        onClick={() => updateOrderStatus(order.id, 'completed')}
+                        className="flex-1 py-2 bg-green-500 hover:bg-green-600 rounded-lg font-semibold flex items-center justify-center gap-2"
+                      >
+                        <CheckCircle className="w-5 h-5" />
+                        {t('orders', 'served', lang)}
+                      </button>
+                    )}
+                    {/* Awaiting Payment Button - for completed but unpaid cashier orders */}
+                    {order.status === 'completed' && ['cash_at_cashier', 'cashier_cash', 'cashier_eftpos'].includes(order.payment_method || '') && order.payment_status !== 'paid' && (
+                      <button
+                        onClick={() => openCashierPaymentModal(order)}
+                        className="flex-1 py-2 bg-orange-500 hover:bg-orange-600 rounded-lg font-semibold flex items-center justify-center gap-2 animate-pulse"
+                      >
+                        <CheckCircle className="w-5 h-5" />
+                        {lang === 'th' ? 'รอจ่ายเงิน' : 'Awaiting Payment'}
+                      </button>
                     )}
                   </div>
                 </div>

@@ -4059,7 +4059,7 @@ async def confirm_cashier_payment(order_id: str, request: ConfirmCashierPaymentR
             raise HTTPException(status_code=404, detail="Order not found")
 
         # Verify order is in a valid state for cashier payment confirmation
-        valid_statuses = ["awaiting_cashier_payment", "pending", "confirmed", "preparing", "ready"]
+        valid_statuses = ["awaiting_cashier_payment", "pending", "confirmed", "preparing", "ready", "completed"]
         current_status = order.get("status")
         if current_status not in valid_statuses:
             raise HTTPException(status_code=400, detail="Order is not in a valid state for cashier payment confirmation")
