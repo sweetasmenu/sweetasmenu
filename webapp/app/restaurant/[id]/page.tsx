@@ -2439,21 +2439,21 @@ function ItemModal({
         onClick={(e) => e.stopPropagation()}
         style={{ overscrollBehavior: 'contain', touchAction: 'pan-y' }}
       >
-        <div className="p-4 md:p-6 pt-6">
+        <div className="p-3 sm:p-4 md:p-6 pt-4 sm:pt-6">
           {/* Header */}
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold text-gray-900">
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 line-clamp-2 pr-2">
               {menu.name}
             </h2>
-            <button onClick={onClose} className="text-gray-500 hover:text-gray-900">
+            <button onClick={onClose} className="text-gray-500 hover:text-gray-900 flex-shrink-0">
               <X className="w-6 h-6" />
             </button>
           </div>
 
           {/* Photo - Clickable for Preview (Protected from right-click save) */}
           {menu.photo_url && (
-            <div className="mb-4">
-              <div className="w-full h-64 rounded-xl overflow-hidden bg-gray-100 hover:opacity-90 transition-opacity">
+            <div className="mb-3 sm:mb-4">
+              <div className="w-full h-44 sm:h-56 md:h-64 rounded-xl overflow-hidden bg-gray-100 hover:opacity-90 transition-opacity">
                 <ProtectedImage
                   src={menu.photo_url}
                   alt={menu.name}
@@ -2469,24 +2469,24 @@ function ItemModal({
 
           {/* Description */}
           {menu.description && (
-            <p className="text-gray-600 mb-6">
+            <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">
               {menu.description}
             </p>
           )}
 
           {/* Meats Selection - Required when meats exist */}
           {menu.meats && menu.meats.filter(m => m.is_available !== false).length > 0 && (
-            <div className="mb-6">
-              <h3 className="font-semibold text-gray-900 mb-3">
+            <div className="mb-4 sm:mb-6">
+              <h3 className="font-semibold text-gray-900 mb-2 sm:mb-3 text-sm sm:text-base">
                 Choose Meat: <span className="text-red-500">*</span>
               </h3>
-              <div className="space-y-2">
+              <div className="space-y-1.5 sm:space-y-2">
                 {menu.meats.filter(m => m.is_available !== false).map((meat, idx) => {
                   const displayName = meat.nameEn || meat.name;
                   return (
                     <label
                       key={idx}
-                      className="flex items-center justify-between p-3 border-2 rounded-lg cursor-pointer hover:bg-gray-50"
+                      className="flex items-center justify-between p-2.5 sm:p-3 border-2 rounded-lg cursor-pointer hover:bg-gray-50"
                       style={{
                         borderColor: selectedMeat === displayName ? themeColor : '#e5e7eb',
                         backgroundColor: selectedMeat === displayName ? `${themeColor}15` : 'white'
@@ -2522,15 +2522,15 @@ function ItemModal({
 
           {/* Add-ons Selection */}
           {menu.addOns && menu.addOns.filter(a => a.is_available !== false).length > 0 && (
-            <div className="mb-6">
-              <h3 className="font-semibold text-gray-900 mb-3">Add-ons (Optional):</h3>
-              <div className="space-y-2">
+            <div className="mb-4 sm:mb-6">
+              <h3 className="font-semibold text-gray-900 mb-2 sm:mb-3 text-sm sm:text-base">Add-ons (Optional):</h3>
+              <div className="space-y-1.5 sm:space-y-2">
                 {menu.addOns.filter(a => a.is_available !== false).map((addon, idx) => {
                   const displayName = addon.nameEn || addon.name;
                   return (
                     <label
                       key={idx}
-                      className="flex items-center justify-between p-3 border-2 rounded-lg cursor-pointer hover:bg-gray-50"
+                      className="flex items-center justify-between p-2.5 sm:p-3 border-2 rounded-lg cursor-pointer hover:bg-gray-50"
                       style={{
                         borderColor: selectedAddOns.includes(displayName) ? themeColor : '#e5e7eb',
                         backgroundColor: selectedAddOns.includes(displayName) ? `${themeColor}15` : 'white'
@@ -2564,44 +2564,44 @@ function ItemModal({
           )}
 
           {/* Quantity */}
-          <div className="mb-6">
-            <h3 className="font-semibold text-gray-900 mb-3">Quantity:</h3>
-            <div className="flex items-center gap-4">
+          <div className="mb-4 sm:mb-6">
+            <h3 className="font-semibold text-gray-900 mb-2 sm:mb-3 text-sm sm:text-base">Quantity:</h3>
+            <div className="flex items-center gap-3 sm:gap-4">
               <button
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                className="w-10 h-10 rounded-full text-white flex items-center justify-center transition-all hover:opacity-80"
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full text-white flex items-center justify-center transition-all hover:opacity-80"
                 style={{ backgroundColor: themeColor }}
               >
-                <Minus className="w-5 h-5" />
+                <Minus className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
-              <span className="text-xl font-bold text-gray-900">{quantity}</span>
+              <span className="text-lg sm:text-xl font-bold text-gray-900">{quantity}</span>
               <button
                 onClick={() => setQuantity(quantity + 1)}
-                className="w-10 h-10 rounded-full text-white flex items-center justify-center transition-all hover:opacity-80"
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full text-white flex items-center justify-center transition-all hover:opacity-80"
                 style={{ backgroundColor: themeColor }}
               >
-                <Plus className="w-5 h-5" />
+                <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             </div>
           </div>
 
           {/* Notes */}
-          <div className="mb-6">
-            <h3 className="font-semibold text-gray-900 mb-3">Special Instructions (Optional):</h3>
+          <div className="mb-4 sm:mb-6">
+            <h3 className="font-semibold text-gray-900 mb-2 sm:mb-3 text-sm sm:text-base">Special Instructions (Optional):</h3>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="E.g., No spicy, Extra sauce..."
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-gray-900 bg-white"
-              rows={3}
+              className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-gray-900 bg-white text-sm sm:text-base"
+              rows={2}
             />
           </div>
 
-          {/* Price and Add Button */}
-          <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+          {/* Price and Add Button - sticky bottom on mobile */}
+          <div className="flex items-center justify-between pt-3 sm:pt-4 border-t border-gray-200 pb-2 sm:pb-0">
             <div>
-              <p className="text-sm text-gray-600">Total Price:</p>
-              <p className="text-3xl font-bold text-orange-500">
+              <p className="text-xs sm:text-sm text-gray-600">Total Price:</p>
+              <p className="text-2xl sm:text-3xl font-bold text-orange-500">
                 ${calculatePrice().toFixed(2)} NZD
               </p>
             </div>
@@ -2616,7 +2616,7 @@ function ItemModal({
                 handleAddToCart();
               }}
               disabled={menu.meats && menu.meats.filter(m => m.is_available !== false).length > 0 && !selectedMeat}
-              className={`px-8 py-3 text-white rounded-lg font-bold text-lg transition-opacity flex items-center gap-2 ${
+              className={`px-5 py-2.5 sm:px-8 sm:py-3 text-white rounded-lg font-bold text-base sm:text-lg transition-opacity flex items-center gap-2 ${
                 menu.meats && menu.meats.filter(m => m.is_available !== false).length > 0 && !selectedMeat ? 'opacity-50 cursor-not-allowed' : ''
               }`}
               style={{ backgroundColor: themeColor }}
