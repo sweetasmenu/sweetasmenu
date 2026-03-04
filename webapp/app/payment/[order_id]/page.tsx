@@ -409,9 +409,6 @@ export default function PaymentPage() {
   // Surcharge confirmation popup
   const [showSurchargeConfirm, setShowSurchargeConfirm] = useState(false);
 
-  // Pay at Cashier confirmation popup
-  const [showPayAtCashierConfirm, setShowPayAtCashierConfirm] = useState(false);
-
   // Surcharge settings for card payments
   const [surchargeSettings, setSurchargeSettings] = useState({
     credit_card_surcharge_enabled: false,
@@ -1012,31 +1009,23 @@ export default function PaymentPage() {
                 <Banknote className="w-8 h-8 text-orange-600" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-2">Pay at Cashier</h3>
-              <p className="text-gray-800">
-                Please pay at the cashier first. Your order will start being prepared after payment is received.
-              </p>
             </div>
 
             <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-orange-800">Table Number</span>
-                <span className="font-bold text-orange-900">{order.table_no || '-'}</span>
-              </div>
+              {order.table_no && (
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-orange-800">Table Number</span>
+                  <span className="font-bold text-orange-900">{order.table_no}</span>
+                </div>
+              )}
               <div className="flex justify-between items-center">
                 <span className="text-orange-800">Amount to Pay</span>
                 <span className="text-2xl font-bold text-orange-600">${order.total_price.toFixed(2)} NZD</span>
               </div>
             </div>
 
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-              <p className="text-sm text-yellow-800">
-                <strong>Note:</strong> Please show your table number to the cashier when paying.
-                You can pay with cash or card at the cashier.
-              </p>
-            </div>
-
             <button
-              onClick={() => setShowPayAtCashierConfirm(true)}
+              onClick={() => handlePayAtCashier()}
               disabled={processingCashPayment}
               className="w-full py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg font-bold text-lg hover:from-orange-600 hover:to-orange-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
@@ -1122,63 +1111,6 @@ export default function PaymentPage() {
         </div>
       )}
 
-      {/* Pay at Cashier Confirmation Modal */}
-      {showPayAtCashierConfirm && order && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl">
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Banknote className="w-8 h-8 text-orange-600" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Important Notice</h3>
-            </div>
-
-            <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 mb-6">
-              <p className="text-orange-800 font-medium text-center leading-relaxed">
-                Please pay at the cashier first.<br />
-                Your order will start being prepared after payment is received.
-              </p>
-            </div>
-
-            <div className="bg-gray-50 rounded-xl p-4 mb-6">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-gray-800">Table Number</span>
-                <span className="font-bold text-gray-900">{order.table_no || '-'}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-gray-800">Amount to Pay</span>
-                <span className="text-xl font-bold text-orange-600">${order.total_price.toFixed(2)} NZD</span>
-              </div>
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                onClick={() => {
-                  setShowPayAtCashierConfirm(false);
-                  setSelectedMethod(null);
-                }}
-                className="flex-1 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
-              >
-                Change Payment
-              </button>
-              <button
-                onClick={() => {
-                  setShowPayAtCashierConfirm(false);
-                  handlePayAtCashier();
-                }}
-                disabled={processingCashPayment}
-                className="flex-1 py-3 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                {processingCashPayment ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
-                  'OK, I Understand'
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
