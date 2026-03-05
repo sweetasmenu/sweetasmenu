@@ -3,7 +3,7 @@ Smart Menu SaaS - Full AI Backend
 รวมทุก AI features: Translation, Image Enhancement, Generation
 """
 
-from fastapi import FastAPI, HTTPException, UploadFile, File, Form
+from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional, Dict, Any, List
@@ -3620,41 +3620,50 @@ async def check_user_profiles_table(user_id: str):
 # ============================================================
 
 @app.get("/api/public/menu/{restaurant_id}", summary="Get Public Menu with Branding")
-async def get_public_menu(restaurant_id: str):
+async def get_public_menu(restaurant_id: str, response: Response):
     """
-    ดึงเมนูสาธารณะพร้อมข้อมูล branding (logo, theme_color, cover_image)
-    สำหรับหน้าเมนูลูกค้า
-    
+    ดึงเมนูสาธารณะพร้อมข้อมูล branding, location, surcharges, bestsellers
+    (Consolidated endpoint - ลดจาก 5 API calls เหลือ 1 call)
+
     Args:
         restaurant_id: Restaurant ID หรือ slug (ไม่รองรับ "default")
-        
+
     Returns:
-        Dictionary with menu items and restaurant branding
+        Dictionary with menu items, restaurant branding, location, surcharges, bestsellers
     """
     try:
         # Handle "default" case - return helpful error
         if restaurant_id == "default":
             raise HTTPException(
-                status_code=400, 
+                status_code=400,
                 detail="Invalid restaurant_id: 'default' is not allowed for public menu. Please use a valid restaurant ID or slug."
             )
-        
+
         # Get restaurant info (supports both UUID and slug)
         restaurant = restaurant_service.get_restaurant_by_id_or_slug(restaurant_id)
-        
+
         if not restaurant:
             raise HTTPException(
-                status_code=404, 
+                status_code=404,
                 detail=f"Restaurant not found: '{restaurant_id}'. Please check the restaurant ID or slug."
             )
-        
+
+        rid = restaurant.get("id")
+
         # Get menu items
         try:
-            menu_items = menu_service.get_menu_items(restaurant.get("id"))
+            menu_items = menu_service.get_menu_items(rid)
         except Exception as e:
             print(f"❌ Get public menu items error: {str(e)}")
             menu_items = []
-        
+
+        # Get bestsellers (non-blocking - gracefully handle failure)
+        best_sellers_data = []
+        try:
+            best_sellers_data = best_sellers_service.get_best_sellers(rid, days=7, limit=5)
+        except Exception as e:
+            print(f"⚠️ Get bestsellers error (non-fatal): {str(e)}")
+
         # Get restaurant owner's plan for branding restrictions
         owner_user_id = restaurant.get("user_id")
         owner_plan = "free_trial"  # Default
@@ -3672,10 +3681,10 @@ async def get_public_menu(restaurant_id: str):
             "cover_image_url": restaurant.get("cover_image_url"),
             "name": restaurant.get("name"),
             "menu_template": restaurant.get("menu_template", "grid"),
-            "hide_powered_by": is_enterprise,  # Only Enterprise can hide "Powered by Smart Menu"
-            "primary_language": restaurant.get("primary_language", "en"),  # Default to English for NZ
-            "category_order": restaurant.get("category_order") or [],  # Category display order
-            "operating_hours": restaurant.get("operating_hours"),  # Operating hours for store open/close status
+            "hide_powered_by": is_enterprise,
+            "primary_language": restaurant.get("primary_language", "en"),
+            "category_order": restaurant.get("category_order") or [],
+            "operating_hours": restaurant.get("operating_hours"),
         }
 
         # Get service options (default all enabled)
@@ -3688,10 +3697,33 @@ async def get_public_menu(restaurant_id: str):
         # Get delivery rates
         delivery_rates = restaurant.get("delivery_rates") or []
 
+        # Location data (previously separate API call)
+        location = {
+            "latitude": restaurant.get("latitude"),
+            "longitude": restaurant.get("longitude"),
+            "address": restaurant.get("address"),
+        }
+
+        # Surcharge settings (previously separate API call)
+        surcharge_settings = {
+            "credit_card_surcharge_enabled": restaurant.get("credit_card_surcharge_enabled", False),
+            "credit_card_surcharge_rate": float(restaurant.get("credit_card_surcharge_rate", 2.50) or 2.50),
+        }
+
+        # Food surcharge settings (previously separate API call)
+        food_surcharge_settings = {
+            "food_surcharge_enabled": restaurant.get("food_surcharge_enabled", False),
+            "food_surcharge_rate": float(restaurant.get("food_surcharge_rate", 10.0) or 10.0),
+            "food_surcharge_name": restaurant.get("food_surcharge_name", "Holiday Surcharge") or "Holiday Surcharge",
+        }
+
+        # Cache-Control: allow Vercel edge + browser to cache for 60s, serve stale for 5min while revalidating
+        response.headers["Cache-Control"] = "public, s-maxage=60, stale-while-revalidate=300"
+
         return {
             "success": True,
             "restaurant": {
-                "id": restaurant.get("id"),
+                "id": rid,
                 "name": restaurant.get("name"),
                 "slug": restaurant.get("slug"),
                 "description": restaurant.get("description"),
@@ -3701,10 +3733,15 @@ async def get_public_menu(restaurant_id: str):
             },
             "branding": branding,
             "service_options": service_options,
-            "delivery_rates": delivery_rates,  # Delivery fee tiers
-            "plan": owner_plan,  # For language restriction: enterprise = multi-language, others = English only
+            "delivery_rates": delivery_rates,
+            "plan": owner_plan,
             "menu_items": menu_items,
-            "count": len(menu_items)
+            "count": len(menu_items),
+            # Consolidated data (eliminates 4 extra API calls from frontend)
+            "location": location,
+            "surcharge_settings": surcharge_settings,
+            "food_surcharge_settings": food_surcharge_settings,
+            "best_sellers": best_sellers_data,
         }
     except HTTPException:
         raise

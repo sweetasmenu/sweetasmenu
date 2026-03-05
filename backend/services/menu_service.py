@@ -202,7 +202,9 @@ class MenuService:
             return []
 
         try:
-            query = self.supabase_client.table('menus').select('*').eq('restaurant_id', restaurant_id)
+            # Select only needed columns (avoid SELECT * to reduce payload over SG→NZ connection)
+            select_cols = 'id, name_original, name_english, description_original, description_english, price, image_url, category, category_english, options, menu_type, is_active, is_featured, is_best_seller, sort_order, restaurant_id'
+            query = self.supabase_client.table('menus').select(select_cols).eq('restaurant_id', restaurant_id)
 
             # Only filter by is_active for public view (not owner view)
             if not include_hidden:
@@ -390,9 +392,6 @@ class MenuService:
             "is_active": db_item.get("is_active", True),
             "is_featured": db_item.get("is_featured", False),
             "is_best_seller": db_item.get("is_best_seller", False),
-            "created_at": db_item.get("created_at"),
-            "updated_at": db_item.get("updated_at"),
-            "restaurant_id": db_item.get("restaurant_id"),
         }
 
 # Create singleton instance

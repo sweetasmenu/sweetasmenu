@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { ImageOff } from 'lucide-react';
+import { getOptimizedImageUrl } from '@/lib/utils/imageOptimization';
 
 interface ProtectedImageProps {
   src: string;
@@ -44,7 +45,12 @@ export default function ProtectedImage({
   onClick,
   protected: isProtected = true
 }: ProtectedImageProps) {
-  const [imageSrc, setImageSrc] = useState<string>(priority ? src : '');
+  // Optimize Supabase image URLs with CDN transforms (WebP, resize, compression)
+  const optimizedSrc = src.includes('supabase')
+    ? getOptimizedImageUrl(src, { width: width || 600, quality: 80, format: 'webp' })
+    : src;
+
+  const [imageSrc, setImageSrc] = useState<string>(priority ? optimizedSrc : '');
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -54,7 +60,7 @@ export default function ProtectedImage({
   // Lazy loading with Intersection Observer
   useEffect(() => {
     if (priority) {
-      setImageSrc(src);
+      setImageSrc(optimizedSrc);
       return;
     }
 
@@ -64,7 +70,7 @@ export default function ProtectedImage({
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            setImageSrc(src);
+            setImageSrc(optimizedSrc);
             if (observerRef.current && containerRef.current) {
               observerRef.current.unobserve(containerRef.current);
             }
@@ -84,7 +90,7 @@ export default function ProtectedImage({
         observerRef.current.disconnect();
       }
     };
-  }, [src, priority]);
+  }, [optimizedSrc, priority]);
 
   // Protection: Prevent context menu (right-click)
   const handleContextMenu = useCallback((e: React.MouseEvent) => {
