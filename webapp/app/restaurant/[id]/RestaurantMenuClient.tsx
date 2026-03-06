@@ -79,7 +79,7 @@ export default function RestaurantMenuClient({ initialData, restaurantId }: { in
 
   const [menus, setMenus] = useState<MenuItem[]>([]);
   const [originalMenus, setOriginalMenus] = useState<MenuItem[]>([]); // Keep original for kitchen
-  const [loading, setLoading] = useState(!initialData); // Skip loading if we have initialData
+  const [loading, setLoading] = useState(true); // Always start loading until processMenuData finishes
   const [error, setError] = useState('');
   const [cart, setCart] = useState<CartItem[]>([]);
   const [showCart, setShowCart] = useState(false);

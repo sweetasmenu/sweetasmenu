@@ -155,7 +155,7 @@ function StripePaymentForm({
       <button
         type="submit"
         disabled={!stripe || processing}
-        className="w-full py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-bold text-lg hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        className="w-full py-3 sm:py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-bold text-base sm:text-lg hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
       >
         {processing ? (
           <>
@@ -249,20 +249,20 @@ function BankTransferPayment({
 
       {/* QR Code - Only show if enabled */}
       {showQrCode && (
-        <div className="bg-white border border-gray-200 rounded-xl p-6 text-center">
-          <h4 className="font-semibold text-gray-900 mb-4">Scan to Pay</h4>
-          <div className="bg-white p-4 inline-block rounded-lg shadow-inner">
-            <QRCode value={qrData} size={180} />
+        <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 text-center">
+          <h4 className="font-semibold text-gray-900 mb-3 sm:mb-4 text-sm sm:text-base">Scan to Pay</h4>
+          <div className="bg-white p-3 sm:p-4 inline-block rounded-lg shadow-inner">
+            <QRCode value={qrData} size={140} />
           </div>
-          <p className="text-sm text-gray-700 mt-2">
+          <p className="text-xs sm:text-sm text-gray-700 mt-2">
             Scan with your mobile banking app
           </p>
         </div>
       )}
 
       {/* Bank Details */}
-      <div className="bg-gray-50 rounded-xl p-4 space-y-3">
-        <h4 className="font-semibold text-gray-900">Bank Details</h4>
+      <div className="bg-gray-50 rounded-xl p-3 sm:p-4 space-y-2.5 sm:space-y-3">
+        <h4 className="font-semibold text-gray-900 text-sm sm:text-base">Bank Details</h4>
 
         <div className="flex justify-between items-center">
           <div>
@@ -313,13 +313,13 @@ function BankTransferPayment({
       </div>
 
       {/* Upload Slip */}
-      <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-        <h4 className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
-          <Upload className="w-5 h-5" />
+      <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 sm:p-4">
+        <h4 className="font-semibold text-blue-900 mb-1.5 sm:mb-2 flex items-center gap-1.5 sm:gap-2 text-sm sm:text-base">
+          <Upload className="w-4 h-4 sm:w-5 sm:h-5" />
           Upload Payment Slip
           <span className="text-red-500">*</span>
         </h4>
-        <p className="text-sm text-blue-700 mb-3">
+        <p className="text-xs sm:text-sm text-blue-700 mb-2 sm:mb-3">
           Please upload your transfer receipt for verification
         </p>
 
@@ -747,32 +747,32 @@ export default function PaymentPage() {
     }
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
-          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce">
-            <CheckCircle className="w-12 h-12 text-green-600" />
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center p-3 sm:p-4">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-5 sm:p-8 text-center">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 animate-bounce">
+            <CheckCircle className="w-9 h-9 sm:w-12 sm:h-12 text-green-600" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Payment Successful!</h1>
-          <p className="text-gray-800 mb-4">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Payment Successful!</h1>
+          <p className="text-sm sm:text-base text-gray-800 mb-3 sm:mb-4">
             Your payment is being verified. Your order will be sent to the kitchen shortly.
           </p>
 
           {/* Order Number */}
-          <div className="bg-gray-100 rounded-xl p-4 mb-6">
-            <p className="text-sm text-gray-800 mb-1">Order Number</p>
-            <p className="text-2xl font-mono font-bold text-gray-900">
+          <div className="bg-gray-100 rounded-xl p-3 sm:p-4 mb-4 sm:mb-6">
+            <p className="text-xs sm:text-sm text-gray-800 mb-1">Order Number</p>
+            <p className="text-xl sm:text-2xl font-mono font-bold text-gray-900">
               #{order?.id.slice(0, 8).toUpperCase()}
             </p>
-            <p className="text-xs text-green-600 mt-2">Estimated time: 15-30 minutes</p>
+            <p className="text-xs text-green-600 mt-1 sm:mt-2">Estimated time: 15-30 minutes</p>
           </div>
 
           {/* QR Code for order tracking */}
-          <div className="bg-white border border-gray-200 rounded-xl p-4 mb-6">
-            <p className="text-sm text-gray-800 mb-3">Scan to track your order</p>
+          <div className="bg-white border border-gray-200 rounded-xl p-3 sm:p-4 mb-4 sm:mb-6">
+            <p className="text-xs sm:text-sm text-gray-800 mb-2 sm:mb-3">Scan to track your order</p>
             <div className="flex justify-center">
-              <QRCode value={orderTrackingUrl} size={150} />
+              <QRCode value={orderTrackingUrl} size={120} />
             </div>
-            <p className="text-xs text-gray-700 mt-3">
+            <p className="text-xs text-gray-700 mt-2 sm:mt-3">
               Save this QR code to check your order status anytime
             </p>
           </div>
@@ -780,7 +780,7 @@ export default function PaymentPage() {
           {/* Primary: Back to Menu */}
           <Link
             href={menuUrl}
-            className="inline-block w-full px-6 py-4 bg-orange-500 text-white rounded-lg font-bold hover:bg-orange-600 mb-3"
+            className="inline-block w-full px-5 py-3 sm:px-6 sm:py-4 bg-orange-500 text-white rounded-lg font-bold text-sm sm:text-base hover:bg-orange-600 mb-2 sm:mb-3"
           >
             Back to Menu
           </Link>
@@ -788,7 +788,7 @@ export default function PaymentPage() {
           {/* Track Your Order */}
           <Link
             href={`/order-status/${order?.id}?${statusParams.toString()}`}
-            className="inline-block w-full px-6 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 mb-3"
+            className="inline-block w-full px-5 py-2.5 sm:px-6 sm:py-3 bg-green-600 text-white rounded-lg font-semibold text-sm sm:text-base hover:bg-green-700 mb-2 sm:mb-3"
           >
             Track Your Order
           </Link>
@@ -799,7 +799,7 @@ export default function PaymentPage() {
               navigator.clipboard.writeText(orderTrackingUrl);
               alert('Order tracking link copied!');
             }}
-            className="w-full px-6 py-3 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 flex items-center justify-center gap-2"
+            className="w-full px-5 py-2.5 sm:px-6 sm:py-3 bg-gray-100 text-gray-700 rounded-lg font-medium text-sm sm:text-base hover:bg-gray-200 flex items-center justify-center gap-2"
           >
             <Copy className="w-4 h-4" />
             Copy Tracking Link
@@ -822,24 +822,24 @@ export default function PaymentPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-4 sm:py-8 px-3 sm:px-4">
       <div className="max-w-lg mx-auto">
         {/* Header */}
-        <div className="mb-6">
+        <div className="mb-4 sm:mb-6">
           <Link
             href={`/restaurant/${restaurant?.slug || order.restaurant_id}`}
-            className="inline-flex items-center text-gray-700 hover:text-gray-900 mb-4"
+            className="inline-flex items-center text-gray-700 hover:text-gray-900 mb-3 sm:mb-4 text-sm sm:text-base"
           >
-            <ArrowLeft className="w-4 h-4 mr-2" />
+            <ArrowLeft className="w-4 h-4 mr-1.5 sm:mr-2" />
             Back
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900">Complete Payment</h1>
-          <p className="text-gray-800">{restaurant?.name || 'Restaurant'}</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Complete Payment</h1>
+          <p className="text-sm sm:text-base text-gray-800">{restaurant?.name || 'Restaurant'}</p>
         </div>
 
         {/* Order Summary */}
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-          <h2 className="font-semibold text-gray-900 mb-4">Order Summary</h2>
+        <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-4 sm:mb-6">
+          <h2 className="font-semibold text-gray-900 mb-3 sm:mb-4 text-sm sm:text-base">Order Summary</h2>
 
           <div className="space-y-2 mb-4">
             {order.items.map((item, idx) => (
@@ -889,10 +889,10 @@ export default function PaymentPage() {
         </div>
 
         {/* Payment Method Selection */}
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-          <h2 className="font-semibold text-gray-900 mb-4">Payment Method</h2>
+        <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-4 sm:mb-6">
+          <h2 className="font-semibold text-gray-900 mb-3 sm:mb-4 text-sm sm:text-base">Payment Method</h2>
 
-          <div className="space-y-3">
+          <div className="space-y-2.5 sm:space-y-3">
             {paymentSettings.accept_card && (
               <button
                 onClick={() => {
@@ -904,20 +904,20 @@ export default function PaymentPage() {
                     setClientSecret(null);
                   }
                 }}
-                className={`w-full p-4 rounded-lg border-2 text-left transition-all flex items-center gap-4 ${
+                className={`w-full p-3 sm:p-4 rounded-lg border-2 text-left transition-all flex items-center gap-3 sm:gap-4 ${
                   selectedMethod === 'card'
                     ? 'border-blue-500 bg-blue-50'
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
               >
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <CreditCard className="w-6 h-6 text-blue-600" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <CreditCard className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
                 </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900">Credit/Debit Card</h3>
-                  <p className="text-sm text-gray-800">Visa, Mastercard, Amex, Apple Pay</p>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-gray-900 text-sm sm:text-base">Credit/Debit Card</h3>
+                  <p className="text-xs sm:text-sm text-gray-800">Visa, Mastercard, Amex, Apple Pay</p>
                   {surchargeSettings.credit_card_surcharge_enabled && (
-                    <p className="text-xs text-orange-600 mt-1">
+                    <p className="text-xs text-orange-600 mt-0.5 sm:mt-1">
                       +{surchargeSettings.credit_card_surcharge_rate}% service fee applies
                     </p>
                   )}
@@ -928,18 +928,18 @@ export default function PaymentPage() {
             {paymentSettings.accept_bank_transfer && paymentSettings.bank_accounts.length > 0 && (
               <button
                 onClick={() => setSelectedMethod('bank_transfer')}
-                className={`w-full p-4 rounded-lg border-2 text-left transition-all flex items-center gap-4 ${
+                className={`w-full p-3 sm:p-4 rounded-lg border-2 text-left transition-all flex items-center gap-3 sm:gap-4 ${
                   selectedMethod === 'bank_transfer'
                     ? 'border-green-500 bg-green-50'
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
               >
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                  <Building2 className="w-6 h-6 text-green-600" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Building2 className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900">Bank Transfer</h3>
-                  <p className="text-sm text-gray-800">Transfer directly to bank account</p>
+                  <h3 className="font-semibold text-gray-900 text-sm sm:text-base">Bank Transfer</h3>
+                  <p className="text-xs sm:text-sm text-gray-800">Transfer directly to bank account</p>
                 </div>
               </button>
             )}
@@ -948,18 +948,18 @@ export default function PaymentPage() {
             {(order.service_type === 'dine_in' || order.service_type === 'pickup') && paymentSettings?.accept_pay_at_cashier && (
               <button
                 onClick={() => setSelectedMethod('cash_at_cashier')}
-                className={`w-full p-4 rounded-lg border-2 text-left transition-all flex items-center gap-4 ${
+                className={`w-full p-3 sm:p-4 rounded-lg border-2 text-left transition-all flex items-center gap-3 sm:gap-4 ${
                   selectedMethod === 'cash_at_cashier'
                     ? 'border-orange-500 bg-orange-50'
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
               >
-                <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                  <Banknote className="w-6 h-6 text-orange-600" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Banknote className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900">Pay at Cashier</h3>
-                  <p className="text-sm text-gray-800">Pay with cash or card at the cashier</p>
+                  <h3 className="font-semibold text-gray-900 text-sm sm:text-base">Pay at Cashier</h3>
+                  <p className="text-xs sm:text-sm text-gray-800">Pay with cash or card at the cashier</p>
                 </div>
               </button>
             )}
@@ -968,7 +968,7 @@ export default function PaymentPage() {
 
         {/* Payment Form */}
         {selectedMethod === 'card' && clientSecret && stripePromise && (
-          <div className="bg-white rounded-xl shadow-lg p-6">
+          <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6">
             <Elements
               stripe={stripePromise}
               options={{
@@ -991,7 +991,7 @@ export default function PaymentPage() {
         )}
 
         {selectedMethod === 'bank_transfer' && paymentSettings.bank_accounts.length > 0 && (
-          <div className="bg-white rounded-xl shadow-lg p-6">
+          <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6">
             <BankTransferPayment
               order={order}
               bankAccounts={paymentSettings.bank_accounts}
@@ -1003,31 +1003,31 @@ export default function PaymentPage() {
 
         {/* Pay at Cashier Confirmation */}
         {selectedMethod === 'cash_at_cashier' && (
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Banknote className="w-8 h-8 text-orange-600" />
+          <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6">
+            <div className="text-center mb-4 sm:mb-6">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                <Banknote className="w-6 h-6 sm:w-8 sm:h-8 text-orange-600" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Pay at Cashier</h3>
+              <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">Pay at Cashier</h3>
             </div>
 
-            <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6">
+            <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
               {order.table_no && (
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-orange-800">Table Number</span>
+                  <span className="text-sm sm:text-base text-orange-800">Table Number</span>
                   <span className="font-bold text-orange-900">{order.table_no}</span>
                 </div>
               )}
               <div className="flex justify-between items-center">
-                <span className="text-orange-800">Amount to Pay</span>
-                <span className="text-2xl font-bold text-orange-600">${order.total_price.toFixed(2)} NZD</span>
+                <span className="text-sm sm:text-base text-orange-800">Amount to Pay</span>
+                <span className="text-xl sm:text-2xl font-bold text-orange-600">${order.total_price.toFixed(2)} NZD</span>
               </div>
             </div>
 
             <button
               onClick={() => handlePayAtCashier()}
               disabled={processingCashPayment}
-              className="w-full py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg font-bold text-lg hover:from-orange-600 hover:to-orange-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full py-3 sm:py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg font-bold text-base sm:text-lg hover:from-orange-600 hover:to-orange-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {processingCashPayment ? (
                 <>
@@ -1052,14 +1052,14 @@ export default function PaymentPage() {
 
       {/* Surcharge Confirmation Modal */}
       {showSurchargeConfirm && order && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl">
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <AlertCircle className="w-8 h-8 text-orange-600" />
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-4 sm:p-6 shadow-xl">
+            <div className="text-center mb-4 sm:mb-6">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                <AlertCircle className="w-6 h-6 sm:w-8 sm:h-8 text-orange-600" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Service Fee Notice</h3>
-              <p className="text-gray-800">
+              <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">Service Fee Notice</h3>
+              <p className="text-sm sm:text-base text-gray-800">
                 A {surchargeSettings.credit_card_surcharge_rate}% service fee will be added for card payments.
               </p>
             </div>
@@ -1068,18 +1068,18 @@ export default function PaymentPage() {
               const modalSurcharge = Math.round((order.subtotal + (order.delivery_fee || 0)) * surchargeSettings.credit_card_surcharge_rate) / 100;
               const modalTotal = order.total_price + modalSurcharge;
               return (
-                <div className="bg-gray-50 rounded-xl p-4 mb-6 space-y-2">
-                  <div className="flex justify-between text-sm">
+                <div className="bg-gray-50 rounded-xl p-3 sm:p-4 mb-4 sm:mb-6 space-y-2">
+                  <div className="flex justify-between text-xs sm:text-sm">
                     <span className="text-gray-800">Order Total</span>
                     <span className="font-medium text-gray-900">${order.total_price.toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between text-sm text-orange-600">
+                  <div className="flex justify-between text-xs sm:text-sm text-orange-600">
                     <span>Service Fee ({surchargeSettings.credit_card_surcharge_rate}%)</span>
                     <span className="font-medium">
                       +${modalSurcharge.toFixed(2)}
                     </span>
                   </div>
-                  <div className="flex justify-between text-lg font-bold pt-2 border-t border-gray-200 text-gray-900">
+                  <div className="flex justify-between text-base sm:text-lg font-bold pt-2 border-t border-gray-200 text-gray-900">
                     <span>Total</span>
                     <span className="text-blue-600">
                       ${modalTotal.toFixed(2)} NZD
@@ -1089,10 +1089,10 @@ export default function PaymentPage() {
               );
             })()}
 
-            <div className="flex gap-3">
+            <div className="flex gap-2.5 sm:gap-3">
               <button
                 onClick={() => setShowSurchargeConfirm(false)}
-                className="flex-1 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
+                className="flex-1 py-2.5 sm:py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold text-sm sm:text-base hover:bg-gray-300 transition-colors"
               >
                 Change Payment
               </button>
@@ -1102,7 +1102,7 @@ export default function PaymentPage() {
                   setSelectedMethod('card');
                   setClientSecret(null);
                 }}
-                className="flex-1 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                className="flex-1 py-2.5 sm:py-3 bg-blue-600 text-white rounded-lg font-semibold text-sm sm:text-base hover:bg-blue-700 transition-colors"
               >
                 Accept & Continue
               </button>
