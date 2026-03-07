@@ -108,6 +108,17 @@ class StripeService:
 
             intent = stripe.PaymentIntent.retrieve(payment_intent_id, api_key=effective_key)
 
+            # Get receipt URL safely (charges not auto-expanded in newer API versions)
+            receipt_url = None
+            try:
+                if hasattr(intent, 'latest_charge') and intent.latest_charge:
+                    charge = stripe.Charge.retrieve(intent.latest_charge, api_key=effective_key)
+                    receipt_url = charge.receipt_url
+                elif hasattr(intent, 'charges') and intent.charges and intent.charges.data:
+                    receipt_url = intent.charges.data[0].receipt_url
+            except Exception:
+                pass
+
             return {
                 'payment_intent_id': intent.id,
                 'status': intent.status,
@@ -115,12 +126,10 @@ class StripeService:
                 'currency': intent.currency,
                 'order_id': intent.metadata.get('order_id'),
                 'restaurant_id': intent.metadata.get('restaurant_id'),
-                'receipt_url': intent.charges.data[0].receipt_url if intent.charges.data else None,
+                'receipt_url': receipt_url,
                 'paid': intent.status == 'succeeded',
             }
 
-        except stripe.error.StripeError as e:
-            raise Exception(f"Stripe error: {str(e)}")
         except Exception as e:
             raise Exception(f"Failed to retrieve payment intent: {str(e)}")
 
@@ -151,6 +160,17 @@ class StripeService:
 
             is_paid = intent.status == 'succeeded'
 
+            # Get receipt URL safely (charges not auto-expanded in newer API versions)
+            receipt_url = None
+            try:
+                if hasattr(intent, 'latest_charge') and intent.latest_charge:
+                    charge = stripe.Charge.retrieve(intent.latest_charge, api_key=effective_key)
+                    receipt_url = charge.receipt_url
+                elif hasattr(intent, 'charges') and intent.charges and intent.charges.data:
+                    receipt_url = intent.charges.data[0].receipt_url
+            except Exception:
+                pass
+
             return {
                 'payment_intent_id': intent.id,
                 'status': intent.status,
@@ -159,12 +179,10 @@ class StripeService:
                 'currency': intent.currency,
                 'order_id': intent.metadata.get('order_id'),
                 'restaurant_id': intent.metadata.get('restaurant_id'),
-                'receipt_url': intent.charges.data[0].receipt_url if intent.charges.data else None,
+                'receipt_url': receipt_url,
                 'paid_at': datetime.now().isoformat() if is_paid else None,
             }
 
-        except stripe.error.StripeError as e:
-            raise Exception(f"Stripe error: {str(e)}")
         except Exception as e:
             raise Exception(f"Failed to confirm payment: {str(e)}")
 
