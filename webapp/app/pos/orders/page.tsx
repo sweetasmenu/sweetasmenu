@@ -1455,7 +1455,7 @@ export default function StaffOrdersPage() {
                     {/* Confirm Order Button - for pending orders (already paid/verified) */}
                     {order.status === 'pending' && (
                       <button
-                        onClick={() => updateOrderStatus(order.id, 'preparing')}
+                        onClick={() => updateOrderStatus(order.id, 'confirmed')}
                         className={`flex-1 py-2 ${themeClasses.bgPrimary} ${themeClasses.bgPrimaryHover} rounded-lg font-semibold flex items-center justify-center gap-2`}
                       >
                         <CheckCircle className="w-5 h-5" />
