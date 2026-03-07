@@ -6,8 +6,8 @@ export default function TermsOfServicePage() {
   const lastUpdated = "6 January 2026";
   const companyName = "Zestio Tech Limited";
   const appName = "SweetAsMenu";
-  const contactEmail = "support@zestiotech.com";
-  const supportEmail = "support@zestiotech.com";
+  const contactEmail = "support@sweetasmenu.com";
+  const supportEmail = "support@sweetasmenu.com";
   const websiteUrl = "sweetasmenu.com";
 
   return (

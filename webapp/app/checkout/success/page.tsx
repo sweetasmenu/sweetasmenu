@@ -257,8 +257,8 @@ function CheckoutSuccessContent() {
           <h3 className="font-bold text-gray-900 mb-2">Need Help Getting Started?</h3>
           <p className="text-sm text-gray-600 mb-4">
             Our team is here to help! Contact us anytime at{' '}
-            <a href="mailto:support@zestiotech.com" className="text-orange-500 hover:underline font-semibold">
-              support@zestiotech.com
+            <a href="mailto:support@sweetasmenu.com" className="text-orange-500 hover:underline font-semibold">
+              support@sweetasmenu.com
             </a>
           </p>
           <div className="flex items-center justify-center space-x-4 text-sm text-gray-500">

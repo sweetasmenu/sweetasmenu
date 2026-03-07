@@ -7,8 +7,8 @@ import { Mail, Phone, MapPin, Clock, Send, MessageSquare, Loader2, CheckCircle }
 export default function ContactPage() {
   const companyName = "Zestio Tech Limited";
   const appName = "SweetAsMenu";
-  const contactEmail = "support@zestiotech.com";
-  const salesEmail = "sales@zestiotech.com";
+  const contactEmail = "support@sweetasmenu.com";
+  const salesEmail = "sales@sweetasmenu.com";
   const phone = "+64 22 123 4567";
   const address = "Auckland, New Zealand";
   const websiteUrl = "sweetasmenu.com";

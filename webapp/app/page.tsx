@@ -910,7 +910,7 @@ export default function HomePage() {
                 AI-powered digital menus for discerning restaurants in New Zealand.
               </p>
               <a
-                href="https://zestiotech.com"
+                href="https://sweetasmenu.com"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-xs text-neutral-600 hover:text-amber-500 transition-colors"
@@ -933,7 +933,7 @@ export default function HomePage() {
             <div className="col-span-2 md:col-span-1">
               <h4 className="text-white font-medium mb-4 sm:mb-6 tracking-wide uppercase text-xs sm:text-sm">Contact</h4>
               <ul className="space-y-2 sm:space-y-3 text-neutral-500 text-xs sm:text-sm">
-                <li><a href="mailto:support@zestiotech.com" className="hover:text-amber-500 transition-colors break-all">support@zestiotech.com</a></li>
+                <li><a href="mailto:support@sweetasmenu.com" className="hover:text-amber-500 transition-colors break-all">support@sweetasmenu.com</a></li>
                 <li>8/28 Setthasiri Rama 5</li>
                 <li>Nonthaburi, Thailand 11000</li>
               </ul>

@@ -121,7 +121,7 @@ export default function CheckoutCancelPage() {
               Have questions? We're here to help you make the right decision.
             </p>
             <a
-              href="mailto:support@zestiotech.com"
+              href="mailto:support@sweetasmenu.com"
               className="inline-flex items-center text-orange-500 hover:text-orange-600 font-semibold text-sm"
             >
               Contact Support →
