@@ -89,7 +89,6 @@ interface Subscription {
   next_billing_date: string | null;
   cancel_at_period_end: boolean;
   role?: string; // User role from some API responses
-  blinkpay_consent_id?: string | null;
   billing_provider?: string | null;
   payment_method?: PaymentMethodInfo | null;
 }
@@ -1308,7 +1307,7 @@ function SettingsContent() {
       const data = await response.json();
 
       if (data.success) {
-        alert('Your subscription has been cancelled. You can re-subscribe anytime from the Pricing page.');
+        alert('Your subscription will be cancelled at the end of your current billing period.');
         window.location.reload();
       } else {
         alert(data.detail || 'Failed to cancel subscription. Please try again.');
@@ -1316,6 +1315,36 @@ function SettingsContent() {
     } catch (error) {
       console.error('Failed to cancel subscription:', error);
       alert('Failed to cancel subscription. Please try again.');
+    }
+  };
+
+  const handleManageSubscription = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        alert('Please login first');
+        return;
+      }
+
+      const response = await fetch(`${BACKEND_URL}/api/billing/create-portal-session`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: session.user.id,
+          return_url: window.location.href,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success && data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(data.detail || 'Failed to open billing portal. Please try again.');
+      }
+    } catch (error) {
+      console.error('Failed to open billing portal:', error);
+      alert('Failed to open billing portal. Please try again.');
     }
   };
 
@@ -3743,22 +3772,24 @@ function SettingsContent() {
                 </a>
               )}
 
-              {/* Change plan button - show when active paid */}
-              {profile.subscription.status === 'active' &&
-               profile.subscription.plan?.toLowerCase() !== 'free' && (
-                <a
-                  href="/pricing"
-                  className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium flex items-center justify-center gap-2 transition-colors"
-                >
-                  <CreditCard className="w-5 h-5" />
-                  Change Plan
-                </a>
-              )}
-
-              {/* Cancel subscription button - only for active paid */}
+              {/* Manage Subscription via Stripe Portal - show when active paid */}
               {profile.subscription.status === 'active' &&
                profile.subscription.plan?.toLowerCase() !== 'free' &&
                profile.subscription.is_subscribed && (
+                <button
+                  onClick={handleManageSubscription}
+                  className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium flex items-center justify-center gap-2 transition-colors"
+                >
+                  <ExternalLink className="w-5 h-5" />
+                  Manage Subscription
+                </button>
+              )}
+
+              {/* Cancel subscription button - only for active paid, not already cancelling */}
+              {profile.subscription.status === 'active' &&
+               profile.subscription.plan?.toLowerCase() !== 'free' &&
+               profile.subscription.is_subscribed &&
+               !profile.subscription.cancel_at_period_end && (
                 <button
                   onClick={() => {
                     if (confirm('Are you sure you want to cancel your subscription? Your access will continue until the end of your current billing period.')) {

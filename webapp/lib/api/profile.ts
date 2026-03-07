@@ -91,7 +91,7 @@ export async function updateUserProfile(
 }
 
 /**
- * Cancel BlinkPay subscription
+ * Cancel Stripe subscription (at end of billing period)
  */
 export async function cancelSubscription(userId: string): Promise<{ success: boolean }> {
   const response = await fetch(`${BACKEND_URL}/api/billing/cancel`, {
@@ -104,6 +104,64 @@ export async function cancelSubscription(userId: string): Promise<{ success: boo
 
   if (!response.ok || !data.success) {
     throw new Error(data.detail?.message || data.message || 'Failed to cancel subscription');
+  }
+
+  return data;
+}
+
+/**
+ * Create Stripe Checkout Session
+ */
+export async function createCheckoutSession(
+  userId: string,
+  email: string,
+  planId: string,
+  interval: string,
+  successUrl: string,
+  cancelUrl: string,
+): Promise<{ url: string; session_id: string }> {
+  const response = await fetch(`${BACKEND_URL}/api/billing/create-checkout-session`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      user_id: userId,
+      user_email: email,
+      plan_id: planId,
+      interval,
+      success_url: successUrl,
+      cancel_url: cancelUrl,
+    }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok || !data.success) {
+    throw new Error(data.detail?.message || data.message || 'Failed to create checkout session');
+  }
+
+  return data;
+}
+
+/**
+ * Create Stripe Customer Portal Session
+ */
+export async function createPortalSession(
+  userId: string,
+  returnUrl: string,
+): Promise<{ url: string }> {
+  const response = await fetch(`${BACKEND_URL}/api/billing/create-portal-session`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      user_id: userId,
+      return_url: returnUrl,
+    }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok || !data.success) {
+    throw new Error(data.detail?.message || data.message || 'Failed to create portal session');
   }
 
   return data;

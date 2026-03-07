@@ -3,7 +3,7 @@ Smart Menu SaaS - Full AI Backend
 รวมทุก AI features: Translation, Image Enhancement, Generation
 """
 
-from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Response
+from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Response, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional, Dict, Any, List
@@ -22,8 +22,7 @@ from services.ai_service import ai_service  # Unified AI service (cost-optimized
 from services.menu_storage import menu_storage  # Keep for backward compatibility
 from services.menu_service import menu_service  # New: Supabase-based menu service
 from services.stripe_service import stripe_service
-from services.blinkpay_service import blinkpay_service
-from services.billing_scheduler import process_due_subscriptions
+from services.stripe_subscription_service import stripe_subscription_service, STRIPE_PRICE_IDS
 from services.trial_limits import trial_limits_service
 from services.customization_service import customization_service
 from services.user_role_service import user_role_service
@@ -188,18 +187,17 @@ class SaveMenuItemRequest(BaseModel):
     is_best_seller: Optional[bool] = False  # Best Seller flag
     is_active: Optional[bool] = True  # Visible on menu flag
 
-class BillingCheckoutRequest(BaseModel):
+class StripeCheckoutRequest(BaseModel):
     user_id: str
     user_email: str
     plan_id: str
     interval: str = "monthly"
-    redirect_url: Optional[str] = None
+    success_url: Optional[str] = None
+    cancel_url: Optional[str] = None
 
-class BillingVerifyRequest(BaseModel):
-    consent_id: str
+class StripePortalRequest(BaseModel):
     user_id: str
-    plan_id: str
-    interval: str = "monthly"
+    return_url: Optional[str] = None
 
 class BillingCancelRequest(BaseModel):
     user_id: str
@@ -1715,7 +1713,7 @@ async def initialize_trial(request: TrialStatusRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 # ============================================================
-# BlinkPay Subscription Billing Routes
+# Stripe Subscription Billing Routes
 # ============================================================
 
 PLAN_PRICES = {
@@ -1731,148 +1729,117 @@ PLAN_TO_ROLE = {
 }
 
 
-@app.post("/api/billing/checkout", summary="Create BlinkPay Billing Consent")
-async def billing_checkout(request: BillingCheckoutRequest):
+@app.post("/api/billing/create-checkout-session", summary="Create Stripe Checkout Session")
+async def billing_create_checkout_session(request: StripeCheckoutRequest):
     """
-    Create a BlinkPay enduring consent for recurring subscription billing.
-    Returns a redirect URL for the user to authorise bank payments.
+    Create a Stripe Checkout Session for subscription billing.
+    Returns a URL to redirect the user to Stripe's hosted checkout page.
     """
     try:
-        price = PLAN_PRICES.get(request.plan_id, {}).get(request.interval)
-        if not price:
+        # Validate plan and interval
+        price_id = STRIPE_PRICE_IDS.get(request.plan_id, {}).get(request.interval)
+        if not price_id:
             raise HTTPException(status_code=400, detail=f"Invalid plan or interval: {request.plan_id}/{request.interval}")
 
-        frontend_url = os.getenv('FRONTEND_URL', 'http://localhost:3000')
-        redirect_url = request.redirect_url or f"{frontend_url}/checkout/success"
-
-        result = await blinkpay_service.create_enduring_consent(
+        # Get or create Stripe Customer
+        customer_id = stripe_subscription_service.get_or_create_customer(
+            supabase_client=restaurant_service.supabase_client,
             user_id=request.user_id,
-            user_email=request.user_email,
+            email=request.user_email,
+        )
+
+        frontend_url = os.getenv('FRONTEND_URL', 'http://localhost:3000')
+        success_url = request.success_url or f"{frontend_url}/checkout/success"
+        cancel_url = request.cancel_url or f"{frontend_url}/checkout?plan={request.plan_id}&interval={request.interval}"
+
+        result = stripe_subscription_service.create_checkout_session(
+            customer_id=customer_id,
+            price_id=price_id,
+            user_id=request.user_id,
             plan_id=request.plan_id,
-            amount=price,
-            billing_interval=request.interval,
-            redirect_url=redirect_url,
+            interval=request.interval,
+            success_url=success_url,
+            cancel_url=cancel_url,
         )
 
         return {
             "success": True,
-            "consent_id": result['consent_id'],
-            "redirect_uri": result['redirect_uri'],
+            "url": result['url'],
+            "session_id": result['session_id'],
         }
 
     except HTTPException:
         raise
     except Exception as e:
-        print(f"Billing checkout error: {str(e)}")
+        print(f"Stripe checkout error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.post("/api/billing/verify", summary="Verify BlinkPay Consent and Activate Subscription")
-async def billing_verify(request: BillingVerifyRequest):
+@app.post("/api/billing/create-portal-session", summary="Create Stripe Customer Portal Session")
+async def billing_create_portal_session(request: StripePortalRequest):
     """
-    After user authorises consent at their bank, verify the consent status
-    and activate their subscription.
+    Create a Stripe Customer Portal session for self-service subscription management.
     """
     try:
-        # Check consent status with BlinkPay
-        consent = await blinkpay_service.get_consent(request.consent_id)
-        status = consent.get('status', '').lower()
+        # Get user's stripe_customer_id
+        profile = user_role_service.supabase_client.table('user_profiles').select(
+            'stripe_customer_id'
+        ).eq('user_id', request.user_id).single().execute()
 
-        if status not in ('authorised', 'active'):
-            return {
-                "success": False,
-                "status": status,
-                "message": f"Consent not yet authorised (status: {status})",
-            }
+        customer_id = profile.data.get('stripe_customer_id') if profile.data else None
+        if not customer_id:
+            raise HTTPException(status_code=400, detail="No Stripe customer found. Please subscribe first.")
 
-        plan_id = request.plan_id
-        interval = request.interval
-        price = PLAN_PRICES.get(plan_id, {}).get(interval, 0)
-        new_role = PLAN_TO_ROLE.get(plan_id, 'professional')
+        frontend_url = os.getenv('FRONTEND_URL', 'http://localhost:3000')
+        return_url = request.return_url or f"{frontend_url}/dashboard/settings"
 
-        from datetime import timedelta
-        now = datetime.now()
-        next_billing = now + timedelta(days=365 if interval == 'yearly' else 30)
-
-        # Update user profile
-        update_data = {
-            'role': new_role,
-            'plan': plan_id,
-            'subscription_status': 'active',
-            'billing_interval': interval,
-            'subscription_start_date': now.isoformat(),
-            'next_billing_date': next_billing.isoformat(),
-            'blinkpay_consent_id': request.consent_id,
-            'billing_provider': 'blinkpay',
-            'payment_method': 'blinkpay',
-            'last_payment_date': now.isoformat(),
-            'last_payment_amount': price,
-            'updated_at': now.isoformat(),
-        }
-
-        user_role_service.supabase_client.table('user_profiles').update(update_data).eq('user_id', request.user_id).execute()
-
-        print(f"Activated subscription for user {request.user_id}: {plan_id}/{interval} via BlinkPay")
-
-        # Log initial subscription payment
-        try:
-            restaurant_service.supabase_client.table('payment_logs').insert({
-                'user_id': request.user_id,
-                'amount': price,
-                'currency': 'NZD',
-                'payment_type': 'subscription',
-                'payment_method': 'blinkpay',
-                'payment_status': 'completed',
-                'plan': plan_id,
-                'billing_interval': interval,
-                'blinkpay_consent_id': request.consent_id,
-            }).execute()
-        except Exception as log_err:
-            print(f"Failed to log payment: {log_err}")
+        result = stripe_subscription_service.create_portal_session(
+            customer_id=customer_id,
+            return_url=return_url,
+        )
 
         return {
             "success": True,
-            "status": "active",
-            "plan": plan_id,
-            "role": new_role,
-            "interval": interval,
+            "url": result['url'],
         }
 
+    except HTTPException:
+        raise
     except Exception as e:
-        print(f"Billing verify error: {str(e)}")
+        print(f"Stripe portal error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.post("/api/billing/cancel", summary="Cancel BlinkPay Subscription")
+@app.post("/api/billing/cancel", summary="Cancel Stripe Subscription")
 async def billing_cancel(request: BillingCancelRequest):
     """
-    Cancel subscription by revoking the BlinkPay enduring consent.
+    Cancel subscription at end of current billing period.
     """
     try:
-        # Get user's consent ID
         profile = user_role_service.supabase_client.table('user_profiles').select(
-            'blinkpay_consent_id, plan'
+            'stripe_subscription_id'
         ).eq('user_id', request.user_id).single().execute()
 
-        consent_id = profile.data.get('blinkpay_consent_id') if profile.data else None
-        if not consent_id:
-            raise HTTPException(status_code=400, detail="No active BlinkPay subscription found")
+        subscription_id = profile.data.get('stripe_subscription_id') if profile.data else None
+        if not subscription_id:
+            raise HTTPException(status_code=400, detail="No active subscription found")
 
-        # Revoke consent at BlinkPay
-        await blinkpay_service.revoke_consent(consent_id)
+        result = stripe_subscription_service.cancel_subscription(subscription_id)
 
-        # Update user profile - downgrade to free
+        # Update cancel_at_period_end in DB
         now = datetime.now()
         user_role_service.supabase_client.table('user_profiles').update({
-            'subscription_status': 'cancelled',
+            'cancel_at_period_end': True,
             'updated_at': now.isoformat(),
         }).eq('user_id', request.user_id).execute()
 
-        print(f"Cancelled subscription for user {request.user_id}")
+        print(f"Cancelled subscription for user {request.user_id} at period end")
 
         return {
             "success": True,
-            "status": "cancelled",
+            "status": "cancelling",
+            "cancel_at_period_end": True,
+            "current_period_end": result.get('current_period_end'),
         }
 
     except HTTPException:
@@ -1889,9 +1856,9 @@ async def get_billing_subscription(user_id: str):
     """
     try:
         profile = user_role_service.supabase_client.table('user_profiles').select(
-            'plan, subscription_status, billing_interval, blinkpay_consent_id, '
-            'billing_provider, subscription_start_date, next_billing_date, '
-            'last_payment_date, last_payment_amount'
+            'plan, subscription_status, billing_interval, stripe_subscription_id, '
+            'stripe_customer_id, billing_provider, subscription_start_date, '
+            'subscription_end_date, next_billing_date, cancel_at_period_end'
         ).eq('user_id', user_id).single().execute()
 
         if not profile.data:
@@ -1908,68 +1875,27 @@ async def get_billing_subscription(user_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.post("/api/admin/billing/process-renewals", summary="Process Due Subscription Renewals")
-async def admin_process_renewals():
+@app.post("/api/webhooks/stripe-subscription", summary="Stripe Subscription Webhook Handler")
+async def stripe_subscription_webhook(request: Request):
     """
-    Trigger recurring billing for all due subscriptions.
-    Call this from a cron job (e.g. daily).
+    Handle Stripe webhook events for subscription lifecycle.
+    Events: checkout.session.completed, customer.subscription.updated,
+    customer.subscription.deleted, invoice.payment_failed
     """
     try:
-        results = await process_due_subscriptions(
-            restaurant_service.supabase_client
+        payload = await request.body()
+        sig_header = request.headers.get('stripe-signature', '')
+
+        result = stripe_subscription_service.handle_webhook_event(
+            payload=payload,
+            sig_header=sig_header,
+            supabase_client=restaurant_service.supabase_client,
         )
-        return {"success": True, **results}
-    except Exception as e:
-        print(f"Process renewals error: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
 
-
-@app.post("/api/webhooks/blinkpay", summary="BlinkPay Webhook Handler")
-async def blinkpay_webhook(payload: dict):
-    """
-    Handle BlinkPay webhook events (payment status updates, consent revocations).
-    """
-    try:
-        event_type = payload.get('event_type', '')
-        data = payload.get('data', {})
-        consent_id = data.get('consent_id', '')
-
-        print(f"BlinkPay webhook: {event_type}, consent_id={consent_id}")
-
-        if event_type == 'consent_revoked' and consent_id:
-            # Mark subscription as cancelled
-            now = datetime.now()
-            user_role_service.supabase_client.table('user_profiles').update({
-                'subscription_status': 'cancelled',
-                'updated_at': now.isoformat(),
-            }).eq('blinkpay_consent_id', consent_id).execute()
-            print(f"Consent revoked via webhook: {consent_id}")
-
-        elif event_type in ('payment_completed', 'payment_failed'):
-            payment_id = data.get('payment_id', '')
-            status = 'completed' if event_type == 'payment_completed' else 'failed'
-
-            # Update payment log if exists
-            if payment_id:
-                try:
-                    restaurant_service.supabase_client.table('payment_logs').update({
-                        'payment_status': status,
-                    }).eq('blinkpay_payment_id', payment_id).execute()
-                except Exception:
-                    pass
-
-            # If payment failed, mark subscription as past_due
-            if status == 'failed' and consent_id:
-                now = datetime.now()
-                user_role_service.supabase_client.table('user_profiles').update({
-                    'subscription_status': 'past_due',
-                    'updated_at': now.isoformat(),
-                }).eq('blinkpay_consent_id', consent_id).execute()
-
-        return {"received": True}
+        return result
 
     except Exception as e:
-        print(f"Webhook error: {str(e)}")
+        print(f"Stripe subscription webhook error: {str(e)}")
         return {"received": True, "error": str(e)}
 
 # ============================================================
@@ -3170,7 +3096,7 @@ async def get_user_profile(
         subscription_start_date = user_profile.get('subscription_start_date') if user_profile else None
         subscription_end_date = user_profile.get('subscription_end_date') if user_profile else None
         next_billing_date = user_profile.get('next_billing_date') if user_profile else None
-        blinkpay_consent_id = user_profile.get('blinkpay_consent_id') if user_profile else None
+        cancel_at_period_end = user_profile.get('cancel_at_period_end', False) if user_profile else False
         billing_provider = user_profile.get('billing_provider') if user_profile else None
 
         subscription_data = {
@@ -3182,10 +3108,8 @@ async def get_user_profile(
             "current_period_start": subscription_start_date,
             "current_period_end": subscription_end_date,
             "next_billing_date": next_billing_date,
-            "cancel_at_period_end": False,
-            "blinkpay_consent_id": blinkpay_consent_id,
+            "cancel_at_period_end": cancel_at_period_end,
             "billing_provider": billing_provider,
-            "payment_method": None,
         }
         
         return {

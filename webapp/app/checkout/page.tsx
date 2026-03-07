@@ -4,8 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Lock, Check, ArrowLeft, Loader2, Tag, X,
-  Building2, Upload, CheckCircle,
-  AlertCircle, Banknote
+  CreditCard, CheckCircle, AlertCircle
 } from 'lucide-react';
 import Link from 'next/link';
 import { SUBSCRIPTION_PLANS } from '@/lib/subscription/plans';
@@ -13,7 +12,6 @@ import { createClient } from '@/lib/supabase/client';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-type PaymentMethod = 'open_banking' | 'bank_transfer';
 type BillingInterval = 'monthly' | 'yearly';
 
 interface CouponInfo {
@@ -35,17 +33,12 @@ function CheckoutContent() {
 
   // Form states
   const [billingInterval, setBillingInterval] = useState<BillingInterval>(initialInterval);
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('open_banking');
 
   // Coupon states
   const [couponCode, setCouponCode] = useState('');
   const [couponLoading, setCouponLoading] = useState(false);
   const [appliedCoupon, setAppliedCoupon] = useState<CouponInfo | null>(null);
   const [couponError, setCouponError] = useState('');
-
-  // Bank transfer states
-  const [bankSlipFile, setBankSlipFile] = useState<File | null>(null);
-  const [bankReference, setBankReference] = useState('');
 
   const supabase = createClient();
   const plan = SUBSCRIPTION_PLANS.find(p => p.id === planId) || SUBSCRIPTION_PLANS[1];
@@ -121,15 +114,20 @@ function CheckoutContent() {
     setCouponError('');
   };
 
-  // Handle BlinkPay Open Banking checkout
-  const handleOpenBankingCheckout = async () => {
+  // Handle Stripe Checkout
+  const handleCheckout = async () => {
+    if (!user) {
+      router.push('/login?redirect=/checkout?plan=' + planId + '&interval=' + billingInterval);
+      return;
+    }
+
     setLoading(true);
     setError('');
 
     try {
       const origin = window.location.origin;
 
-      const response = await fetch(`${API_URL}/api/billing/checkout`, {
+      const response = await fetch(`${API_URL}/api/billing/create-checkout-session`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -137,99 +135,28 @@ function CheckoutContent() {
           user_email: user.email,
           plan_id: planId,
           interval: billingInterval,
-          redirect_url: `${origin}/checkout/success?plan=${planId}&interval=${billingInterval}`,
+          success_url: `${origin}/checkout/success`,
+          cancel_url: `${origin}/checkout?plan=${planId}&interval=${billingInterval}`,
         }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.detail || 'Failed to create billing session');
+        throw new Error(errorData.detail || 'Failed to create checkout session');
       }
 
       const data = await response.json();
 
-      if (data.redirect_uri) {
-        // Save consent_id for verification on return
-        localStorage.setItem('pending_consent_id', data.consent_id);
-        localStorage.setItem('pending_plan_id', planId);
-        localStorage.setItem('pending_interval', billingInterval);
-        // Redirect to bank login
-        window.location.href = data.redirect_uri;
+      if (data.url) {
+        // Redirect to Stripe Checkout
+        window.location.href = data.url;
       } else {
-        throw new Error('No redirect URL returned');
+        throw new Error('No checkout URL returned');
       }
     } catch (err: any) {
       console.error('Checkout error:', err);
       setError(err.message || 'Failed to start checkout process');
       setLoading(false);
-    }
-  };
-
-  // Handle Bank Transfer
-  const handleBankTransfer = async () => {
-    if (!bankSlipFile) {
-      setError('Please upload your payment slip');
-      return;
-    }
-
-    setLoading(true);
-    setError('');
-
-    try {
-      // Upload slip to Supabase storage
-      const fileName = `payment-slips/${user.id}/${Date.now()}-${bankSlipFile.name}`;
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('payment-slips')
-        .upload(fileName, bankSlipFile);
-
-      if (uploadError) {
-        throw new Error('Failed to upload payment slip');
-      }
-
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('payment-slips')
-        .getPublicUrl(fileName);
-
-      // Submit bank transfer payment
-      const response = await fetch(`${API_URL}/api/payments/bank-transfer/submit`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          user_id: user.id,
-          plan: planId,
-          amount: finalPrice,
-          billing_interval: billingInterval,
-          bank_transfer_slip_url: publicUrl,
-          bank_transfer_reference: bankReference,
-          coupon_code: appliedCoupon?.code || null,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        router.push('/checkout/success?method=bank_transfer');
-      } else {
-        throw new Error(data.error || 'Failed to submit payment');
-      }
-    } catch (err: any) {
-      console.error('Bank transfer error:', err);
-      setError(err.message || 'Failed to submit bank transfer');
-      setLoading(false);
-    }
-  };
-
-  const handleCheckout = () => {
-    if (!user) {
-      router.push('/login?redirect=/checkout?plan=' + planId + '&interval=' + billingInterval);
-      return;
-    }
-
-    if (paymentMethod === 'bank_transfer') {
-      handleBankTransfer();
-    } else {
-      handleOpenBankingCheckout();
     }
   };
 
@@ -304,130 +231,18 @@ function CheckoutContent() {
               </div>
             </div>
 
-            {/* Payment Method Selection */}
+            {/* Payment Method Info */}
             <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-6">
               <h2 className="text-lg font-bold text-gray-900 mb-4">Payment Method</h2>
-              <div className="space-y-3">
-                {/* Open Banking (BlinkPay) */}
-                <button
-                  onClick={() => setPaymentMethod('open_banking')}
-                  className={`w-full p-4 rounded-xl border-2 transition-all text-left ${
-                    paymentMethod === 'open_banking'
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                        paymentMethod === 'open_banking' ? 'bg-blue-100' : 'bg-gray-100'
-                      }`}>
-                        <Banknote className={`w-5 h-5 ${
-                          paymentMethod === 'open_banking' ? 'text-blue-600' : 'text-gray-500'
-                        }`} />
-                      </div>
-                      <div>
-                        <p className="font-semibold text-gray-900">Pay via Bank (Open Banking)</p>
-                        <p className="text-sm text-gray-500">Secure direct bank payment - Instant</p>
-                      </div>
-                    </div>
-                    <div className="hidden sm:flex items-center gap-1 text-xs text-blue-600 bg-blue-50 border border-blue-200 px-2 py-1 rounded-md">
-                      Recommended
-                    </div>
-                  </div>
-                </button>
-
-                {/* Bank Transfer */}
-                <button
-                  onClick={() => setPaymentMethod('bank_transfer')}
-                  className={`w-full p-4 rounded-xl border-2 transition-all text-left ${
-                    paymentMethod === 'bank_transfer'
-                      ? 'border-green-500 bg-green-50'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                      paymentMethod === 'bank_transfer' ? 'bg-green-100' : 'bg-gray-100'
-                    }`}>
-                      <Building2 className={`w-5 h-5 ${
-                        paymentMethod === 'bank_transfer' ? 'text-green-600' : 'text-gray-500'
-                      }`} />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-gray-900">Bank Transfer</p>
-                      <p className="text-sm text-gray-500">Direct bank payment - Manual verification (1-2 days)</p>
-                    </div>
-                  </div>
-                </button>
-              </div>
-
-              {/* Bank Transfer Details */}
-              {paymentMethod === 'bank_transfer' && (
-                <div className="mt-6 space-y-4">
-                  <div className="bg-green-50 border border-green-200 rounded-xl p-4">
-                    <h3 className="font-semibold text-green-800 mb-3">Bank Account Details</h3>
-                    <div className="space-y-2 text-sm">
-                      <p><span className="text-gray-600">Bank:</span> <span className="font-medium">ANZ New Zealand</span></p>
-                      <p><span className="text-gray-600">Account Name:</span> <span className="font-medium">Smart Menu NZ Ltd</span></p>
-                      <p><span className="text-gray-600">Account Number:</span> <span className="font-medium font-mono">06-0123-0456789-00</span></p>
-                      <p><span className="text-gray-600">Reference:</span> <span className="font-medium">{user.email}</span></p>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Upload Payment Slip *
-                    </label>
-                    <div className="border-2 border-dashed border-gray-300 rounded-xl p-4 text-center hover:border-green-400 transition-colors">
-                      <input
-                        type="file"
-                        accept="image/*,.pdf"
-                        onChange={(e) => setBankSlipFile(e.target.files?.[0] || null)}
-                        className="hidden"
-                        id="slip-upload"
-                      />
-                      <label htmlFor="slip-upload" className="cursor-pointer">
-                        {bankSlipFile ? (
-                          <div className="flex items-center justify-center gap-2 text-green-600">
-                            <CheckCircle className="w-5 h-5" />
-                            <span>{bankSlipFile.name}</span>
-                          </div>
-                        ) : (
-                          <div className="text-gray-500">
-                            <Upload className="w-8 h-8 mx-auto mb-2" />
-                            <p>Click to upload payment slip</p>
-                            <p className="text-xs">PNG, JPG, PDF up to 5MB</p>
-                          </div>
-                        )}
-                      </label>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Transfer Reference (optional)
-                    </label>
-                    <input
-                      type="text"
-                      value={bankReference}
-                      onChange={(e) => setBankReference(e.target.value)}
-                      placeholder="e.g. Transaction ID"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
-                    />
-                  </div>
-
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
-                    <div className="flex gap-2">
-                      <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
-                      <div className="text-sm text-yellow-800">
-                        <p className="font-semibold">Processing Time</p>
-                        <p>Bank transfers are verified within 1-2 business days. Your subscription will be activated once payment is confirmed.</p>
-                      </div>
-                    </div>
-                  </div>
+              <div className="flex items-center gap-3 p-4 rounded-xl border-2 border-indigo-200 bg-indigo-50">
+                <div className="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center">
+                  <CreditCard className="w-5 h-5 text-indigo-600" />
                 </div>
-              )}
+                <div>
+                  <p className="font-semibold text-gray-900">Credit / Debit Card</p>
+                  <p className="text-sm text-gray-500">Secure payment via Stripe</p>
+                </div>
+              </div>
             </div>
 
             {/* Coupon Code */}
@@ -549,27 +364,18 @@ function CheckoutContent() {
               {/* Checkout Button */}
               <button
                 onClick={handleCheckout}
-                disabled={loading || (paymentMethod === 'bank_transfer' && !bankSlipFile)}
-                className={`w-full py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg ${
-                  paymentMethod === 'bank_transfer'
-                    ? 'bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white'
-                    : 'bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white'
-                }`}
+                disabled={loading}
+                className="w-full py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white"
               >
                 {loading ? (
                   <>
                     <Loader2 className="w-6 h-6 animate-spin" />
-                    Processing...
-                  </>
-                ) : paymentMethod === 'open_banking' ? (
-                  <>
-                    <Banknote className="w-6 h-6" />
-                    Pay via Bank
+                    Redirecting to Stripe...
                   </>
                 ) : (
                   <>
-                    <Building2 className="w-6 h-6" />
-                    Submit Bank Transfer
+                    <CreditCard className="w-6 h-6" />
+                    Subscribe Now
                   </>
                 )}
               </button>
@@ -577,12 +383,12 @@ function CheckoutContent() {
               {/* Security Badge */}
               <div className="mt-4 flex items-center justify-center gap-2 text-sm text-gray-500">
                 <Lock className="w-4 h-4" />
-                <span>Secure payment - SSL encrypted</span>
+                <span>Secure payment powered by Stripe</span>
               </div>
 
               {/* Features */}
               <div className="mt-6 pt-4 border-t border-gray-200">
-                <p className="text-sm font-semibold text-gray-700 mb-3">What's included:</p>
+                <p className="text-sm font-semibold text-gray-700 mb-3">What&apos;s included:</p>
                 <ul className="space-y-2">
                   {plan.features.slice(0, 4).map((feature, idx) => (
                     <li key={idx} className="flex items-start text-sm">

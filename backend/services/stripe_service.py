@@ -1,6 +1,6 @@
 """
 Stripe Service for Order Card Payments
-SaaS subscription billing is handled by BlinkPay (see blinkpay_service.py).
+SaaS subscription billing is handled by stripe_subscription_service.py.
 """
 
 import os

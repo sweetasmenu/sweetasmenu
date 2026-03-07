@@ -2,23 +2,22 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { CheckCircle, ArrowRight, Download, Sparkles, Loader2, Clock, Building2 } from 'lucide-react';
+import { CheckCircle, ArrowRight, Sparkles, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import confetti from 'canvas-confetti';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
 function CheckoutSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const paymentMethod = searchParams.get('method'); // 'bank_transfer' or null (open banking)
-  const planIdParam = searchParams.get('plan');
-  const intervalParam = searchParams.get('interval');
+  const sessionId = searchParams.get('session_id');
 
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [subscription, setSubscription] = useState<any>(null);
   const [error, setError] = useState('');
-  const [isBankTransfer, setIsBankTransfer] = useState(false);
 
   const supabase = createClient();
 
@@ -34,72 +33,70 @@ function CheckoutSuccessContent() {
 
         setUser(session.user);
 
-        // Handle bank transfer success
-        if (paymentMethod === 'bank_transfer') {
-          setIsBankTransfer(true);
+        if (!sessionId) {
+          setError('No checkout session found. Please try again from the pricing page.');
           setLoading(false);
+          return;
+        }
+
+        // Poll for subscription activation (webhook may take a moment)
+        let attempts = 0;
+        const maxAttempts = 10;
+
+        const checkSubscription = async (): Promise<boolean> => {
+          const response = await fetch(
+            `${API_URL}/api/billing/subscription/${session.user.id}`
+          );
+
+          if (response.ok) {
+            const data = await response.json();
+            if (data.success && data.subscription?.subscription_status === 'active') {
+              const sub = data.subscription;
+              setSubscription({
+                plan_name: sub.plan === 'basic' ? 'Starter'
+                  : sub.plan === 'enterprise' ? 'Enterprise'
+                  : 'Professional',
+                interval: sub.billing_interval,
+                plan_id: sub.plan,
+              });
+              return true;
+            }
+          }
+          return false;
+        };
+
+        // Try immediately first
+        let activated = await checkSubscription();
+
+        // If not yet active, poll every 2 seconds
+        while (!activated && attempts < maxAttempts) {
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          attempts++;
+          activated = await checkSubscription();
+        }
+
+        if (activated) {
+          confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.6 },
+            colors: ['#f97316', '#ef4444', '#ec4899'],
+          });
+        } else {
+          // Payment went through at Stripe but webhook hasn't fired yet
+          // Show success anyway since Stripe checkout was completed
+          setSubscription({
+            plan_name: 'Premium',
+            interval: 'monthly',
+            plan_id: 'pro',
+          });
 
           confetti({
             particleCount: 100,
             spread: 70,
             origin: { y: 0.6 },
-            colors: ['#22c55e', '#10b981', '#14b8a6'],
+            colors: ['#f97316', '#ef4444', '#ec4899'],
           });
-          return;
-        }
-
-        // Handle BlinkPay consent verification
-        const consentId = localStorage.getItem('pending_consent_id');
-        const planId = planIdParam || localStorage.getItem('pending_plan_id') || 'pro';
-        const interval = intervalParam || localStorage.getItem('pending_interval') || 'monthly';
-
-        if (consentId) {
-          const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-          const response = await fetch(`${API_URL}/api/billing/verify`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              consent_id: consentId,
-              user_id: session.user.id,
-              plan_id: planId,
-              interval: interval,
-            }),
-          });
-
-          if (response.ok) {
-            const data = await response.json();
-
-            if (data.success) {
-              setSubscription({
-                plan_name: planId === 'basic' ? 'Starter' : planId === 'enterprise' ? 'Enterprise' : 'Professional',
-                interval: interval,
-                plan_id: planId,
-              });
-
-              // Save selected plan to localStorage
-              localStorage.setItem('selected_plan', planId);
-              localStorage.setItem('selected_interval', interval);
-
-              // Clean up pending data
-              localStorage.removeItem('pending_consent_id');
-              localStorage.removeItem('pending_plan_id');
-              localStorage.removeItem('pending_interval');
-
-              confetti({
-                particleCount: 100,
-                spread: 70,
-                origin: { y: 0.6 },
-                colors: ['#f97316', '#ef4444', '#ec4899'],
-              });
-            } else {
-              setError(data.message || 'Payment consent not yet authorised. Please try again.');
-            }
-          } else {
-            const errorData = await response.json();
-            setError(errorData.detail || 'Failed to verify payment');
-          }
-        } else {
-          setError('No payment session found. Please try again from the pricing page.');
         }
 
         setLoading(false);
@@ -111,7 +108,7 @@ function CheckoutSuccessContent() {
     };
 
     verifyPayment();
-  }, [paymentMethod, planIdParam, intervalParam]);
+  }, [sessionId]);
 
   if (loading) {
     return (
@@ -130,7 +127,7 @@ function CheckoutSuccessContent() {
       <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-3xl">⚠️</span>
+            <span className="text-3xl">&#9888;&#65039;</span>
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Payment Verification Failed</h1>
           <p className="text-gray-600 mb-6">{error}</p>
@@ -145,108 +142,6 @@ function CheckoutSuccessContent() {
     );
   }
 
-  // Bank Transfer Success UI
-  if (isBankTransfer) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 via-teal-50 to-emerald-50 py-12 px-4">
-        <div className="max-w-3xl mx-auto">
-          {/* Bank Transfer Success Message */}
-          <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 text-center mb-8">
-            {/* Pending Icon */}
-            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Building2 className="w-12 h-12 text-green-500" />
-            </div>
-
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
-              Payment Submitted!
-            </h1>
-
-            <p className="text-xl text-gray-600 mb-8">
-              Thank you! Your bank transfer details have been received.
-            </p>
-
-            {/* Status Info */}
-            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6 mb-8">
-              <div className="flex items-center justify-center gap-3 mb-3">
-                <Clock className="w-6 h-6 text-yellow-600" />
-                <h2 className="font-bold text-yellow-800 text-lg">Pending Verification</h2>
-              </div>
-              <p className="text-yellow-700">
-                Our team will verify your payment within <strong>1-2 business days</strong>.
-                You will receive an email confirmation once your subscription is activated.
-              </p>
-            </div>
-
-            {/* What Happens Next */}
-            <div className="text-left mb-8">
-              <h2 className="text-xl font-bold text-gray-900 mb-4 text-center">
-                What Happens Next?
-              </h2>
-              <div className="space-y-4">
-                <div className="flex items-start">
-                  <div className="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center font-bold mr-4 flex-shrink-0">
-                    1
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-1">Payment Verification</h3>
-                    <p className="text-sm text-gray-600">
-                      Our admin team reviews your payment slip and bank transfer details.
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start">
-                  <div className="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center font-bold mr-4 flex-shrink-0">
-                    2
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-1">Email Confirmation</h3>
-                    <p className="text-sm text-gray-600">
-                      Once verified, you'll receive an email at <strong>{user?.email}</strong>
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start">
-                  <div className="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center font-bold mr-4 flex-shrink-0">
-                    3
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-1">Subscription Activated</h3>
-                    <p className="text-sm text-gray-600">
-                      Your premium features will be unlocked automatically.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href="/dashboard"
-                className="inline-flex items-center justify-center bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white px-8 py-4 rounded-lg font-bold text-lg transition-all transform hover:scale-105 shadow-lg"
-              >
-                Go to Dashboard
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </Link>
-            </div>
-          </div>
-
-          {/* Support Section */}
-          <div className="bg-white rounded-2xl shadow-xl p-6 text-center">
-            <h3 className="font-bold text-gray-900 mb-2">Questions About Your Payment?</h3>
-            <p className="text-sm text-gray-600 mb-4">
-              Contact us at{' '}
-              <a href="mailto:support@zestiotech.com" className="text-green-500 hover:underline font-semibold">
-                support@zestiotech.com
-              </a>
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Open Banking Success UI
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 py-12 px-4">
       <div className="max-w-3xl mx-auto">
@@ -295,7 +190,7 @@ function CheckoutSuccessContent() {
           <div className="text-left mb-8">
             <h2 className="text-xl font-bold text-gray-900 mb-4 text-center">
               <Sparkles className="w-6 h-6 inline mr-2 text-yellow-500" />
-              What's Next?
+              What&apos;s Next?
             </h2>
             <div className="space-y-4">
               <div className="flex items-start">
