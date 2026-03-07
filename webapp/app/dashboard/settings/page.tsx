@@ -87,6 +87,7 @@ interface Subscription {
   current_period_start: string | null;
   current_period_end: string | null;
   next_billing_date: string | null;
+  billing_interval?: string | null;
   cancel_at_period_end: boolean;
   role?: string; // User role from some API responses
   billing_provider?: string | null;
@@ -1468,6 +1469,24 @@ function SettingsContent() {
       month: '2-digit',
       year: 'numeric',
     });
+  };
+
+  const getNextBillingDate = () => {
+    if (!profile) return null;
+    const sub = profile.subscription;
+    if (sub.next_billing_date) return sub.next_billing_date;
+    if (sub.current_period_end) return sub.current_period_end;
+    // Compute from start date + billing interval
+    if (sub.current_period_start && sub.billing_interval) {
+      const start = new Date(sub.current_period_start);
+      if (sub.billing_interval === 'yearly') {
+        start.setFullYear(start.getFullYear() + 1);
+      } else {
+        start.setMonth(start.getMonth() + 1);
+      }
+      return start.toISOString();
+    }
+    return null;
   };
 
   const getPlanDisplayName = (plan: string) => {
@@ -3634,14 +3653,10 @@ function SettingsContent() {
                 <div className="sm:text-right">
                   {profile.subscription.is_subscribed ? (
                     <>
-                      {profile.subscription.next_billing_date && (
-                        <p className="text-blue-100 text-sm mb-1">Next Billing</p>
-                      )}
+                      <p className="text-blue-100 text-sm mb-1">Next Billing</p>
                       <p className="text-lg font-semibold">
-                        {profile.subscription.next_billing_date
-                          ? formatDate(profile.subscription.next_billing_date)
-                          : profile.subscription.current_period_end
-                          ? `Expires: ${formatDate(profile.subscription.current_period_end)}`
+                        {getNextBillingDate()
+                          ? formatDate(getNextBillingDate())
                           : 'N/A'}
                       </p>
                     </>
@@ -3695,7 +3710,7 @@ function SettingsContent() {
               {profile.subscription.current_period_start && (
                 <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0 py-3 border-b border-gray-200">
                   <span className="text-gray-600">Subscription Started</span>
-                  <span className="font-medium">
+                  <span className="font-medium text-gray-900">
                     {formatDate(profile.subscription.current_period_start)}
                   </span>
                 </div>
@@ -3715,11 +3730,11 @@ function SettingsContent() {
 
               {profile.subscription.is_subscribed && (
                 <>
-                  {profile.subscription.next_billing_date && (
+                  {getNextBillingDate() && (
                     <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0 py-3 border-b border-gray-200">
                       <span className="text-gray-600">Next Billing Date</span>
-                      <span className="font-medium">
-                        {formatDate(profile.subscription.next_billing_date)}
+                      <span className="font-medium text-gray-900">
+                        {formatDate(getNextBillingDate())}
                       </span>
                     </div>
                   )}

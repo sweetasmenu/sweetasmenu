@@ -3100,6 +3100,8 @@ async def get_user_profile(
         cancel_at_period_end = user_profile.get('cancel_at_period_end', False) if user_profile else False
         billing_provider = user_profile.get('billing_provider') if user_profile else None
 
+        billing_interval = user_profile.get('billing_interval') if user_profile else None
+
         subscription_data = {
             "plan": plan_from_role,
             "role": user_role,
@@ -3109,6 +3111,7 @@ async def get_user_profile(
             "current_period_start": subscription_start_date,
             "current_period_end": subscription_end_date,
             "next_billing_date": next_billing_date,
+            "billing_interval": billing_interval,
             "cancel_at_period_end": cancel_at_period_end,
             "billing_provider": billing_provider,
         }
