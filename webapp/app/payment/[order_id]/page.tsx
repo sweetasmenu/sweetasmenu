@@ -746,14 +746,20 @@ export default function PaymentPage() {
     const orderTrackingUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/order-status/${order?.id}?${statusParams.toString()}`;
     const menuUrl = `/restaurant/${restaurantSlug || restaurant?.slug || order?.restaurant_id}`;
 
-    // Save order ID to localStorage for order history
+    // Save order to localStorage for order history (as object with restaurantId)
     if (typeof window !== 'undefined' && order?.id) {
       const existingOrders = JSON.parse(localStorage.getItem('my_orders') || '[]');
-      if (!existingOrders.includes(order.id)) {
-        existingOrders.unshift(order.id);
-        // Keep only last 20 orders
-        localStorage.setItem('my_orders', JSON.stringify(existingOrders.slice(0, 20)));
-      }
+      const slug = restaurantSlug || restaurant?.slug || order?.restaurant_id || '';
+      const newOrder = {
+        orderId: order.id,
+        restaurantId: slug,
+        restaurantName: restaurant?.name || 'Restaurant',
+        createdAt: new Date().toISOString(),
+      };
+      const updatedOrders = [newOrder, ...existingOrders.filter((o: any) =>
+        (typeof o === 'string' ? o : o.orderId) !== order.id
+      )].slice(0, 20);
+      localStorage.setItem('my_orders', JSON.stringify(updatedOrders));
     }
 
     return (
