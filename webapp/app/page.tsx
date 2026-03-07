@@ -934,8 +934,8 @@ export default function HomePage() {
               <h4 className="text-white font-medium mb-4 sm:mb-6 tracking-wide uppercase text-xs sm:text-sm">Contact</h4>
               <ul className="space-y-2 sm:space-y-3 text-neutral-500 text-xs sm:text-sm">
                 <li><a href="mailto:support@sweetasmenu.com" className="hover:text-amber-500 transition-colors break-all">support@sweetasmenu.com</a></li>
-                <li>8/28 Setthasiri Rama 5</li>
-                <li>Nonthaburi, Thailand 11000</li>
+                <li>25 Fraser Ave, Johnsonville</li>
+                <li>Wellington, 6037</li>
               </ul>
 
               {/* Social Links */}
