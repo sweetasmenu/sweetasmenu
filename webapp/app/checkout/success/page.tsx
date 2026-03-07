@@ -13,6 +13,8 @@ function CheckoutSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const sessionId = searchParams.get('session_id');
+  const planParam = searchParams.get('plan');
+  const intervalParam = searchParams.get('interval');
 
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
@@ -20,6 +22,16 @@ function CheckoutSuccessContent() {
   const [error, setError] = useState('');
 
   const supabase = createClient();
+
+  const getPlanDisplayName = (planId: string | null) => {
+    if (!planId) return 'Professional';
+    const names: Record<string, string> = {
+      'basic': 'Starter',
+      'pro': 'Professional',
+      'enterprise': 'Enterprise',
+    };
+    return names[planId] || 'Professional';
+  };
 
   useEffect(() => {
     const verifyPayment = async () => {
@@ -75,29 +87,22 @@ function CheckoutSuccessContent() {
           activated = await checkSubscription();
         }
 
-        if (activated) {
-          confetti({
-            particleCount: 100,
-            spread: 70,
-            origin: { y: 0.6 },
-            colors: ['#f97316', '#ef4444', '#ec4899'],
-          });
-        } else {
+        if (!activated) {
           // Payment went through at Stripe but webhook hasn't fired yet
-          // Show success anyway since Stripe checkout was completed
+          // Show success with plan info from URL params
           setSubscription({
-            plan_name: 'Premium',
-            interval: 'monthly',
-            plan_id: 'pro',
-          });
-
-          confetti({
-            particleCount: 100,
-            spread: 70,
-            origin: { y: 0.6 },
-            colors: ['#f97316', '#ef4444', '#ec4899'],
+            plan_name: getPlanDisplayName(planParam),
+            interval: intervalParam || 'monthly',
+            plan_id: planParam || 'pro',
           });
         }
+
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ['#f97316', '#ef4444', '#ec4899'],
+        });
 
         setLoading(false);
       } catch (err: any) {
@@ -157,7 +162,7 @@ function CheckoutSuccessContent() {
           </h1>
 
           <p className="text-xl text-gray-600 mb-8">
-            Welcome to {subscription?.plan_name || 'Premium'}! Your subscription is now active.
+            Welcome to {subscription?.plan_name || getPlanDisplayName(planParam)}! Your subscription is now active.
           </p>
 
           {/* Subscription Details */}

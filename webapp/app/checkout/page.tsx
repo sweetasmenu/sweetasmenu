@@ -135,7 +135,7 @@ function CheckoutContent() {
           user_email: user.email,
           plan_id: planId,
           interval: billingInterval,
-          success_url: `${origin}/checkout/success`,
+          success_url: `${origin}/checkout/success?plan=${planId}&interval=${billingInterval}`,
           cancel_url: `${origin}/checkout?plan=${planId}&interval=${billingInterval}`,
         }),
       });
