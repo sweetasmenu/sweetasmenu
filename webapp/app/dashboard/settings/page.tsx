@@ -3716,17 +3716,6 @@ function SettingsContent() {
                 </div>
               )}
 
-              {/* Subscription End/Expiry Date */}
-              {profile.subscription.current_period_end && (
-                <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0 py-3 border-b border-gray-200">
-                  <span className="text-gray-600">
-                    {profile.subscription.is_subscribed ? 'Current Period Ends' : 'Expires On'}
-                  </span>
-                  <span className="font-medium">
-                    {formatDate(profile.subscription.current_period_end)}
-                  </span>
-                </div>
-              )}
 
               {profile.subscription.is_subscribed && (
                 <>
