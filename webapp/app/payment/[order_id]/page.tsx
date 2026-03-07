@@ -104,7 +104,7 @@ function StripePaymentForm({
       return;
     }
 
-    if (paymentIntent && paymentIntent.status === 'succeeded') {
+    if (paymentIntent && (paymentIntent.status === 'succeeded' || paymentIntent.status === 'processing')) {
       // Confirm payment on backend - update order status from pending_payment to pending
       try {
         const confirmResponse = await fetch(`${API_URL}/api/payments/confirm`, {
@@ -141,6 +141,16 @@ function StripePaymentForm({
         }
         onSuccess(); // Still proceed to success since Stripe payment worked
       }
+    } else if (paymentIntent && paymentIntent.status === 'requires_action') {
+      // 3D Secure or other action required - Stripe handles this automatically
+      // If we reach here, the action failed or was cancelled
+      setError('Payment requires additional verification. Please try again.');
+      setProcessing(false);
+    } else {
+      // Unknown status - reset processing state
+      console.error('Unexpected payment status:', paymentIntent?.status);
+      setError('Payment could not be completed. Please try again.');
+      setProcessing(false);
     }
   };
 
