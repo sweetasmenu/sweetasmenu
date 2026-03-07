@@ -90,21 +90,23 @@ class StripeService:
         except Exception as e:
             raise Exception(f"Failed to create payment intent: {str(e)}")
 
-    def retrieve_payment_intent(self, payment_intent_id: str) -> Dict[str, Any]:
+    def retrieve_payment_intent(self, payment_intent_id: str, api_key: str = None) -> Dict[str, Any]:
         """
         Retrieve a Payment Intent to check its status
 
         Args:
             payment_intent_id: Stripe Payment Intent ID
+            api_key: Optional Stripe API key (restaurant's key if PI was created with it)
 
         Returns:
             Dictionary with payment details
         """
         try:
-            if not self.api_key:
+            effective_key = api_key or self.api_key
+            if not effective_key:
                 raise Exception("Stripe API key not configured")
 
-            intent = stripe.PaymentIntent.retrieve(payment_intent_id)
+            intent = stripe.PaymentIntent.retrieve(payment_intent_id, api_key=effective_key)
 
             return {
                 'payment_intent_id': intent.id,
@@ -122,22 +124,24 @@ class StripeService:
         except Exception as e:
             raise Exception(f"Failed to retrieve payment intent: {str(e)}")
 
-    def confirm_payment(self, payment_intent_id: str, order_id: str = None) -> Dict[str, Any]:
+    def confirm_payment(self, payment_intent_id: str, order_id: str = None, api_key: str = None) -> Dict[str, Any]:
         """
         Confirm/verify that a payment was successful
 
         Args:
             payment_intent_id: Stripe Payment Intent ID
             order_id: Order ID to verify (optional, for extra validation)
+            api_key: Optional Stripe API key (restaurant's key if PI was created with it)
 
         Returns:
             Dictionary with verification result
         """
         try:
-            if not self.api_key:
+            effective_key = api_key or self.api_key
+            if not effective_key:
                 raise Exception("Stripe API key not configured")
 
-            intent = stripe.PaymentIntent.retrieve(payment_intent_id)
+            intent = stripe.PaymentIntent.retrieve(payment_intent_id, api_key=effective_key)
 
             # Verify order_id if provided (soft check - log warning but don't fail)
             stored_order_id = intent.metadata.get('order_id')

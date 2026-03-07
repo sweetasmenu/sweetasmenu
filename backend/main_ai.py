@@ -2014,10 +2014,24 @@ async def confirm_payment(request: ConfirmPaymentRequest):
     try:
         print(f"🔄 Confirming payment for order {request.order_id}, payment_intent: {request.payment_intent_id}")
 
-        # Verify payment with Stripe
+        # Get the restaurant's Stripe key (PaymentIntent was created with it)
+        restaurant_stripe_key = None
+        try:
+            order = orders_service.get_order(request.order_id)
+            if order and order.get('restaurant_id'):
+                restaurant_result = supabase_client.table('restaurants').select(
+                    'stripe_secret_key'
+                ).eq('id', order['restaurant_id']).limit(1).execute()
+                if restaurant_result.data and restaurant_result.data[0].get('stripe_secret_key'):
+                    restaurant_stripe_key = restaurant_result.data[0]['stripe_secret_key']
+        except Exception as db_err:
+            print(f"⚠️ Failed to get restaurant Stripe key: {db_err}")
+
+        # Verify payment with Stripe (use restaurant key if available)
         result = stripe_service.confirm_payment(
             payment_intent_id=request.payment_intent_id,
-            order_id=request.order_id
+            order_id=request.order_id,
+            api_key=restaurant_stripe_key,
         )
 
         print(f"📋 Stripe confirmation result: paid={result.get('paid')}, status={result.get('status')}")
@@ -2063,13 +2077,25 @@ async def confirm_payment(request: ConfirmPaymentRequest):
 
 
 @app.get("/api/payments/status/{payment_intent_id}", summary="Get Payment Status")
-async def get_payment_status(payment_intent_id: str):
+async def get_payment_status(payment_intent_id: str, restaurant_id: str = None):
     """
     ตรวจสอบสถานะการชำระเงินจาก Stripe Payment Intent
     Used by POS to verify payment before confirming order
     """
     try:
-        result = stripe_service.retrieve_payment_intent(payment_intent_id)
+        # Look up restaurant's Stripe key if restaurant_id provided
+        restaurant_stripe_key = None
+        if restaurant_id:
+            try:
+                restaurant_result = supabase_client.table('restaurants').select(
+                    'stripe_secret_key'
+                ).eq('id', restaurant_id).limit(1).execute()
+                if restaurant_result.data and restaurant_result.data[0].get('stripe_secret_key'):
+                    restaurant_stripe_key = restaurant_result.data[0]['stripe_secret_key']
+            except Exception:
+                pass
+
+        result = stripe_service.retrieve_payment_intent(payment_intent_id, api_key=restaurant_stripe_key)
 
         return {
             "success": True,
