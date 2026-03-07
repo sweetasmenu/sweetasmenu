@@ -1882,10 +1882,11 @@ async def stripe_subscription_webhook(request: Request):
     Events: checkout.session.completed, customer.subscription.updated,
     customer.subscription.deleted, invoice.payment_failed
     """
-    try:
-        payload = await request.body()
-        sig_header = request.headers.get('stripe-signature', '')
+    # Read raw body FIRST before anything else can consume the stream
+    payload = await request.body()
+    sig_header = request.headers.get('stripe-signature', '')
 
+    try:
         result = stripe_subscription_service.handle_webhook_event(
             payload=payload,
             sig_header=sig_header,
@@ -1896,7 +1897,7 @@ async def stripe_subscription_webhook(request: Request):
 
     except Exception as e:
         print(f"Stripe subscription webhook error: {str(e)}")
-        return {"received": True, "error": str(e)}
+        raise HTTPException(status_code=400, detail=str(e))
 
 # ============================================================
 # Payment System Routes (Order Payments)

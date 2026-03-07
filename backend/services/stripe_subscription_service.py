@@ -171,12 +171,21 @@ class StripeSubscriptionService:
         """
         Process Stripe webhook events for subscription lifecycle.
         """
+        # Read webhook secret fresh from env (not cached) to avoid init-order issues
+        webhook_secret = os.getenv('STRIPE_SUBSCRIPTION_WEBHOOK_SECRET', '') or self.webhook_secret
+
+        if not webhook_secret:
+            print("ERROR: STRIPE_SUBSCRIPTION_WEBHOOK_SECRET is not set")
+            raise Exception("Webhook secret not configured")
+
         try:
             event = stripe.Webhook.construct_event(
-                payload, sig_header, self.webhook_secret
+                payload, sig_header, webhook_secret
             )
-        except stripe.error.SignatureVerificationError:
-            raise Exception("Invalid webhook signature")
+        except (stripe.SignatureVerificationError if hasattr(stripe, 'SignatureVerificationError') else stripe.error.SignatureVerificationError) as e:
+            print(f"Webhook signature verification failed: {str(e)}")
+            print(f"Secret length: {len(webhook_secret)}, sig_header present: {bool(sig_header)}, payload length: {len(payload)}")
+            raise Exception(f"Invalid webhook signature: {str(e)}")
 
         event_type = event['type']
         data = event['data']['object']

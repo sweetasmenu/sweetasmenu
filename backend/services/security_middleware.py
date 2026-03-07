@@ -244,8 +244,8 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                 }
             )
 
-        # Skip rate limiting for health checks
-        if request.url.path in ["/", "/health", "/api/health"]:
+        # Skip rate limiting for health checks and webhooks
+        if request.url.path in ["/", "/health", "/api/health"] or request.url.path.startswith("/api/webhooks/"):
             response = await call_next(request)
             return response
 
