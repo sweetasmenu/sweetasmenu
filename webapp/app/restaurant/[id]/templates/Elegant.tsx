@@ -101,7 +101,7 @@ export default function Elegant({ menus, groupedMenus, themeColor, onItemClick, 
                     <div className={`relative bg-gray-200 ${
                       menu.is_best_seller ? 'w-full lg:w-1/2' : 'w-full lg:w-1/3'
                     }`}>
-                      <div className={menu.is_best_seller ? 'h-56 sm:h-80' : 'h-48 sm:h-64'}>
+                      <div className={menu.is_best_seller ? 'h-44 sm:h-80' : 'h-36 sm:h-64'}>
                         <ProtectedImage
                           src={menu.photo_url}
                           alt={menu.name}
@@ -128,7 +128,7 @@ export default function Elegant({ menus, groupedMenus, themeColor, onItemClick, 
                   )}
 
                   {/* Content */}
-                  <div className={`p-4 sm:p-6 lg:p-8 flex-1 flex flex-col justify-center ${
+                  <div className={`p-3 sm:p-6 lg:p-8 flex-1 flex flex-col justify-center ${
                     menu.is_best_seller ? 'bg-gradient-to-br from-orange-50 to-transparent' : ''
                   }`}>
                     {/* Name */}

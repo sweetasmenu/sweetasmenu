@@ -89,7 +89,7 @@ export default function ClassicList({ menus, groupedMenus, themeColor, onItemCli
                 <div className="flex flex-col sm:flex-row">
                   {/* Photo */}
                   {menu.photo_url && (
-                    <div className="w-full sm:w-32 h-48 sm:h-32 flex-shrink-0 bg-gray-200">
+                    <div className="w-full sm:w-32 h-36 sm:h-32 flex-shrink-0 bg-gray-200">
                       <ProtectedImage
                         src={menu.photo_url}
                         alt={menu.name}

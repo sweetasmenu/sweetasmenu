@@ -100,7 +100,7 @@ export default function MagazineStyle({ menus, groupedMenus, themeColor, onItemC
                     >
                       {/* Large Photo for Best Sellers */}
                       {menu.photo_url && (
-                        <div className="relative w-full h-48 sm:h-64 bg-gray-200">
+                        <div className="relative w-full h-36 sm:h-64 bg-gray-200">
                           <ProtectedImage
                             src={menu.photo_url}
                             alt={menu.name}
@@ -118,8 +118,8 @@ export default function MagazineStyle({ menus, groupedMenus, themeColor, onItemC
                       )}
 
                       {/* Content */}
-                      <div className="p-4 sm:p-6">
-                        <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+                      <div className="p-3 sm:p-6">
+                        <h3 className="text-base sm:text-2xl font-bold text-gray-900 mb-2">
                           {selectedLanguage === 'en' && menu.nameEn ? menu.nameEn : menu.name}
                         </h3>
 
@@ -131,16 +131,16 @@ export default function MagazineStyle({ menus, groupedMenus, themeColor, onItemC
 
                         {/* Price & Button */}
                         <div className="flex items-center justify-between">
-                          <span className="text-2xl sm:text-3xl font-bold" style={{ color: themeColor }}>
+                          <span className="text-lg sm:text-3xl font-bold" style={{ color: themeColor }}>
                             ${menu.price}
-                            <span className="text-sm sm:text-lg ml-1 text-gray-500">NZD</span>
+                            <span className="text-xs sm:text-lg ml-1 text-gray-500">NZD</span>
                           </span>
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               onItemClick(menu);
                             }}
-                            className="px-4 py-2 sm:px-6 sm:py-3 text-white rounded-lg font-bold transition-all hover:scale-105 shadow-lg flex items-center gap-1 sm:gap-2 text-sm sm:text-base"
+                            className="px-3 py-1.5 sm:px-6 sm:py-3 text-white rounded-lg font-bold transition-all hover:scale-105 shadow-lg flex items-center gap-1 sm:gap-2 text-xs sm:text-base"
                             style={{ backgroundColor: themeColor }}
                           >
                             <Plus className="w-5 h-5" />
@@ -165,7 +165,7 @@ export default function MagazineStyle({ menus, groupedMenus, themeColor, onItemC
                   >
                     {/* Photo */}
                     {menu.photo_url && (
-                      <div className="w-full h-32 bg-gray-200">
+                      <div className="w-full h-28 sm:h-32 bg-gray-200">
                         <ProtectedImage
                           src={menu.photo_url}
                           alt={menu.name}

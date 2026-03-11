@@ -205,7 +205,7 @@ export default function GridView({ menus, groupedMenus, themeColor, onItemClick,
                   {items.map((menu, menuIdx) => (
                     <div
                       key={menu.menu_id}
-                      className="flex-shrink-0 w-[280px] sm:w-[300px] md:w-[320px] bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all cursor-pointer transform hover:-translate-y-1"
+                      className="flex-shrink-0 w-[200px] sm:w-[300px] md:w-[320px] bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all cursor-pointer transform hover:-translate-y-1"
                       onClick={() => onItemClick(menu)}
                     >
                       {/* Photo - Fixed aspect ratio */}
@@ -238,8 +238,8 @@ export default function GridView({ menus, groupedMenus, themeColor, onItemClick,
                       </div>
 
                       {/* Content */}
-                      <div className="p-3 sm:p-5">
-                        <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2 line-clamp-1">
+                      <div className="p-2.5 sm:p-5">
+                        <h3 className="text-sm sm:text-lg font-bold text-gray-900 mb-2 line-clamp-1">
                           {selectedLanguage === 'en' && menu.nameEn ? menu.nameEn : menu.name}
                         </h3>
                         {menu.description && (
@@ -279,7 +279,7 @@ export default function GridView({ menus, groupedMenus, themeColor, onItemClick,
               </div>
             ) : (
               /* Grid View - When expanded or <= 3 items */
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
                 {items.map((menu, menuIdx) => (
                   <div
                     key={menu.menu_id}
@@ -316,9 +316,9 @@ export default function GridView({ menus, groupedMenus, themeColor, onItemClick,
                     </div>
 
                     {/* Content */}
-                    <div className="p-4 sm:p-6">
+                    <div className="p-2.5 sm:p-6">
                       <div className="mb-2">
-                        <h3 className="text-lg sm:text-xl font-bold text-gray-900 flex items-center gap-2">
+                        <h3 className="text-sm sm:text-xl font-bold text-gray-900 flex items-center gap-2">
                           {selectedLanguage === 'en' && menu.nameEn ? menu.nameEn : menu.name}
                           {menu.is_best_seller && !menu.photo_url && (
                             <Star className="w-4 h-4 fill-orange-500 text-orange-500" />
@@ -326,12 +326,12 @@ export default function GridView({ menus, groupedMenus, themeColor, onItemClick,
                         </h3>
                       </div>
                       {menu.description && (
-                        <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                        <p className="text-sm text-gray-600 mb-4 line-clamp-1 sm:line-clamp-2">
                           {selectedLanguage === 'en' && menu.descriptionEn ? menu.descriptionEn : menu.description}
                         </p>
                       )}
                       <div className="flex items-center justify-between">
-                        <span className="text-xl sm:text-2xl font-bold" style={{ color: themeColor }}>
+                        <span className="text-base sm:text-2xl font-bold" style={{ color: themeColor }}>
                           ${menu.price}
                         </span>
                         <button
@@ -339,7 +339,7 @@ export default function GridView({ menus, groupedMenus, themeColor, onItemClick,
                             e.stopPropagation();
                             onItemClick(menu);
                           }}
-                          className="px-3 py-1.5 sm:px-4 sm:py-2 text-white rounded-lg font-semibold transition-all hover:scale-105 flex items-center gap-1 sm:gap-2 text-sm sm:text-base"
+                          className="px-2 py-1 sm:px-4 sm:py-2 text-white rounded-lg font-semibold transition-all hover:scale-105 flex items-center gap-1 sm:gap-2 text-xs sm:text-base"
                           style={{ backgroundColor: themeColor }}
                         >
                           <Plus className="w-4 h-4" />

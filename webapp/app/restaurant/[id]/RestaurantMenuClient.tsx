@@ -2511,7 +2511,7 @@ function ItemModal({
           {/* Photo - Clickable for Preview (Protected from right-click save) */}
           {menu.photo_url && (
             <div className="mb-3 sm:mb-4">
-              <div className="w-full h-44 sm:h-56 md:h-64 rounded-xl overflow-hidden bg-gray-100 hover:opacity-90 transition-opacity">
+              <div className="w-full h-36 sm:h-56 md:h-64 rounded-xl overflow-hidden bg-gray-100 hover:opacity-90 transition-opacity">
                 <ProtectedImage
                   src={menu.photo_url}
                   alt={menu.name}
@@ -2521,7 +2521,7 @@ function ItemModal({
                   priority
                 />
               </div>
-              <p className="text-xs text-gray-400 text-center mt-1">Tap image to view full size</p>
+              <p className="text-xs text-gray-400 text-center mt-1 hidden sm:block">Tap image to view full size</p>
             </div>
           )}
 
@@ -2534,7 +2534,7 @@ function ItemModal({
 
           {/* Meats Selection - Required when meats exist */}
           {menu.meats && menu.meats.filter(m => m.is_available !== false).length > 0 && (
-            <div className="mb-4 sm:mb-6">
+            <div className="mb-3 sm:mb-6">
               <h3 className="font-semibold text-gray-900 mb-2 sm:mb-3 text-sm sm:text-base">
                 Choose Meat: <span className="text-red-500">*</span>
               </h3>
@@ -2580,7 +2580,7 @@ function ItemModal({
 
           {/* Add-ons Selection */}
           {menu.addOns && menu.addOns.filter(a => a.is_available !== false).length > 0 && (
-            <div className="mb-4 sm:mb-6">
+            <div className="mb-3 sm:mb-6">
               <h3 className="font-semibold text-gray-900 mb-2 sm:mb-3 text-sm sm:text-base">Add-ons (Optional):</h3>
               <div className="space-y-1.5 sm:space-y-2">
                 {menu.addOns.filter(a => a.is_available !== false).map((addon, idx) => {
@@ -2622,7 +2622,7 @@ function ItemModal({
           )}
 
           {/* Quantity */}
-          <div className="mb-4 sm:mb-6">
+          <div className="mb-3 sm:mb-6">
             <h3 className="font-semibold text-gray-900 mb-2 sm:mb-3 text-sm sm:text-base">Quantity:</h3>
             <div className="flex items-center gap-3 sm:gap-4">
               <button
@@ -2644,7 +2644,7 @@ function ItemModal({
           </div>
 
           {/* Notes */}
-          <div className="mb-4 sm:mb-6">
+          <div className="mb-3 sm:mb-6">
             <h3 className="font-semibold text-gray-900 mb-2 sm:mb-3 text-sm sm:text-base">Special Instructions (Optional):</h3>
             <textarea
               value={notes}
@@ -2659,7 +2659,7 @@ function ItemModal({
           <div className="flex items-center justify-between pt-3 sm:pt-4 border-t border-gray-200 pb-2 sm:pb-0">
             <div>
               <p className="text-xs sm:text-sm text-gray-600">Total Price:</p>
-              <p className="text-2xl sm:text-3xl font-bold text-orange-500">
+              <p className="text-xl sm:text-3xl font-bold text-orange-500">
                 ${calculatePrice().toFixed(2)} NZD
               </p>
             </div>

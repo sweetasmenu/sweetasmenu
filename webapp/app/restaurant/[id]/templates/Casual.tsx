@@ -77,7 +77,7 @@ export default function Casual({ menus, groupedMenus, themeColor, onItemClick, s
           )}
           
           {/* Items Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
             {items.map((menu) => (
               <div
                 key={menu.menu_id}
@@ -90,7 +90,7 @@ export default function Casual({ menus, groupedMenus, themeColor, onItemClick, s
               >
                 {/* Photo with Fun Overlay */}
                 {menu.photo_url ? (
-                  <div className="relative w-full h-48 bg-gray-200">
+                  <div className="relative w-full h-32 sm:h-48 bg-gray-200">
                     <ProtectedImage
                       src={menu.photo_url}
                       alt={menu.name}
@@ -103,10 +103,10 @@ export default function Casual({ menus, groupedMenus, themeColor, onItemClick, s
                         <div className="relative">
                           {/* Starburst effect */}
                           <div className="absolute inset-0 animate-ping opacity-50">
-                            <Star className="w-12 h-12 fill-yellow-400 text-yellow-400" />
+                            <Star className="w-8 h-8 sm:w-12 sm:h-12 fill-yellow-400 text-yellow-400" />
                           </div>
                           <div className="relative">
-                            <Star className="w-12 h-12 fill-yellow-400 text-orange-500" />
+                            <Star className="w-8 h-8 sm:w-12 sm:h-12 fill-yellow-400 text-orange-500" />
                             <span className="absolute inset-0 flex items-center justify-center text-orange-600 text-xs font-black">
                               #1
                             </span>
@@ -117,7 +117,7 @@ export default function Casual({ menus, groupedMenus, themeColor, onItemClick, s
                   </div>
                 ) : (
                   <div
-                    className="w-full h-48 flex items-center justify-center bg-gradient-to-br"
+                    className="w-full h-32 sm:h-48 flex items-center justify-center bg-gradient-to-br"
                     style={{
                       backgroundImage: `linear-gradient(135deg, ${themeColor}33, ${themeColor}11)`
                     }}
@@ -127,9 +127,9 @@ export default function Casual({ menus, groupedMenus, themeColor, onItemClick, s
                 )}
 
                 {/* Content */}
-                <div className="p-4 sm:p-5">
+                <div className="p-2.5 sm:p-5">
                   {/* Name */}
-                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-1 flex items-center gap-2">
+                  <h3 className="text-sm sm:text-xl font-bold text-gray-900 mb-1 flex items-center gap-1 sm:gap-2">
                     {selectedLanguage === 'en' && menu.nameEn ? menu.nameEn : menu.name}
                     {menu.is_best_seller && (
                       <Heart className="w-4 h-4 fill-red-500 text-red-500 animate-pulse" />
@@ -138,14 +138,14 @@ export default function Casual({ menus, groupedMenus, themeColor, onItemClick, s
 
                   {/* Description */}
                   {menu.description && (
-                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                    <p className="text-sm text-gray-600 mb-3 line-clamp-2 hidden sm:block">
                       {selectedLanguage === 'en' && menu.descriptionEn ? menu.descriptionEn : menu.description}
                     </p>
                   )}
 
                   {/* Price & Button */}
                   <div className="flex items-center justify-between">
-                    <span className="text-xl sm:text-2xl font-black" style={{ color: themeColor }}>
+                    <span className="text-base sm:text-2xl font-black" style={{ color: themeColor }}>
                       ${menu.price}
                     </span>
                     <button
@@ -153,7 +153,7 @@ export default function Casual({ menus, groupedMenus, themeColor, onItemClick, s
                         e.stopPropagation();
                         onItemClick(menu);
                       }}
-                      className="px-4 py-2 text-white rounded-full font-bold transition-all hover:scale-110 shadow-md flex items-center gap-1"
+                      className="px-2.5 py-1.5 sm:px-4 sm:py-2 text-white rounded-full font-bold transition-all hover:scale-110 shadow-md flex items-center gap-1 text-xs sm:text-sm"
                       style={{ backgroundColor: themeColor }}
                     >
                       <Plus className="w-4 h-4" />
