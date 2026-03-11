@@ -81,6 +81,8 @@ interface Restaurant {
   gst_registered?: boolean;
   gst_number?: string;
   ird_number?: string;
+  // Email visibility on menu page
+  show_email_on_menu?: boolean;
 }
 
 interface PaymentMethodInfo {
@@ -131,6 +133,7 @@ function SettingsContent() {
     address: '',
     theme_color: '#000000',
     menu_template: 'grid',
+    show_email_on_menu: true,
     // Tax/Business info for NZ
     gst_registered: true,
     gst_number: '',
@@ -518,6 +521,7 @@ function SettingsContent() {
         address: profile.restaurant.address || '',
         theme_color: profile.restaurant.theme_color || '#000000',
         menu_template: profile.restaurant.menu_template || 'grid',
+        show_email_on_menu: profile.restaurant.show_email_on_menu ?? true,
         // Tax/Business info
         gst_registered: profile.restaurant.gst_registered ?? true,
         gst_number: profile.restaurant.gst_number || '',
@@ -1290,6 +1294,7 @@ function SettingsContent() {
           address: formData.address || undefined,
           theme_color: canCustomizeTheme ? (formData.theme_color || undefined) : undefined,
           menu_template: formData.menu_template || undefined,
+          show_email_on_menu: formData.show_email_on_menu,
           // Tax/Business info for NZ
           gst_registered: formData.gst_registered,
           gst_number: formData.gst_number || undefined,
@@ -1887,6 +1892,15 @@ function SettingsContent() {
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
                   />
+                  <label className="flex items-center gap-2 mt-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.show_email_on_menu}
+                      onChange={(e) => setFormData({ ...formData, show_email_on_menu: e.target.checked })}
+                      className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="text-xs text-gray-500">Show email on menu page (always shown on receipt)</span>
+                  </label>
                 </div>
               </div>
 

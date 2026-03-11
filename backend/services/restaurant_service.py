@@ -176,7 +176,7 @@ class RestaurantService:
                 'credit_card_surcharge_enabled, credit_card_surcharge_rate, '
                 'food_surcharge_enabled, food_surcharge_rate, food_surcharge_name, '
                 'latitude, longitude, gst_registered, gst_number, ird_number, '
-                'operating_hours, stripe_publishable_key, stripe_secret_key'
+                'operating_hours, stripe_publishable_key, stripe_secret_key, show_email_on_menu'
             ).eq('id', restaurant_id).limit(1).execute()
             
             if result.data and len(result.data) > 0:

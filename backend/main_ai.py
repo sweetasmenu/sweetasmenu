@@ -231,6 +231,8 @@ class UpdateProfileRequest(BaseModel):
     ird_number: Optional[str] = None
     # Operating hours
     operating_hours: Optional[dict] = None  # {weekday: {enabled, open, close}, weekend: {enabled, open, close}, holiday: {enabled, name, start_date, end_date, reopen_date}}
+    # Show email on menu page
+    show_email_on_menu: Optional[bool] = None
 
 # Payment System Models
 class CreatePaymentIntentRequest(BaseModel):
@@ -3231,6 +3233,10 @@ async def update_user_profile(request: UpdateProfileRequest):
             update_data['operating_hours'] = request.operating_hours
             print(f"📅 Operating hours to save: {request.operating_hours}")
 
+        # Show email on menu
+        if request.show_email_on_menu is not None:
+            update_data['show_email_on_menu'] = request.show_email_on_menu
+
         # Update in database using restaurant_service
         if not update_data:
             raise HTTPException(
@@ -3685,6 +3691,7 @@ async def get_public_menu(restaurant_id: str, response: Response):
                 "address": restaurant.get("address"),
                 "phone": restaurant.get("phone"),
                 "email": restaurant.get("email"),
+                "show_email_on_menu": restaurant.get("show_email_on_menu", True),
             },
             "branding": branding,
             "service_options": service_options,
