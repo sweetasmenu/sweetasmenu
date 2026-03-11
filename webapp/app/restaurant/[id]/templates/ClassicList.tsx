@@ -71,10 +71,10 @@ export default function ClassicList({ menus, groupedMenus, themeColor, onItemCli
             className={`mb-6 pb-2 border-b-2 ${isBestsellerCategory(category) ? 'bg-gradient-to-r from-orange-50 to-red-50 -mx-4 px-4 py-4 rounded-xl border-orange-400' : ''}`}
             style={{ borderColor: isBestsellerCategory(category) ? '#f97316' : themeColor }}
           >
-            <h2 className={`text-2xl sm:text-3xl font-bold flex items-center gap-2 sm:gap-3 ${isBestsellerCategory(category) ? 'text-orange-600' : 'text-gray-900'}`}>
-              {isBestsellerCategory(category) && <Flame className="w-6 h-6 sm:w-8 sm:h-8 text-orange-500 fill-orange-500" />}
+            <h2 className={`text-lg sm:text-3xl font-bold flex items-center gap-1.5 sm:gap-3 ${isBestsellerCategory(category) ? 'text-orange-600' : 'text-gray-900'}`}>
+              {isBestsellerCategory(category) && <Flame className="w-5 h-5 sm:w-8 sm:h-8 text-orange-500 fill-orange-500" />}
               {isBestsellerCategory(category) ? t('bestseller') : category}
-              {isBestsellerCategory(category) && <span className="text-sm sm:text-lg font-normal text-orange-500">{t('popularDishes')}</span>}
+              {isBestsellerCategory(category) && <span className="text-xs sm:text-lg font-normal text-orange-500">{t('popularDishes')}</span>}
             </h2>
           </div>
 

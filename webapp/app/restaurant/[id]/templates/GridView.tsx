@@ -159,21 +159,21 @@ export default function GridView({ menus, groupedMenus, themeColor, onItemClick,
           <div key={category} id={`category-${category.replace(/\s+/g, '-')}`} className="scroll-mt-20">
             {/* Category Header - Special style for Bestseller */}
             <div
-              className={`mb-6 pb-2 border-b-2 flex items-center justify-between ${isBestsellerCategory(category) ? 'bg-gradient-to-r from-orange-50 to-red-50 -mx-4 px-4 py-4 rounded-xl border-orange-400' : ''}`}
+              className={`mb-4 sm:mb-6 pb-2 border-b-2 flex items-center justify-between gap-2 ${isBestsellerCategory(category) ? 'bg-gradient-to-r from-orange-50 to-red-50 -mx-4 px-3 sm:px-4 py-3 sm:py-4 rounded-xl border-orange-400' : ''}`}
               style={{ borderColor: isBestsellerCategory(category) ? '#f97316' : themeColor }}
             >
-              <h2 className={`text-2xl sm:text-3xl font-bold flex items-center gap-2 sm:gap-3 flex-wrap ${isBestsellerCategory(category) ? 'text-orange-600' : 'text-gray-900'}`}>
-                {isBestsellerCategory(category) && <Flame className="w-6 h-6 sm:w-8 sm:h-8 text-orange-500 fill-orange-500" />}
+              <h2 className={`text-lg sm:text-3xl font-bold flex items-center gap-1.5 sm:gap-3 flex-wrap ${isBestsellerCategory(category) ? 'text-orange-600' : 'text-gray-900'}`}>
+                {isBestsellerCategory(category) && <Flame className="w-5 h-5 sm:w-8 sm:h-8 text-orange-500 fill-orange-500" />}
                 {isBestsellerCategory(category) ? t('bestseller') : category}
-                {isBestsellerCategory(category) && <span className="text-sm sm:text-lg font-normal text-orange-500">{t('popularDishes')}</span>}
-                <span className="text-sm sm:text-lg font-normal text-gray-500">({items.length})</span>
+                {isBestsellerCategory(category) && <span className="text-xs sm:text-lg font-normal text-orange-500">{t('popularDishes')}</span>}
+                <span className="text-xs sm:text-lg font-normal text-gray-500">({items.length})</span>
               </h2>
 
               {/* View All / Collapse button */}
               {items.length > 3 && (
                 <button
                   onClick={() => toggleCategory(category)}
-                  className="px-4 py-2 text-sm font-semibold rounded-lg transition-all hover:scale-105"
+                  className="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all hover:scale-105 flex-shrink-0"
                   style={{
                     backgroundColor: isExpanded ? `${themeColor}20` : themeColor,
                     color: isExpanded ? themeColor : 'white'

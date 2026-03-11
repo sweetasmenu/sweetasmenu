@@ -64,10 +64,10 @@ export default function Elegant({ menus, groupedMenus, themeColor, onItemClick, 
           {/* Category Header - Elegant Style / Special for Bestseller */}
           {isBestsellerCategory(category) ? (
             <div className="bg-gradient-to-r from-orange-50 to-red-50 -mx-4 px-4 py-4 sm:py-6 rounded-xl border-2 border-orange-400 mb-6 sm:mb-10">
-              <h2 className="text-2xl sm:text-4xl font-serif font-bold text-orange-600 flex items-center justify-center gap-2 sm:gap-4 flex-wrap">
-                <Flame className="w-7 h-7 sm:w-10 sm:h-10 text-orange-500 fill-orange-500" />
+              <h2 className="text-lg sm:text-4xl font-serif font-bold text-orange-600 flex items-center justify-center gap-1.5 sm:gap-4 flex-wrap">
+                <Flame className="w-5 h-5 sm:w-10 sm:h-10 text-orange-500 fill-orange-500" />
                 {t('bestseller')}
-                <span className="text-sm sm:text-xl font-normal text-orange-500">{t('popularDishes')}</span>
+                <span className="text-xs sm:text-xl font-normal text-orange-500">{t('popularDishes')}</span>
               </h2>
             </div>
           ) : (
@@ -77,7 +77,7 @@ export default function Elegant({ menus, groupedMenus, themeColor, onItemClick, 
                 <Sparkles className="w-5 h-5" style={{ color: themeColor }} />
                 <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
               </div>
-              <h2 className="text-2xl sm:text-4xl font-serif font-bold text-gray-900">
+              <h2 className="text-lg sm:text-4xl font-serif font-bold text-gray-900">
                 {category}
               </h2>
             </div>

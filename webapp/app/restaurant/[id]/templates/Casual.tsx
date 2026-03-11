@@ -62,15 +62,15 @@ export default function Casual({ menus, groupedMenus, themeColor, onItemClick, s
           {/* Category Header - Fun Style / Special for Bestseller */}
           {isBestsellerCategory(category) ? (
             <div className="bg-gradient-to-r from-orange-200 to-red-200 rounded-2xl p-4 sm:p-6 mb-6 shadow-lg border-2 border-orange-400">
-              <h2 className="text-2xl sm:text-3xl font-bold text-orange-700 text-center flex items-center justify-center gap-2 sm:gap-3 flex-wrap">
-                <Flame className="w-6 h-6 sm:w-8 sm:h-8 text-orange-600 fill-orange-600" />
+              <h2 className="text-lg sm:text-3xl font-bold text-orange-700 text-center flex items-center justify-center gap-1.5 sm:gap-3 flex-wrap">
+                <Flame className="w-5 h-5 sm:w-8 sm:h-8 text-orange-600 fill-orange-600" />
                 {t('bestseller')}
-                <span className="text-sm sm:text-lg font-normal text-orange-600">{t('popularDishes')}</span>
+                <span className="text-xs sm:text-lg font-normal text-orange-600">{t('popularDishes')}</span>
               </h2>
             </div>
           ) : (
             <div className={`bg-gradient-to-r ${categoryColors[categoryIndex % categoryColors.length]} rounded-2xl p-4 sm:p-6 mb-6 shadow-lg`}>
-              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center">
+              <h2 className="text-lg sm:text-3xl font-bold text-gray-900 text-center">
                 🍽️ {category}
               </h2>
             </div>
