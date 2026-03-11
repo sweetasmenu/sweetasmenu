@@ -1339,21 +1339,62 @@ export default function RestaurantMenuClient({ initialData, restaurantId }: { in
               {branding.name || 'Our Menu'}
             </h1>
             
-            {/* Restaurant Info */}
-            <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-white/90 text-sm md:text-base">
-              {menus.length > 0 && (
-                <div className="flex items-center gap-2">
-                  <Utensils className="w-5 h-5" />
-                  <span>{menus.length} Menu Items</span>
+            {/* Operating Hours Summary */}
+            {operatingHours && (() => {
+              const dayNames = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const;
+              const shortNames: Record<string, string> = {
+                monday: 'Mon', tuesday: 'Tue', wednesday: 'Wed', thursday: 'Thu',
+                friday: 'Fri', saturday: 'Sat', sunday: 'Sun'
+              };
+              // Group days by their open/close times
+              const groups: { days: string[]; open: string; close: string }[] = [];
+              const closedDays: string[] = [];
+              dayNames.forEach(day => {
+                const h = operatingHours[day];
+                if (!h || !h.enabled) {
+                  closedDays.push(shortNames[day]);
+                  return;
+                }
+                const existing = groups.find(g => g.open === h.open && g.close === h.close);
+                if (existing) {
+                  existing.days.push(shortNames[day]);
+                } else {
+                  groups.push({ days: [shortNames[day]], open: h.open, close: h.close });
+                }
+              });
+              // Format consecutive days as range (e.g., Mon-Fri)
+              const formatDays = (days: string[]) => {
+                const allShort = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                const indices = days.map(d => allShort.indexOf(d)).sort((a, b) => a - b);
+                if (indices.length >= 2) {
+                  let isConsecutive = true;
+                  for (let i = 1; i < indices.length; i++) {
+                    if (indices[i] !== indices[i - 1] + 1) { isConsecutive = false; break; }
+                  }
+                  if (isConsecutive) return `${allShort[indices[0]]}-${allShort[indices[indices.length - 1]]}`;
+                }
+                return days.join(', ');
+              };
+              const formatTime = (t: string) => {
+                const [hh, mm] = t.split(':').map(Number);
+                const suffix = hh >= 12 ? 'PM' : 'AM';
+                const h12 = hh % 12 || 12;
+                return mm === 0 ? `${h12}${suffix}` : `${h12}:${mm.toString().padStart(2, '0')}${suffix}`;
+              };
+              return (
+                <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-white/90 text-xs sm:text-sm mt-1">
+                  <Clock className="w-4 h-4 flex-shrink-0" />
+                  {groups.map((g, i) => (
+                    <span key={i}>
+                      {formatDays(g.days)} {formatTime(g.open)}-{formatTime(g.close)}
+                    </span>
+                  ))}
+                  {closedDays.length > 0 && (
+                    <span className="text-white/60">{closedDays.join(', ')} Closed</span>
+                  )}
                 </div>
-              )}
-              {Object.keys(groupedMenus).length > 0 && (
-                <div className="flex items-center gap-2">
-                  <Store className="w-5 h-5" />
-                  <span>{Object.keys(groupedMenus).length} Categories</span>
-                </div>
-              )}
-            </div>
+              );
+            })()}
           </div>
         </div>
         
