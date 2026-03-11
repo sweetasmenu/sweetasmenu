@@ -24,6 +24,12 @@ export const posTranslations = {
       hi: 'रसोई', es: 'Cocina', fr: 'Cuisine',
       de: 'Küche', id: 'Dapur', ms: 'Dapur'
     },
+    attendanceMode: {
+      th: 'ลงเวลา', en: 'Clock In/Out', zh: '打卡',
+      ja: '出退勤', ko: '출퇴근', vi: 'Chấm công',
+      hi: 'हाज़िरी', es: 'Fichar', fr: 'Pointage',
+      de: 'Stempeluhr', id: 'Absensi', ms: 'Kehadiran'
+    },
     staffSystem: {
       th: 'ระบบพนักงาน', en: 'Staff System', zh: '员工系统',
       ja: 'スタッフシステム', ko: '직원 시스템', vi: 'Hệ thống nhân viên',
@@ -35,6 +41,24 @@ export const posTranslations = {
       ja: 'キッチンシステム', ko: '주방 시스템', vi: 'Hệ thống bếp',
       hi: 'रसोई प्रणाली', es: 'Sistema de cocina', fr: 'Système de cuisine',
       de: 'Küchensystem', id: 'Sistem Dapur', ms: 'Sistem Dapur'
+    },
+    attendanceSystem: {
+      th: 'ระบบลงเวลา', en: 'Attendance System', zh: '考勤系统',
+      ja: '勤怠システム', ko: '근태 시스템', vi: 'Hệ thống chấm công',
+      hi: 'उपस्थिति प्रणाली', es: 'Sistema de asistencia', fr: 'Système de pointage',
+      de: 'Anwesenheitssystem', id: 'Sistem Absensi', ms: 'Sistem Kehadiran'
+    },
+    scanToClockIn: {
+      th: 'สแกน QR เพื่อลงเวลาเข้า-ออกงาน', en: 'Scan QR to clock in/out', zh: '扫码打卡上下班',
+      ja: 'QRをスキャンして出退勤', ko: 'QR 스캔으로 출퇴근', vi: 'Quét QR để chấm công',
+      hi: 'QR स्कैन करें', es: 'Escanea QR para fichar', fr: 'Scannez le QR pour pointer',
+      de: 'QR scannen zum Stempeln', id: 'Scan QR untuk absensi', ms: 'Imbas QR untuk kehadiran'
+    },
+    qrRefreshesDaily: {
+      th: 'QR จะเปลี่ยนใหม่ทุกวันอัตโนมัติ', en: 'QR refreshes daily automatically', zh: 'QR码每天自动刷新',
+      ja: 'QRは毎日自動更新', ko: 'QR은 매일 자동 갱신', vi: 'QR tự động đổi mỗi ngày',
+      hi: 'QR रोज़ अपडेट होता है', es: 'QR se renueva diariamente', fr: 'Le QR se renouvelle chaque jour',
+      de: 'QR wird täglich aktualisiert', id: 'QR diperbarui setiap hari', ms: 'QR dikemas kini setiap hari'
     },
     selectRestaurant: {
       th: 'เลือกร้านอาหาร', en: 'Select Restaurant', zh: '选择餐厅',

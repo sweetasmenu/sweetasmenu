@@ -5,12 +5,6 @@ import { useSearchParams } from 'next/navigation';
 import { Shield, Users, Utensils, Truck, Store, Plus, Trash2, Edit2, Save, X, Loader2, Globe, ExternalLink, MapPin, Navigation, CreditCard, Building2, QrCode, Key, Eye, EyeOff, CheckCircle, AlertCircle, ArrowUpRight, Printer, Clock, Calendar, XCircle, Banknote, Download, FileSpreadsheet, FileText } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { printViaIframe } from '@/lib/utils/printHelper';
-import dynamic from 'next/dynamic';
-
-const QRCodeSVG = dynamic(() => import('qrcode.react').then(mod => mod.QRCodeSVG), {
-  ssr: false,
-  loading: () => <div className="w-[200px] h-[200px] bg-gray-200 animate-pulse rounded-xl" />,
-});
 
 interface ServiceOptions {
   dine_in: boolean;
@@ -265,9 +259,6 @@ function SettingsContent() {
   });
 
   // Attendance state
-  const [showAttendanceQR, setShowAttendanceQR] = useState(false);
-  const [attendanceToken, setAttendanceToken] = useState('');
-  const [attendanceQRLoading, setAttendanceQRLoading] = useState(false);
   const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([]);
   const [attendanceLoading, setAttendanceLoading] = useState(false);
   const [attendanceStartDate, setAttendanceStartDate] = useState(() => {
@@ -1012,26 +1003,6 @@ function SettingsContent() {
   // ============================================================
   // Attendance Functions
   // ============================================================
-
-  const loadAttendanceQRToken = async () => {
-    if (!profile?.restaurant?.restaurant_id) return;
-    setAttendanceQRLoading(true);
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
-      const response = await fetch(
-        `${BACKEND_URL}/api/staff/attendance/qr-token?restaurant_id=${profile.restaurant.restaurant_id}&user_id=${session.user.id}`
-      );
-      const data = await response.json();
-      if (data.success) {
-        setAttendanceToken(data.token);
-      }
-    } catch (e) {
-      console.error('Failed to load QR token:', e);
-    } finally {
-      setAttendanceQRLoading(false);
-    }
-  };
 
   const loadAttendanceRecords = async () => {
     if (!profile?.restaurant?.restaurant_id) return;
@@ -3241,71 +3212,15 @@ function SettingsContent() {
 
             {/* ---- Staff Attendance Section ---- */}
             <div className="mt-8 pt-6 border-t border-gray-200">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-                <div>
-                  <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
-                    <Clock className="w-5 h-5 text-green-500" />
-                    Staff Attendance
-                  </h3>
-                  <p className="text-xs text-gray-500 mt-0.5">
-                    QR-based clock-in and clock-out for your staff
-                  </p>
-                </div>
-                <button
-                  onClick={() => {
-                    setShowAttendanceQR(!showAttendanceQR);
-                    if (!showAttendanceQR && !attendanceToken) loadAttendanceQRToken();
-                  }}
-                  className="w-full sm:w-auto px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center gap-2 text-sm"
-                >
-                  <QrCode className="w-4 h-4" />
-                  {showAttendanceQR ? 'Hide QR Code' : 'Show Attendance QR'}
-                </button>
+              <div className="mb-4">
+                <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
+                  <Clock className="w-5 h-5 text-green-500" />
+                  Staff Attendance
+                </h3>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  View attendance records. QR code is available on the POS login page.
+                </p>
               </div>
-
-              {/* QR Code Panel */}
-              {showAttendanceQR && (
-                <div className="mb-6 p-4 bg-green-50 rounded-xl border-2 border-green-200 text-center">
-                  <p className="text-sm text-gray-600 mb-3">
-                    Print or display this QR code in your restaurant. Staff scan it daily to clock in and out.
-                  </p>
-                  {attendanceQRLoading ? (
-                    <div className="flex items-center justify-center py-8">
-                      <Loader2 className="w-8 h-8 animate-spin text-green-500" />
-                    </div>
-                  ) : attendanceToken ? (
-                    <>
-                      <div className="inline-block p-4 bg-white rounded-xl shadow-md mb-3">
-                        <QRCodeSVG
-                          value={`${typeof window !== 'undefined' ? window.location.origin : ''}/staff-attendance/${profile?.restaurant?.restaurant_id}?token=${attendanceToken}`}
-                          size={200}
-                          level="M"
-                        />
-                      </div>
-                      <p className="text-xs text-gray-500 mt-2">
-                        QR code refreshes daily for security. Click Regenerate if it stops working.
-                      </p>
-                      <div className="flex gap-2 justify-center mt-3">
-                        <button
-                          onClick={loadAttendanceQRToken}
-                          className="px-3 py-1.5 text-sm bg-white border border-green-300 rounded-lg text-green-700 hover:bg-green-50"
-                        >
-                          Regenerate
-                        </button>
-                        <button
-                          onClick={() => window.print()}
-                          className="px-3 py-1.5 text-sm bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 flex items-center gap-1"
-                        >
-                          <Printer className="w-3.5 h-3.5" />
-                          Print
-                        </button>
-                      </div>
-                    </>
-                  ) : (
-                    <p className="text-sm text-red-500">Failed to load QR code. Please try again.</p>
-                  )}
-                </div>
-              )}
 
               {/* Records Filter Row */}
               <div className="flex flex-col sm:flex-row gap-2 mb-4">

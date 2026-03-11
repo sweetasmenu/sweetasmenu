@@ -2,9 +2,15 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChefHat, Users, Lock, Store, Loader2, Globe, Keyboard } from 'lucide-react';
+import { ChefHat, Users, Lock, Store, Loader2, Globe, Keyboard, Clock } from 'lucide-react';
 import { t, tBilingual, mapToPOSLanguage, POSLanguage } from '@/lib/pos-translations';
 import BilingualText, { BilingualTextInline } from '@/components/BilingualText';
+import dynamic from 'next/dynamic';
+
+const QRCodeSVG = dynamic(() => import('qrcode.react').then(mod => mod.QRCodeSVG), {
+  ssr: false,
+  loading: () => <div className="w-[200px] h-[200px] bg-slate-700 animate-pulse rounded-xl" />,
+});
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -31,10 +37,12 @@ export default function POSLoginPage() {
   const [pin, setPin] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [loginType, setLoginType] = useState<'kitchen' | 'staff'>('staff');
+  const [loginType, setLoginType] = useState<'staff' | 'attendance'>('staff');
   const [lang, setLang] = useState<POSLanguage>('en'); // Default to English for NZ
   const [showOnScreenKeyboard, setShowOnScreenKeyboard] = useState(false);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
+  const [attendanceToken, setAttendanceToken] = useState('');
+  const [attendanceQRLoading, setAttendanceQRLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Detect if device is touch-capable (mobile/tablet)
@@ -208,6 +216,32 @@ export default function POSLoginPage() {
     }
   };
 
+  // Fetch attendance QR token when switching to attendance mode
+  const loadAttendanceToken = async () => {
+    if (!selectedRestaurant?.id) return;
+    setAttendanceQRLoading(true);
+    try {
+      const response = await fetch(
+        `${BACKEND_URL}/api/staff/attendance/qr-token?restaurant_id=${selectedRestaurant.id}&user_id=pos`
+      );
+      const data = await response.json();
+      if (data.success) {
+        setAttendanceToken(data.token);
+      }
+    } catch (e) {
+      console.error('Failed to load attendance QR token:', e);
+    } finally {
+      setAttendanceQRLoading(false);
+    }
+  };
+
+  // Auto-fetch token when switching to attendance mode or entering step 2
+  useEffect(() => {
+    if (step === 'pin' && loginType === 'attendance' && selectedRestaurant?.id && !attendanceToken) {
+      loadAttendanceToken();
+    }
+  }, [step, loginType, selectedRestaurant?.id]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -243,8 +277,8 @@ export default function POSLoginPage() {
         {/* Logo/Header */}
         <div className="text-center mb-8">
           <div className="w-20 h-20 bg-orange-500 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg">
-            {loginType === 'kitchen' ? (
-              <ChefHat className="w-10 h-10 text-white" />
+            {loginType === 'attendance' ? (
+              <Clock className="w-10 h-10 text-white" />
             ) : (
               <Users className="w-10 h-10 text-white" />
             )}
@@ -259,7 +293,7 @@ export default function POSLoginPage() {
           />
           <BilingualText
             category="login"
-            textKey={loginType === 'kitchen' ? 'kitchenSystem' : 'staffSystem'}
+            textKey={loginType === 'attendance' ? 'attendanceSystem' : 'staffSystem'}
             lang={lang}
             className="justify-center"
             primaryClassName="text-slate-300"
@@ -267,41 +301,46 @@ export default function POSLoginPage() {
           />
         </div>
 
-        {/* Login Type Toggle */}
-        <div className="flex gap-2 mb-6">
-          <button
-            onClick={() => setLoginType('staff')}
-            className={`flex-1 py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 ${
-              loginType === 'staff'
-                ? 'bg-orange-500 text-white'
-                : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
-            }`}
-          >
-            <Users className="w-5 h-5" />
-            <BilingualTextInline
-              category="login"
-              textKey="staffMode"
-              lang={lang}
-              englishClassName={`text-[10px] ${loginType === 'staff' ? 'opacity-80' : 'opacity-60'} ml-1`}
-            />
-          </button>
-          <button
-            onClick={() => setLoginType('kitchen')}
-            className={`flex-1 py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 ${
-              loginType === 'kitchen'
-                ? 'bg-orange-500 text-white'
-                : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
-            }`}
-          >
-            <ChefHat className="w-5 h-5" />
-            <BilingualTextInline
-              category="login"
-              textKey="kitchenMode"
-              lang={lang}
-              englishClassName={`text-[10px] ${loginType === 'kitchen' ? 'opacity-80' : 'opacity-60'} ml-1`}
-            />
-          </button>
-        </div>
+        {/* Login Type Toggle - Only show on step 2 (PIN/Attendance) */}
+        {step === 'pin' && (
+          <div className="flex gap-2 mb-6">
+            <button
+              onClick={() => setLoginType('staff')}
+              className={`flex-1 py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 ${
+                loginType === 'staff'
+                  ? 'bg-orange-500 text-white'
+                  : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+              }`}
+            >
+              <Users className="w-5 h-5" />
+              <BilingualTextInline
+                category="login"
+                textKey="staffMode"
+                lang={lang}
+                englishClassName={`text-[10px] ${loginType === 'staff' ? 'opacity-80' : 'opacity-60'} ml-1`}
+              />
+            </button>
+            <button
+              onClick={() => {
+                setLoginType('attendance');
+                if (!attendanceToken) loadAttendanceToken();
+              }}
+              className={`flex-1 py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 ${
+                loginType === 'attendance'
+                  ? 'bg-green-500 text-white'
+                  : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+              }`}
+            >
+              <Clock className="w-5 h-5" />
+              <BilingualTextInline
+                category="login"
+                textKey="attendanceMode"
+                lang={lang}
+                englishClassName={`text-[10px] ${loginType === 'attendance' ? 'opacity-80' : 'opacity-60'} ml-1`}
+              />
+            </button>
+          </div>
+        )}
 
         {/* Step 1: Restaurant Code */}
         {step === 'restaurant' && (
@@ -427,7 +466,7 @@ export default function POSLoginPage() {
           </div>
         )}
 
-        {/* Step 2: PIN Entry */}
+        {/* Step 2: PIN Entry or Attendance QR */}
         {step === 'pin' && (
           <div className="bg-slate-800 rounded-2xl p-6 shadow-xl">
             {/* Restaurant Info */}
@@ -446,6 +485,7 @@ export default function POSLoginPage() {
                   setStep('restaurant');
                   setPin('');
                   setError('');
+                  setLoginType('staff');
                 }}
                 className="text-orange-500 text-sm mt-1 hover:underline"
               >
@@ -458,94 +498,149 @@ export default function POSLoginPage() {
               </button>
             </div>
 
-            <div className="flex items-center gap-3 mb-6">
-              <Lock className="w-6 h-6 text-orange-500" />
-              <BilingualText
-                category="login"
-                textKey="pinCode"
-                lang={lang}
-                primaryClassName="text-lg font-semibold text-white"
-                englishClassName="text-xs text-slate-400"
-              />
-            </div>
-
-            {/* PIN Display */}
-            <div className="flex justify-center gap-3 mb-6">
-              {[0, 1, 2, 3, 4, 5].map((i) => (
-                <div
-                  key={i}
-                  className={`w-12 h-12 rounded-xl border-2 flex items-center justify-center text-2xl font-bold transition-all ${
-                    pin.length > i
-                      ? 'bg-orange-500 border-orange-500 text-white'
-                      : 'bg-slate-700 border-slate-600 text-slate-500'
-                  }`}
-                >
-                  {pin.length > i ? '•' : ''}
+            {/* Staff PIN Entry Mode */}
+            {loginType === 'staff' && (
+              <>
+                <div className="flex items-center gap-3 mb-6">
+                  <Lock className="w-6 h-6 text-orange-500" />
+                  <BilingualText
+                    category="login"
+                    textKey="pinCode"
+                    lang={lang}
+                    primaryClassName="text-lg font-semibold text-white"
+                    englishClassName="text-xs text-slate-400"
+                  />
                 </div>
-              ))}
-            </div>
 
-            {error && (
-              <div className="p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-400 text-sm text-center mb-4">
-                {error}
-              </div>
+                {/* PIN Display */}
+                <div className="flex justify-center gap-3 mb-6">
+                  {[0, 1, 2, 3, 4, 5].map((i) => (
+                    <div
+                      key={i}
+                      className={`w-12 h-12 rounded-xl border-2 flex items-center justify-center text-2xl font-bold transition-all ${
+                        pin.length > i
+                          ? 'bg-orange-500 border-orange-500 text-white'
+                          : 'bg-slate-700 border-slate-600 text-slate-500'
+                      }`}
+                    >
+                      {pin.length > i ? '•' : ''}
+                    </div>
+                  ))}
+                </div>
+
+                {error && (
+                  <div className="p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-400 text-sm text-center mb-4">
+                    {error}
+                  </div>
+                )}
+
+                {/* Number Pad */}
+                <div className="grid grid-cols-3 gap-3">
+                  {['1', '2', '3', '4', '5', '6', '7', '8', '9', 'clear', '0', 'del'].map((key) => (
+                    <button
+                      key={key}
+                      onClick={() => {
+                        if (key === 'del') {
+                          handlePinDelete();
+                        } else if (key === 'clear') {
+                          setPin('');
+                        } else {
+                          handlePinKeyPress(key);
+                        }
+                      }}
+                      disabled={loading}
+                      className={`h-16 rounded-xl font-bold text-xl transition-all ${
+                        key === 'clear'
+                          ? 'bg-slate-600 text-slate-300 hover:bg-slate-500'
+                          : key === 'del'
+                          ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
+                          : 'bg-slate-700 text-white hover:bg-slate-600 active:scale-95'
+                      } disabled:opacity-50`}
+                    >
+                      {key === 'del' ? '⌫' : key === 'clear' ? 'C' : key}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Enter Button */}
+                <button
+                  onClick={handlePinSubmit}
+                  disabled={pin.length !== 6 || loading}
+                  className="w-full mt-4 py-4 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold text-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <BilingualTextInline
+                        category="login"
+                        textKey="loggingIn"
+                        lang={lang}
+                        englishClassName="text-sm opacity-80 ml-1"
+                      />
+                    </>
+                  ) : (
+                    <>
+                      ✓ <BilingualTextInline
+                        category="login"
+                        textKey="enter"
+                        lang={lang}
+                        englishClassName="text-sm opacity-80 ml-1"
+                      />
+                    </>
+                  )}
+                </button>
+              </>
             )}
 
-            {/* Number Pad */}
-            <div className="grid grid-cols-3 gap-3">
-              {['1', '2', '3', '4', '5', '6', '7', '8', '9', 'clear', '0', 'del'].map((key) => (
-                <button
-                  key={key}
-                  onClick={() => {
-                    if (key === 'del') {
-                      handlePinDelete();
-                    } else if (key === 'clear') {
-                      setPin('');
-                    } else {
-                      handlePinKeyPress(key);
-                    }
-                  }}
-                  disabled={loading}
-                  className={`h-16 rounded-xl font-bold text-xl transition-all ${
-                    key === 'clear'
-                      ? 'bg-slate-600 text-slate-300 hover:bg-slate-500'
-                      : key === 'del'
-                      ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
-                      : 'bg-slate-700 text-white hover:bg-slate-600 active:scale-95'
-                  } disabled:opacity-50`}
-                >
-                  {key === 'del' ? '⌫' : key === 'clear' ? 'C' : key}
-                </button>
-              ))}
-            </div>
+            {/* Attendance QR Mode */}
+            {loginType === 'attendance' && (
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-3 mb-4">
+                  <Clock className="w-6 h-6 text-green-500" />
+                  <BilingualText
+                    category="login"
+                    textKey="scanToClockIn"
+                    lang={lang}
+                    primaryClassName="text-sm font-semibold text-white"
+                    englishClassName="text-xs text-slate-400"
+                  />
+                </div>
 
-            {/* Enter Button */}
-            <button
-              onClick={handlePinSubmit}
-              disabled={pin.length !== 6 || loading}
-              className="w-full mt-4 py-4 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold text-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  <BilingualTextInline
-                    category="login"
-                    textKey="loggingIn"
-                    lang={lang}
-                    englishClassName="text-sm opacity-80 ml-1"
-                  />
-                </>
-              ) : (
-                <>
-                  ✓ <BilingualTextInline
-                    category="login"
-                    textKey="enter"
-                    lang={lang}
-                    englishClassName="text-sm opacity-80 ml-1"
-                  />
-                </>
-              )}
-            </button>
+                {attendanceQRLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="w-10 h-10 animate-spin text-green-500" />
+                  </div>
+                ) : attendanceToken ? (
+                  <>
+                    <div className="inline-block p-5 bg-white rounded-2xl shadow-lg mb-4">
+                      <QRCodeSVG
+                        value={`${typeof window !== 'undefined' ? window.location.origin : ''}/staff-attendance/${selectedRestaurant?.id}?token=${attendanceToken}`}
+                        size={220}
+                        level="M"
+                      />
+                    </div>
+                    <BilingualText
+                      category="login"
+                      textKey="qrRefreshesDaily"
+                      lang={lang}
+                      className="justify-center"
+                      primaryClassName="text-xs text-slate-400"
+                      englishClassName="text-[10px] text-slate-500"
+                    />
+                  </>
+                ) : (
+                  <div className="py-8">
+                    <p className="text-red-400 text-sm mb-3">Failed to load QR code</p>
+                    <button
+                      onClick={loadAttendanceToken}
+                      className="px-4 py-2 bg-slate-700 text-slate-300 rounded-lg hover:bg-slate-600 text-sm"
+                    >
+                      Retry
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
 
           </div>
         )}
