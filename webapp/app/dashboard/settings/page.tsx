@@ -2,9 +2,15 @@
 
 import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Shield, Users, Utensils, Truck, Store, Plus, Trash2, Edit2, Save, X, Loader2, Globe, ExternalLink, MapPin, Navigation, CreditCard, Building2, QrCode, Key, Eye, EyeOff, CheckCircle, AlertCircle, ArrowUpRight, Printer, Clock, Calendar, XCircle, Banknote } from 'lucide-react';
+import { Shield, Users, Utensils, Truck, Store, Plus, Trash2, Edit2, Save, X, Loader2, Globe, ExternalLink, MapPin, Navigation, CreditCard, Building2, QrCode, Key, Eye, EyeOff, CheckCircle, AlertCircle, ArrowUpRight, Printer, Clock, Calendar, XCircle, Banknote, Download, FileSpreadsheet, FileText } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { printViaIframe } from '@/lib/utils/printHelper';
+import dynamic from 'next/dynamic';
+
+const QRCodeSVG = dynamic(() => import('qrcode.react').then(mod => mod.QRCodeSVG), {
+  ssr: false,
+  loading: () => <div className="w-[200px] h-[200px] bg-gray-200 animate-pulse rounded-xl" />,
+});
 
 interface ServiceOptions {
   dine_in: boolean;
@@ -49,6 +55,18 @@ interface Staff {
   pin_code?: string;
   is_active: boolean;
   created_at?: string;
+}
+
+interface AttendanceRecord {
+  id: string;
+  staff_id: string;
+  restaurant_id: string;
+  clock_in: string;
+  clock_out: string | null;
+  duration_minutes: number | null;
+  date: string;
+  notes: string | null;
+  staff: { name: string; role: string } | null;
 }
 
 interface Restaurant {
@@ -245,6 +263,23 @@ function SettingsContent() {
     role: 'waiter' as Staff['role'],
     pin_code: ''
   });
+
+  // Attendance state
+  const [showAttendanceQR, setShowAttendanceQR] = useState(false);
+  const [attendanceToken, setAttendanceToken] = useState('');
+  const [attendanceQRLoading, setAttendanceQRLoading] = useState(false);
+  const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([]);
+  const [attendanceLoading, setAttendanceLoading] = useState(false);
+  const [attendanceStartDate, setAttendanceStartDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 7);
+    return d.toISOString().split('T')[0];
+  });
+  const [attendanceEndDate, setAttendanceEndDate] = useState(() => {
+    return new Date().toISOString().split('T')[0];
+  });
+  const [attendanceStaffFilter, setAttendanceStaffFilter] = useState('');
+  const [exportingAttendance, setExportingAttendance] = useState<string | null>(null);
 
   // Payment Settings state
   const [paymentSettings, setPaymentSettings] = useState<PaymentSettings>({
@@ -971,6 +1006,146 @@ function SettingsContent() {
       }
     } catch (error) {
       console.error('Failed to delete staff:', error);
+    }
+  };
+
+  // ============================================================
+  // Attendance Functions
+  // ============================================================
+
+  const loadAttendanceQRToken = async () => {
+    if (!profile?.restaurant?.restaurant_id) return;
+    setAttendanceQRLoading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      const response = await fetch(
+        `${BACKEND_URL}/api/staff/attendance/qr-token?restaurant_id=${profile.restaurant.restaurant_id}&user_id=${session.user.id}`
+      );
+      const data = await response.json();
+      if (data.success) {
+        setAttendanceToken(data.token);
+      }
+    } catch (e) {
+      console.error('Failed to load QR token:', e);
+    } finally {
+      setAttendanceQRLoading(false);
+    }
+  };
+
+  const loadAttendanceRecords = async () => {
+    if (!profile?.restaurant?.restaurant_id) return;
+    setAttendanceLoading(true);
+    try {
+      let url = `${BACKEND_URL}/api/staff/attendance/records?restaurant_id=${profile.restaurant.restaurant_id}&start_date=${attendanceStartDate}&end_date=${attendanceEndDate}`;
+      if (attendanceStaffFilter) url += `&staff_id=${attendanceStaffFilter}`;
+      const response = await fetch(url);
+      const data = await response.json();
+      if (data.success) {
+        setAttendanceRecords(data.records || []);
+      }
+    } catch (e) {
+      console.error('Failed to load attendance records:', e);
+    } finally {
+      setAttendanceLoading(false);
+    }
+  };
+
+  const exportAttendanceCSV = () => {
+    setExportingAttendance('csv');
+    try {
+      const headers = ['Date', 'Staff Name', 'Role', 'Clock In', 'Clock Out', 'Duration (min)'];
+      const rows = attendanceRecords.map(r => [
+        r.date,
+        r.staff?.name || '-',
+        r.staff?.role || '-',
+        r.clock_in ? new Date(r.clock_in).toLocaleTimeString('en-NZ', { hour: '2-digit', minute: '2-digit' }) : '-',
+        r.clock_out ? new Date(r.clock_out).toLocaleTimeString('en-NZ', { hour: '2-digit', minute: '2-digit' }) : 'Still clocked in',
+        r.duration_minutes != null ? String(r.duration_minutes) : '-',
+      ]);
+      const csvContent = [
+        `Staff Attendance Report - ${attendanceStartDate} to ${attendanceEndDate}`,
+        '',
+        headers.join(','),
+        ...rows.map(row => row.map(cell => `"${cell}"`).join(',')),
+      ].join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.setAttribute('href', URL.createObjectURL(blob));
+      link.setAttribute('download', `attendance-${attendanceStartDate}-to-${attendanceEndDate}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } finally {
+      setExportingAttendance(null);
+    }
+  };
+
+  const exportAttendanceExcel = () => {
+    setExportingAttendance('excel');
+    try {
+      const headers = ['Date', 'Staff Name', 'Role', 'Clock In', 'Clock Out', 'Duration (min)'];
+      const rows = attendanceRecords.map(r => [
+        r.date,
+        r.staff?.name || '-',
+        r.staff?.role || '-',
+        r.clock_in ? new Date(r.clock_in).toLocaleTimeString('en-NZ', { hour: '2-digit', minute: '2-digit' }) : '-',
+        r.clock_out ? new Date(r.clock_out).toLocaleTimeString('en-NZ', { hour: '2-digit', minute: '2-digit' }) : 'Still clocked in',
+        r.duration_minutes != null ? String(r.duration_minutes) : '-',
+      ]);
+      const csvContent = [
+        headers.join('\t'),
+        ...rows.map(row => row.join('\t')),
+      ].join('\n');
+      const blob = new Blob([csvContent], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.setAttribute('href', URL.createObjectURL(blob));
+      link.setAttribute('download', `attendance-${attendanceStartDate}-to-${attendanceEndDate}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } finally {
+      setExportingAttendance(null);
+    }
+  };
+
+  const exportAttendancePDF = () => {
+    setExportingAttendance('pdf');
+    try {
+      const rows = attendanceRecords.map(r => `
+        <tr>
+          <td style="padding:6px 10px;border-bottom:1px solid #eee">${r.date}</td>
+          <td style="padding:6px 10px;border-bottom:1px solid #eee;font-weight:500">${r.staff?.name || '-'}</td>
+          <td style="padding:6px 10px;border-bottom:1px solid #eee;text-transform:capitalize">${r.staff?.role || '-'}</td>
+          <td style="padding:6px 10px;border-bottom:1px solid #eee">${r.clock_in ? new Date(r.clock_in).toLocaleTimeString('en-NZ', { hour: '2-digit', minute: '2-digit' }) : '-'}</td>
+          <td style="padding:6px 10px;border-bottom:1px solid #eee">${r.clock_out ? new Date(r.clock_out).toLocaleTimeString('en-NZ', { hour: '2-digit', minute: '2-digit' }) : 'Still clocked in'}</td>
+          <td style="padding:6px 10px;border-bottom:1px solid #eee">${r.duration_minutes != null ? r.duration_minutes + ' min' : '-'}</td>
+        </tr>
+      `).join('');
+
+      const html = `
+        <html><head><title>Attendance Report</title>
+        <style>
+          body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; padding: 20px; color: #111; }
+          h1 { font-size: 18px; margin-bottom: 4px; }
+          p { font-size: 12px; color: #666; margin-bottom: 16px; }
+          table { width: 100%; border-collapse: collapse; font-size: 13px; }
+          th { padding: 8px 10px; text-align: left; background: #f3f4f6; font-weight: 600; font-size: 11px; text-transform: uppercase; color: #6b7280; }
+          @media print { body { padding: 0; } }
+        </style></head><body>
+        <h1>Staff Attendance Report</h1>
+        <p>${attendanceStartDate} to ${attendanceEndDate}</p>
+        <table>
+          <thead><tr>
+            <th>Date</th><th>Staff</th><th>Role</th><th>Clock In</th><th>Clock Out</th><th>Duration</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+        </body></html>
+      `;
+      printViaIframe(html);
+    } finally {
+      setExportingAttendance(null);
     }
   };
 
@@ -3063,6 +3238,188 @@ function SettingsContent() {
                 </div>
               </div>
             )}
+
+            {/* ---- Staff Attendance Section ---- */}
+            <div className="mt-8 pt-6 border-t border-gray-200">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                <div>
+                  <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
+                    <Clock className="w-5 h-5 text-green-500" />
+                    Staff Attendance
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    QR-based clock-in and clock-out for your staff
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    setShowAttendanceQR(!showAttendanceQR);
+                    if (!showAttendanceQR && !attendanceToken) loadAttendanceQRToken();
+                  }}
+                  className="w-full sm:w-auto px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center gap-2 text-sm"
+                >
+                  <QrCode className="w-4 h-4" />
+                  {showAttendanceQR ? 'Hide QR Code' : 'Show Attendance QR'}
+                </button>
+              </div>
+
+              {/* QR Code Panel */}
+              {showAttendanceQR && (
+                <div className="mb-6 p-4 bg-green-50 rounded-xl border-2 border-green-200 text-center">
+                  <p className="text-sm text-gray-600 mb-3">
+                    Print or display this QR code in your restaurant. Staff scan it daily to clock in and out.
+                  </p>
+                  {attendanceQRLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="w-8 h-8 animate-spin text-green-500" />
+                    </div>
+                  ) : attendanceToken ? (
+                    <>
+                      <div className="inline-block p-4 bg-white rounded-xl shadow-md mb-3">
+                        <QRCodeSVG
+                          value={`${typeof window !== 'undefined' ? window.location.origin : ''}/staff-attendance/${profile?.restaurant?.restaurant_id}?token=${attendanceToken}`}
+                          size={200}
+                          level="M"
+                        />
+                      </div>
+                      <p className="text-xs text-gray-500 mt-2">
+                        QR code refreshes daily for security. Click Regenerate if it stops working.
+                      </p>
+                      <div className="flex gap-2 justify-center mt-3">
+                        <button
+                          onClick={loadAttendanceQRToken}
+                          className="px-3 py-1.5 text-sm bg-white border border-green-300 rounded-lg text-green-700 hover:bg-green-50"
+                        >
+                          Regenerate
+                        </button>
+                        <button
+                          onClick={() => window.print()}
+                          className="px-3 py-1.5 text-sm bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 flex items-center gap-1"
+                        >
+                          <Printer className="w-3.5 h-3.5" />
+                          Print
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <p className="text-sm text-red-500">Failed to load QR code. Please try again.</p>
+                  )}
+                </div>
+              )}
+
+              {/* Records Filter Row */}
+              <div className="flex flex-col sm:flex-row gap-2 mb-4">
+                <input
+                  type="date"
+                  value={attendanceStartDate}
+                  onChange={(e) => setAttendanceStartDate(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900"
+                />
+                <span className="self-center text-gray-500 text-sm">to</span>
+                <input
+                  type="date"
+                  value={attendanceEndDate}
+                  onChange={(e) => setAttendanceEndDate(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900"
+                />
+                <select
+                  value={attendanceStaffFilter}
+                  onChange={(e) => setAttendanceStaffFilter(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900"
+                >
+                  <option value="">All Staff</option>
+                  {staffList.map(s => (
+                    <option key={s.id} value={s.id}>{s.name}</option>
+                  ))}
+                </select>
+                <button
+                  onClick={loadAttendanceRecords}
+                  disabled={attendanceLoading}
+                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  {attendanceLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Calendar className="w-4 h-4" />}
+                  Load Records
+                </button>
+              </div>
+
+              {/* Export Buttons */}
+              {attendanceRecords.length > 0 && (
+                <div className="flex gap-2 mb-4">
+                  <button
+                    onClick={exportAttendanceCSV}
+                    disabled={exportingAttendance !== null}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm disabled:opacity-50"
+                  >
+                    {exportingAttendance === 'csv' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
+                    CSV
+                  </button>
+                  <button
+                    onClick={exportAttendanceExcel}
+                    disabled={exportingAttendance !== null}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm disabled:opacity-50"
+                  >
+                    {exportingAttendance === 'excel' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileSpreadsheet className="w-3.5 h-3.5" />}
+                    Excel
+                  </button>
+                  <button
+                    onClick={exportAttendancePDF}
+                    disabled={exportingAttendance !== null}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm disabled:opacity-50"
+                  >
+                    {exportingAttendance === 'pdf' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
+                    PDF
+                  </button>
+                </div>
+              )}
+
+              {/* Records Table */}
+              {attendanceLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+                </div>
+              ) : attendanceRecords.length === 0 ? (
+                <div className="text-center py-8 bg-gray-50 rounded-xl">
+                  <Clock className="w-10 h-10 text-gray-300 mx-auto mb-2" />
+                  <p className="text-gray-500 text-sm">No attendance records found. Select a date range and click &quot;Load Records&quot;.</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="bg-gray-50">
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Staff</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">Role</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Clock In</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Clock Out</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Duration</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {attendanceRecords.map(r => (
+                        <tr key={r.id} className="hover:bg-gray-50">
+                          <td className="px-3 py-2 text-gray-900 whitespace-nowrap">{r.date}</td>
+                          <td className="px-3 py-2 font-medium text-gray-900">{r.staff?.name || '-'}</td>
+                          <td className="px-3 py-2 text-gray-500 capitalize hidden sm:table-cell">{r.staff?.role || '-'}</td>
+                          <td className="px-3 py-2 text-gray-900">
+                            {r.clock_in ? new Date(r.clock_in).toLocaleTimeString('en-NZ', { hour: '2-digit', minute: '2-digit' }) : '-'}
+                          </td>
+                          <td className="px-3 py-2 text-gray-900">
+                            {r.clock_out
+                              ? new Date(r.clock_out).toLocaleTimeString('en-NZ', { hour: '2-digit', minute: '2-digit' })
+                              : <span className="text-amber-500 font-medium">Clocked in</span>
+                            }
+                          </td>
+                          <td className="px-3 py-2 text-gray-900">
+                            {r.duration_minutes != null ? `${Math.floor(r.duration_minutes / 60)}h ${r.duration_minutes % 60}m` : '-'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
           </div>
         )}
 

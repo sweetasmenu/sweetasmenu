@@ -11,7 +11,7 @@ from contextlib import asynccontextmanager
 import os
 import base64
 import asyncio
-from datetime import datetime
+from datetime import datetime, date
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -33,6 +33,7 @@ from services.email_service import email_service  # Email notifications
 from services.file_validation import validate_image_upload, get_safe_filename  # File upload validation
 from services.analytics_service import analytics_service  # Analytics & Reports
 from services.staff_service import staff_service  # Staff Management
+from services.attendance_service import attendance_service  # Staff QR Attendance
 from services.image_library_service import image_library_service  # Shared Image Library
 from services.delivery_service import delivery_service  # Delivery distance calculation
 from services.admin_service import admin_service  # Super Admin Dashboard
@@ -4943,6 +4944,81 @@ async def verify_staff_pin(request: dict):
         raise
     except Exception as e:
         print(f"❌ Verify PIN error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ============================================================================
+# STAFF ATTENDANCE ENDPOINTS
+# ============================================================================
+
+@app.get("/api/staff/attendance/qr-token", summary="Get Daily QR Token for Attendance")
+async def get_attendance_qr_token(restaurant_id: str, user_id: str):
+    """Generate today's attendance QR token for the restaurant owner to display"""
+    try:
+        token = attendance_service.generate_daily_token(restaurant_id)
+        return {"success": True, "token": token, "date": date.today().isoformat()}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/staff/attendance/clock-in", summary="Staff Clock In")
+async def staff_clock_in(request: dict):
+    """Staff clock in via QR code + PIN"""
+    try:
+        restaurant_id = request.get('restaurant_id')
+        pin_code = request.get('pin_code')
+        token = request.get('token')
+
+        if not all([restaurant_id, pin_code, token]):
+            raise HTTPException(status_code=400, detail="Missing required fields")
+
+        if not attendance_service.verify_daily_token(restaurant_id, token):
+            raise HTTPException(status_code=403, detail="Invalid or expired QR code. Please scan a fresh QR code.")
+
+        result = attendance_service.clock_in(restaurant_id, pin_code)
+        if result is None:
+            raise HTTPException(status_code=401, detail="Invalid PIN code")
+
+        return {"success": True, **result}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/staff/attendance/clock-out", summary="Staff Clock Out")
+async def staff_clock_out(request: dict):
+    """Staff clock out via QR code + PIN"""
+    try:
+        restaurant_id = request.get('restaurant_id')
+        pin_code = request.get('pin_code')
+        token = request.get('token')
+
+        if not all([restaurant_id, pin_code, token]):
+            raise HTTPException(status_code=400, detail="Missing required fields")
+
+        if not attendance_service.verify_daily_token(restaurant_id, token):
+            raise HTTPException(status_code=403, detail="Invalid or expired QR code. Please scan a fresh QR code.")
+
+        result = attendance_service.clock_out(restaurant_id, pin_code)
+        if result is None:
+            raise HTTPException(status_code=401, detail="Invalid PIN code")
+
+        return {"success": True, **result}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/staff/attendance/records", summary="Get Attendance Records")
+async def get_attendance_records(
+    restaurant_id: str,
+    start_date: str,
+    end_date: str,
+    staff_id: Optional[str] = None
+):
+    """Get staff attendance records for a date range"""
+    try:
+        records = attendance_service.get_records(restaurant_id, start_date, end_date, staff_id)
+        return {"success": True, "count": len(records), "records": records}
+    except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/images/library", summary="Get All Images for User (Shared Library)")
