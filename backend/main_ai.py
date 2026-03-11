@@ -3076,6 +3076,8 @@ async def get_user_profile(
                 "ird_number": restaurant.get("ird_number", ""),
                 # Operating hours
                 "operating_hours": restaurant.get("operating_hours"),
+                # Email visibility on menu
+                "show_email_on_menu": restaurant.get("show_email_on_menu", True),
             }
         else:
             # Fallback if creation failed
