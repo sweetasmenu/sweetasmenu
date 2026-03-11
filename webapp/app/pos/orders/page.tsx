@@ -529,8 +529,18 @@ export default function StaffOrdersPage() {
       });
 
       if (response.ok) {
-        if (['completed', 'cancelled'].includes(newStatus)) {
+        if (newStatus === 'cancelled') {
           setOrders((prev) => prev.filter((o) => o.id !== orderId));
+        } else if (newStatus === 'completed') {
+          setOrders((prev) => {
+            const order = prev.find(o => o.id === orderId);
+            const isCashierUnpaid = order && ['cash_at_cashier', 'cashier_cash', 'cashier_eftpos'].includes(order.payment_method || '') && order.payment_status !== 'paid';
+            if (isCashierUnpaid) {
+              // Keep in list and update status so "รอจ่ายเงิน" button appears immediately
+              return prev.map(o => o.id === orderId ? { ...o, status: 'completed' as const } : o);
+            }
+            return prev.filter(o => o.id !== orderId);
+          });
         }
       }
     } catch (error) {
