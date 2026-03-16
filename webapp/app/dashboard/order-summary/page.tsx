@@ -665,10 +665,8 @@ export default function OrderSummaryPage() {
           <table>
             <tr><td>Card:</td><td class="right">${summary?.payment_method?.card?.count || 0} ($${(summary?.payment_method?.card?.revenue || 0).toFixed(2)})</td></tr>
             <tr><td>Bank Transfer:</td><td class="right">${summary?.payment_method?.bank_transfer?.count || 0} ($${(summary?.payment_method?.bank_transfer?.revenue || 0).toFixed(2)})</td></tr>
-            ${summary?.payment_method?.cash?.count ? `<tr><td>Cash:</td><td class="right">${summary.payment_method.cash.count} ($${(summary.payment_method.cash.revenue || 0).toFixed(2)})</td></tr>` : ''}
-            ${summary?.payment_method?.cashier_cash?.count ? `<tr><td>Cashier/Cash:</td><td class="right">${summary.payment_method.cashier_cash.count} ($${(summary.payment_method.cashier_cash.revenue || 0).toFixed(2)})</td></tr>` : ''}
-            ${summary?.payment_method?.cashier_eftpos?.count ? `<tr><td>Cashier/EFTPOS:</td><td class="right">${summary.payment_method.cashier_eftpos.count} ($${(summary.payment_method.cashier_eftpos.revenue || 0).toFixed(2)})</td></tr>` : ''}
-            ${summary?.payment_method?.cash_at_cashier?.count ? `<tr><td>Cashier/Cash:</td><td class="right">${summary.payment_method.cash_at_cashier.count} ($${(summary.payment_method.cash_at_cashier.revenue || 0).toFixed(2)})</td></tr>` : ''}
+            <tr><td>Cash:</td><td class="right">${(summary?.payment_method?.cash?.count || 0) + (summary?.payment_method?.cashier_cash?.count || 0) + (summary?.payment_method?.cash_at_cashier?.count || 0)} ($${((summary?.payment_method?.cash?.revenue || 0) + (summary?.payment_method?.cashier_cash?.revenue || 0) + (summary?.payment_method?.cash_at_cashier?.revenue || 0)).toFixed(2)})</td></tr>
+            <tr><td>EFTPOS:</td><td class="right">${summary?.payment_method?.cashier_eftpos?.count || 0} ($${(summary?.payment_method?.cashier_eftpos?.revenue || 0).toFixed(2)})</td></tr>
           </table>
         </div>
 
@@ -1116,31 +1114,14 @@ export default function OrderSummaryPage() {
                   <span className="text-gray-600">Bank Transfer:</span>
                   <span className="font-bold text-purple-700">{summary.payment_method.bank_transfer.count} orders</span>
                 </div>
-                {summary.payment_method.cash && summary.payment_method.cash.count > 0 && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Cash:</span>
-                    <span className="font-bold text-purple-700">{summary.payment_method.cash.count} orders</span>
-                  </div>
-                )}
-                {summary.payment_method.cashier_cash && summary.payment_method.cashier_cash.count > 0 && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Cashier/Cash:</span>
-                    <span className="font-bold text-purple-700">{summary.payment_method.cashier_cash.count} orders</span>
-                  </div>
-                )}
-                {summary.payment_method.cashier_eftpos && summary.payment_method.cashier_eftpos.count > 0 && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Cashier/EFTPOS:</span>
-                    <span className="font-bold text-purple-700">{summary.payment_method.cashier_eftpos.count} orders</span>
-                  </div>
-                )}
-                {/* Legacy support for old cash_at_cashier */}
-                {summary.payment_method.cash_at_cashier && summary.payment_method.cash_at_cashier.count > 0 && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Cashier/Cash:</span>
-                    <span className="font-bold text-purple-700">{summary.payment_method.cash_at_cashier.count} orders</span>
-                  </div>
-                )}
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Cash:</span>
+                  <span className="font-bold text-purple-700">{((summary.payment_method.cash?.count || 0) + (summary.payment_method.cashier_cash?.count || 0) + (summary.payment_method.cash_at_cashier?.count || 0))} orders</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">EFTPOS:</span>
+                  <span className="font-bold text-purple-700">{(summary.payment_method.cashier_eftpos?.count || 0)} orders</span>
+                </div>
               </div>
               <div className="mt-2 text-xs text-blue-500 flex items-center gap-1">
                 <Eye className="w-3 h-3" /> Click to view
