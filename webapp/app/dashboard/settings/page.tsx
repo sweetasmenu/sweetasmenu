@@ -364,16 +364,11 @@ function SettingsContent() {
   const [operatingHours, setOperatingHours] = useState<OperatingHours>(defaultOperatingHours);
   const [savingHours, setSavingHours] = useState(false);
 
-  // Generate 24h time options (every 15 minutes)
-  const timeOptions = (() => {
-    const options: string[] = [];
-    for (let h = 0; h < 24; h++) {
-      for (let m = 0; m < 60; m += 15) {
-        options.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
-      }
-    }
-    return options;
-  })();
+  // Generate hour (0-23) and minute (0-59) options
+  const hourOptions = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
+  const minuteOptions = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0'));
+  const getHour = (time: string) => time.split(':')[0] || '00';
+  const getMinute = (time: string) => time.split(':')[1] || '00';
 
   // Image optimization helper
   const optimizeImage = async (file: File, maxSize: number = 512): Promise<Blob> => {
@@ -2224,27 +2219,53 @@ function SettingsContent() {
 
                       {/* Time inputs or Closed label */}
                       {operatingHours[day].enabled ? (
-                        <div className="flex items-center gap-1 sm:gap-2 flex-1 min-w-0">
+                        <div className="flex items-center gap-1 flex-1 min-w-0">
+                          {/* Open time: hour : minute */}
                           <select
-                            value={operatingHours[day].open}
+                            value={getHour(operatingHours[day].open)}
                             onChange={(e) => setOperatingHours({
                               ...operatingHours,
-                              [day]: { ...operatingHours[day], open: e.target.value }
+                              [day]: { ...operatingHours[day], open: `${e.target.value}:${getMinute(operatingHours[day].open)}` }
                             })}
-                            className="flex-1 min-w-0 px-1 sm:px-2 py-1 sm:py-1.5 border border-gray-300 rounded-md text-gray-900 bg-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                            className="w-12 sm:w-14 px-0.5 sm:px-1 py-1 sm:py-1.5 border border-gray-300 rounded-md text-gray-900 bg-white text-xs sm:text-sm text-center focus:outline-none focus:ring-2 focus:ring-green-500"
                           >
-                            {timeOptions.map(t => <option key={t} value={t}>{t}</option>)}
+                            {hourOptions.map(h => <option key={h} value={h}>{h}</option>)}
                           </select>
-                          <span className="text-gray-400 text-xs sm:text-sm flex-shrink-0">-</span>
+                          <span className="text-gray-500 text-xs font-bold">:</span>
                           <select
-                            value={operatingHours[day].close}
+                            value={getMinute(operatingHours[day].open)}
                             onChange={(e) => setOperatingHours({
                               ...operatingHours,
-                              [day]: { ...operatingHours[day], close: e.target.value }
+                              [day]: { ...operatingHours[day], open: `${getHour(operatingHours[day].open)}:${e.target.value}` }
                             })}
-                            className="flex-1 min-w-0 px-1 sm:px-2 py-1 sm:py-1.5 border border-gray-300 rounded-md text-gray-900 bg-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                            className="w-12 sm:w-14 px-0.5 sm:px-1 py-1 sm:py-1.5 border border-gray-300 rounded-md text-gray-900 bg-white text-xs sm:text-sm text-center focus:outline-none focus:ring-2 focus:ring-green-500"
                           >
-                            {timeOptions.map(t => <option key={t} value={t}>{t}</option>)}
+                            {minuteOptions.map(m => <option key={m} value={m}>{m}</option>)}
+                          </select>
+
+                          <span className="text-gray-400 text-xs sm:text-sm flex-shrink-0 mx-0.5">-</span>
+
+                          {/* Close time: hour : minute */}
+                          <select
+                            value={getHour(operatingHours[day].close)}
+                            onChange={(e) => setOperatingHours({
+                              ...operatingHours,
+                              [day]: { ...operatingHours[day], close: `${e.target.value}:${getMinute(operatingHours[day].close)}` }
+                            })}
+                            className="w-12 sm:w-14 px-0.5 sm:px-1 py-1 sm:py-1.5 border border-gray-300 rounded-md text-gray-900 bg-white text-xs sm:text-sm text-center focus:outline-none focus:ring-2 focus:ring-green-500"
+                          >
+                            {hourOptions.map(h => <option key={h} value={h}>{h}</option>)}
+                          </select>
+                          <span className="text-gray-500 text-xs font-bold">:</span>
+                          <select
+                            value={getMinute(operatingHours[day].close)}
+                            onChange={(e) => setOperatingHours({
+                              ...operatingHours,
+                              [day]: { ...operatingHours[day], close: `${getHour(operatingHours[day].close)}:${e.target.value}` }
+                            })}
+                            className="w-12 sm:w-14 px-0.5 sm:px-1 py-1 sm:py-1.5 border border-gray-300 rounded-md text-gray-900 bg-white text-xs sm:text-sm text-center focus:outline-none focus:ring-2 focus:ring-green-500"
+                          >
+                            {minuteOptions.map(m => <option key={m} value={m}>{m}</option>)}
                           </select>
                         </div>
                       ) : (
