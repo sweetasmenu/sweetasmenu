@@ -1408,12 +1408,7 @@ export default function RestaurantMenuClient({ initialData, restaurantId }: { in
                   }
                   return days.join(', ');
                 };
-                const formatTime = (t: string) => {
-                  const [hh, mm] = t.split(':').map(Number);
-                  const suffix = hh >= 12 ? 'PM' : 'AM';
-                  const h12 = hh % 12 || 12;
-                  return mm === 0 ? `${h12}${suffix}` : `${h12}:${mm.toString().padStart(2, '0')}${suffix}`;
-                };
+                const formatTime = (t: string) => t;
                 return (
                   <div className="flex flex-col items-center gap-0.5">
                     {groups.map((g, i) => (

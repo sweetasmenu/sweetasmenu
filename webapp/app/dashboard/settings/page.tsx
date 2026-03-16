@@ -364,6 +364,17 @@ function SettingsContent() {
   const [operatingHours, setOperatingHours] = useState<OperatingHours>(defaultOperatingHours);
   const [savingHours, setSavingHours] = useState(false);
 
+  // Generate 24h time options (every 15 minutes)
+  const timeOptions = (() => {
+    const options: string[] = [];
+    for (let h = 0; h < 24; h++) {
+      for (let m = 0; m < 60; m += 15) {
+        options.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
+      }
+    }
+    return options;
+  })();
+
   // Image optimization helper
   const optimizeImage = async (file: File, maxSize: number = 512): Promise<Blob> => {
     return new Promise((resolve, reject) => {
@@ -2214,25 +2225,27 @@ function SettingsContent() {
                       {/* Time inputs or Closed label */}
                       {operatingHours[day].enabled ? (
                         <div className="flex items-center gap-1 sm:gap-2 flex-1 min-w-0">
-                          <input
-                            type="time"
+                          <select
                             value={operatingHours[day].open}
                             onChange={(e) => setOperatingHours({
                               ...operatingHours,
                               [day]: { ...operatingHours[day], open: e.target.value }
                             })}
                             className="flex-1 min-w-0 px-1 sm:px-2 py-1 sm:py-1.5 border border-gray-300 rounded-md text-gray-900 bg-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                          />
+                          >
+                            {timeOptions.map(t => <option key={t} value={t}>{t}</option>)}
+                          </select>
                           <span className="text-gray-400 text-xs sm:text-sm flex-shrink-0">-</span>
-                          <input
-                            type="time"
+                          <select
                             value={operatingHours[day].close}
                             onChange={(e) => setOperatingHours({
                               ...operatingHours,
                               [day]: { ...operatingHours[day], close: e.target.value }
                             })}
                             className="flex-1 min-w-0 px-1 sm:px-2 py-1 sm:py-1.5 border border-gray-300 rounded-md text-gray-900 bg-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                          />
+                          >
+                            {timeOptions.map(t => <option key={t} value={t}>{t}</option>)}
+                          </select>
                         </div>
                       ) : (
                         <span className="text-gray-400 italic text-xs sm:text-sm">Closed</span>
