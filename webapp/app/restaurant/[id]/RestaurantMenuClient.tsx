@@ -2046,39 +2046,77 @@ export default function RestaurantMenuClient({ initialData, restaurantId }: { in
                           <label className="block text-sm font-medium text-gray-700 mb-2">
                             {dt('customer', 'pickupTime', getCustomerLang())} <span className="text-red-500">*</span>
                           </label>
-                          <input
-                            type="datetime-local"
-                            value={customerDetails.pickup_time}
-                            min={(() => {
-                              const minTime = new Date(Date.now() + 30 * 60 * 1000);
-                              return toNZDatetimeLocal(minTime);
-                            })()}
-                            onFocus={(e) => {
-                              // Auto-set to 30 minutes from now (NZ time) when user clicks on empty field
+                          {(() => {
+                            const pickupVal = customerDetails.pickup_time || '';
+                            const pickupDate = pickupVal.split('T')[0] || '';
+                            const pickupTimePart = pickupVal.split('T')[1] || '';
+                            const pickupHH = pickupTimePart.split(':')[0] || '';
+                            const pickupMM = pickupTimePart.split(':')[1] || '';
+                            const minDatetime = toNZDatetimeLocal(new Date(Date.now() + 30 * 60 * 1000));
+                            const minDate = minDatetime.split('T')[0];
+
+                            const buildPickup = (date: string, hh: string, mm: string) => {
+                              if (date && hh && mm) {
+                                const val = `${date}T${hh}:${mm}`;
+                                const selectedTime = new Date(val).getTime();
+                                const minAllowedTime = Date.now() + 30 * 60 * 1000;
+                                if (selectedTime < minAllowedTime) {
+                                  const corrected = toNZDatetimeLocal(new Date(minAllowedTime));
+                                  setCustomerDetails({ ...customerDetails, pickup_time: corrected });
+                                  return;
+                                }
+                                setCustomerDetails({ ...customerDetails, pickup_time: val });
+                              } else {
+                                setCustomerDetails({ ...customerDetails, pickup_time: date ? `${date}T${hh || '12'}:${mm || '00'}` : '' });
+                              }
+                            };
+
+                            const autoFill = () => {
                               if (!customerDetails.pickup_time) {
-                                const minTime = new Date(Date.now() + 30 * 60 * 1000);
-                                const defaultTime = toNZDatetimeLocal(minTime);
+                                const defaultTime = toNZDatetimeLocal(new Date(Date.now() + 30 * 60 * 1000));
                                 setCustomerDetails({ ...customerDetails, pickup_time: defaultTime });
                               }
-                            }}
-                            onChange={(e) => {
-                              const selectedTime = new Date(e.target.value).getTime();
-                              const minAllowedTime = Date.now() + 30 * 60 * 1000;
-                              if (selectedTime < minAllowedTime) {
-                                // Auto-correct to minimum allowed time (NZ time)
-                                const minTime = new Date(minAllowedTime);
-                                const correctedTime = toNZDatetimeLocal(minTime);
-                                setCustomerDetails({ ...customerDetails, pickup_time: correctedTime });
-                                alert('Pickup time must be at least 30 minutes from now. Auto-adjusted.');
-                                return;
-                              }
-                              setCustomerDetails({ ...customerDetails, pickup_time: e.target.value });
-                              // Auto-blur to close the picker
-                              (e.target as HTMLInputElement).blur();
-                            }}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-gray-900 bg-white"
-                            required
-                          />
+                            };
+
+                            return (
+                              <div className="flex items-center gap-1.5">
+                                <input
+                                  type="date"
+                                  value={pickupDate}
+                                  min={minDate}
+                                  onFocus={autoFill}
+                                  onChange={(e) => buildPickup(e.target.value, pickupHH || '12', pickupMM || '00')}
+                                  className="flex-1 min-w-0 px-2 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-gray-900 bg-white text-sm"
+                                  required
+                                />
+                                <select
+                                  value={pickupHH}
+                                  onFocus={autoFill}
+                                  onChange={(e) => buildPickup(pickupDate, e.target.value, pickupMM || '00')}
+                                  className="w-14 px-1 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white text-sm text-center focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
+                                  required
+                                >
+                                  <option value="" disabled>--</option>
+                                  {Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0')).map(h => (
+                                    <option key={h} value={h}>{h}</option>
+                                  ))}
+                                </select>
+                                <span className="text-gray-500 font-bold">:</span>
+                                <select
+                                  value={pickupMM}
+                                  onFocus={autoFill}
+                                  onChange={(e) => buildPickup(pickupDate, pickupHH || '12', e.target.value)}
+                                  className="w-14 px-1 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white text-sm text-center focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
+                                  required
+                                >
+                                  <option value="" disabled>--</option>
+                                  {Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0')).map(m => (
+                                    <option key={m} value={m}>{m}</option>
+                                  ))}
+                                </select>
+                              </div>
+                            );
+                          })()}
                         </div>
                       </div>
                     )}
