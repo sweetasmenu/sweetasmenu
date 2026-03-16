@@ -509,14 +509,18 @@ class OrdersService:
             delivery_count = len([o for o in orders if o.get('service_type') == 'delivery'])
 
             # Count by payment method (all orders, not just paid)
-            card_count = len([o for o in orders if o.get('payment_method') == 'card' and not o.get('is_voided') and o.get('status') != 'voided'])
-            bank_transfer_count = len([o for o in orders if o.get('payment_method') == 'bank_transfer' and not o.get('is_voided') and o.get('status') != 'voided'])
-            cash_count = len([o for o in orders if o.get('payment_method') == 'cash' and not o.get('is_voided') and o.get('status') != 'voided'])
+            non_voided = [o for o in orders if not o.get('is_voided') and o.get('status') != 'voided']
+            card_count = len([o for o in non_voided if o.get('payment_method') == 'card'])
+            bank_transfer_count = len([o for o in non_voided if o.get('payment_method') == 'bank_transfer'])
+            cash_count = len([o for o in non_voided if o.get('payment_method') in ('cash', 'cashier_cash', 'cash_at_cashier', 'cash_at_counter')])
+            eftpos_count = len([o for o in non_voided if o.get('payment_method') == 'cashier_eftpos'])
 
             # Revenue by payment method (only paid orders)
-            card_revenue = sum(o.get('total_price', 0) or 0 for o in orders if o.get('payment_method') == 'card' and o.get('payment_status') == 'paid')
-            bank_transfer_revenue = sum(o.get('total_price', 0) or 0 for o in orders if o.get('payment_method') == 'bank_transfer' and o.get('payment_status') == 'paid')
-            cash_revenue = sum(o.get('total_price', 0) or 0 for o in orders if o.get('payment_method') == 'cash' and o.get('payment_status') == 'paid')
+            paid_orders = [o for o in orders if o.get('payment_status') == 'paid']
+            card_revenue = sum(o.get('total_price', 0) or 0 for o in paid_orders if o.get('payment_method') == 'card')
+            bank_transfer_revenue = sum(o.get('total_price', 0) or 0 for o in paid_orders if o.get('payment_method') == 'bank_transfer')
+            cash_revenue = sum(o.get('total_price', 0) or 0 for o in paid_orders if o.get('payment_method') in ('cash', 'cashier_cash', 'cash_at_cashier', 'cash_at_counter'))
+            eftpos_revenue = sum(o.get('total_price', 0) or 0 for o in paid_orders if o.get('payment_method') == 'cashier_eftpos')
 
             # Calculate total tax from paid orders
             total_tax = sum(o.get('tax', 0) or 0 for o in orders if o.get('payment_status') == 'paid' and not o.get('is_voided') and o.get('status') != 'voided')
@@ -538,7 +542,8 @@ class OrdersService:
                 "payment_method": {
                     "card": {"count": card_count, "revenue": card_revenue},
                     "bank_transfer": {"count": bank_transfer_count, "revenue": bank_transfer_revenue},
-                    "cash": {"count": cash_count, "revenue": cash_revenue}
+                    "cash": {"count": cash_count, "revenue": cash_revenue},
+                    "eftpos": {"count": eftpos_count, "revenue": eftpos_revenue}
                 }
             }
 
