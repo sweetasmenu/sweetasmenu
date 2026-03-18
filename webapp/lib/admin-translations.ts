@@ -191,6 +191,72 @@ export const adminTranslations = {
     byPlan: { th: 'ตามแพคเกจ', en: 'By Plan' },
     byPaymentMethod: { th: 'ตามวิธีชำระ', en: 'By Payment Method' },
   },
+
+  // Filters
+  filters: {
+    allRoles: { th: 'ทุก Role', en: 'All Roles' },
+    allStatuses: { th: 'ทุกสถานะ', en: 'All Statuses' },
+    allPaymentMethods: { th: 'ทุกวิธีชำระ', en: 'All Payment Methods' },
+    sortBy: { th: 'เรียงตาม', en: 'Sort By' },
+    sortName: { th: 'ชื่อ', en: 'Name' },
+    sortCreatedAt: { th: 'วันสมัคร', en: 'Date Joined' },
+    sortNextBilling: { th: 'วันต่ออายุ', en: 'Next Billing' },
+    expiringSoon: { th: 'ใกล้หมดอายุ', en: 'Expiring Soon' },
+  },
+
+  // Subscription Actions
+  subscriptionActions: {
+    extendTitle: { th: 'ขยายเวลา Subscription', en: 'Extend Subscription' },
+    extendDays: { th: 'จำนวนวันที่ต้องการขยาย', en: 'Number of days to extend' },
+    extendReason: { th: 'เหตุผล (ไม่บังคับ)', en: 'Reason (optional)' },
+    changePlanTitle: { th: 'เปลี่ยนแพคเกจ', en: 'Change Plan' },
+    newPlan: { th: 'แพคเกจใหม่', en: 'New Plan' },
+    billingInterval: { th: 'รอบการชำระ', en: 'Billing Interval' },
+    monthly: { th: 'รายเดือน', en: 'Monthly' },
+    yearly: { th: 'รายปี', en: 'Yearly' },
+    cancelTitle: { th: 'ยกเลิก Subscription', en: 'Cancel Subscription' },
+    cancelReason: { th: 'เหตุผลในการยกเลิก', en: 'Cancellation reason' },
+    cancelImmediate: { th: 'ยกเลิกทันที', en: 'Cancel immediately' },
+    cancelAtPeriodEnd: { th: 'ยกเลิกเมื่อสิ้นสุดรอบ', en: 'Cancel at period end' },
+    confirmExtend: { th: 'ยืนยันการขยายเวลา?', en: 'Confirm extending subscription?' },
+    confirmChangePlan: { th: 'ยืนยันการเปลี่ยนแพคเกจ?', en: 'Confirm changing plan?' },
+    confirmCancel: { th: 'ยืนยันการยกเลิก Subscription?', en: 'Confirm cancelling subscription?' },
+  },
+
+  // Edit User
+  editUser: {
+    title: { th: 'แก้ไขข้อมูลลูกค้า', en: 'Edit Customer' },
+    contactInfo: { th: 'ข้อมูลติดต่อ', en: 'Contact Info' },
+    subscriptionInfo: { th: 'ข้อมูล Subscription', en: 'Subscription Info' },
+    accountStatus: { th: 'สถานะบัญชี', en: 'Account Status' },
+    active: { th: 'เปิดใช้งาน', en: 'Active' },
+    inactive: { th: 'ปิดใช้งาน', en: 'Inactive' },
+    saveChanges: { th: 'บันทึกการเปลี่ยนแปลง', en: 'Save Changes' },
+    editMode: { th: 'โหมดแก้ไข', en: 'Edit Mode' },
+    viewMode: { th: 'โหมดดู', en: 'View Mode' },
+    userUpdated: { th: 'อัพเดทข้อมูลลูกค้าแล้ว', en: 'Customer updated successfully' },
+  },
+
+  // Expiring Warnings
+  expiring: {
+    title: { th: 'ใกล้หมดอายุ', en: 'Expiring Soon' },
+    trialExpiring: { th: 'Trial ใกล้หมดอายุ', en: 'Trial Expiring' },
+    subscriptionExpiring: { th: 'Subscription ใกล้หมดอายุ', en: 'Subscription Expiring' },
+    daysLeft: { th: 'วันที่เหลือ', en: 'days left' },
+    expiresIn: { th: 'หมดอายุใน', en: 'Expires in' },
+    expiresToday: { th: 'หมดอายุวันนี้', en: 'Expires today' },
+    expired: { th: 'หมดอายุแล้ว', en: 'Expired' },
+  },
+
+  // Activity Logs
+  activityLogs: {
+    title: { th: 'บันทึกกิจกรรม', en: 'Activity Logs' },
+    action: { th: 'การกระทำ', en: 'Action' },
+    targetUser: { th: 'ผู้ใช้เป้าหมาย', en: 'Target User' },
+    details: { th: 'รายละเอียด', en: 'Details' },
+    timestamp: { th: 'เวลา', en: 'Timestamp' },
+    noLogs: { th: 'ยังไม่มีบันทึก', en: 'No activity logs yet' },
+  },
 };
 
 // Helper function to get translation
