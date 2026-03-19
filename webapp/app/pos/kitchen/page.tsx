@@ -1182,8 +1182,18 @@ export default function KitchenDisplayPage() {
               <div className="flex items-center gap-3 mb-4">
                 <input
                   type="number"
-                  value={estimatedMinutes}
-                  onChange={(e) => setEstimatedMinutes(Math.max(1, Math.min(180, parseInt(e.target.value) || 1)))}
+                  value={estimatedMinutes === 0 ? '' : estimatedMinutes}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === '') {
+                      setEstimatedMinutes(0);
+                    } else {
+                      setEstimatedMinutes(Math.min(180, parseInt(val) || 0));
+                    }
+                  }}
+                  onBlur={() => {
+                    if (estimatedMinutes < 1) setEstimatedMinutes(1);
+                  }}
                   min={1}
                   max={180}
                   className="flex-1 px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-center text-xl font-bold focus:outline-none focus:border-cyan-500"
