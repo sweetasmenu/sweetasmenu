@@ -163,6 +163,7 @@ export default function AdminDashboardPage() {
   const [activeTab, setActiveTab] = useState<'customers' | 'payments' | 'coupons' | 'logs'>('customers');
   const [searchTerm, setSearchTerm] = useState('');
   const [refreshing, setRefreshing] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   // Filter states
   const [filterRole, setFilterRole] = useState('all');
@@ -568,7 +569,10 @@ export default function AdminDashboardPage() {
               </button>
               {/* Notification Bell */}
               <div className="relative">
-                <button className="p-2 hover:bg-white/20 rounded-lg transition-colors relative">
+                <button
+                  onClick={() => setShowNotifications(!showNotifications)}
+                  className="p-2 hover:bg-white/20 rounded-lg transition-colors relative"
+                >
                   <Bell className="w-6 h-6" />
                   {notifications.length > 0 && (
                     <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-xs flex items-center justify-center">
@@ -576,6 +580,66 @@ export default function AdminDashboardPage() {
                     </span>
                   )}
                 </button>
+                {/* Notification Dropdown */}
+                {showNotifications && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setShowNotifications(false)} />
+                    <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 overflow-hidden">
+                      <div className="p-4 border-b border-gray-100 flex items-center justify-between">
+                        <h3 className="font-semibold text-gray-900 text-sm">{t('notifications.title', lang)}</h3>
+                        <span className="text-xs text-gray-500">{notifications.length} {lang === 'th' ? 'รายการ' : 'items'}</span>
+                      </div>
+                      <div className="max-h-80 overflow-y-auto">
+                        {notifications.length === 0 ? (
+                          <div className="p-6 text-center text-gray-400 text-sm">
+                            {t('messages.noData', lang)}
+                          </div>
+                        ) : (
+                          notifications.map((n, i) => (
+                            <div
+                              key={i}
+                              className={`p-4 border-b border-gray-50 hover:bg-gray-50 cursor-pointer transition-colors ${
+                                n.priority === 'high' ? 'bg-orange-50/50' : ''
+                              }`}
+                              onClick={() => {
+                                setShowNotifications(false);
+                                if (n.type === 'pending_payments' || n.type === 'payment') {
+                                  setActiveTab('payments');
+                                } else if (n.type === 'expiring_trials' || n.type === 'expiring_subscriptions') {
+                                  // Scroll to expiring section
+                                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                                } else {
+                                  setActiveTab('customers');
+                                }
+                              }}
+                            >
+                              <div className="flex items-start gap-3">
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                                  n.priority === 'high' ? 'bg-red-100' : 'bg-blue-100'
+                                }`}>
+                                  {n.priority === 'high' ? (
+                                    <AlertCircle className="w-4 h-4 text-red-600" />
+                                  ) : (
+                                    <Bell className="w-4 h-4 text-blue-600" />
+                                  )}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-medium text-gray-900">{n.title}</p>
+                                  <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{n.message}</p>
+                                  {n.count > 0 && (
+                                    <span className="inline-block mt-1 px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">
+                                      {n.count}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
               {/* Refresh */}
               <button
