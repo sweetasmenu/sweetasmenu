@@ -5235,14 +5235,25 @@ async def create_restaurant(request: Dict[str, Any]):
         if not restaurant_data["name"]:
             raise HTTPException(status_code=400, detail="name is required")
 
-        # Multi-branch restriction: only Enterprise can have multiple restaurants
+        # Multi-branch restriction: check max_branches from user_profiles
         try:
             existing = restaurant_service.supabase_client.table('restaurants').select('id', count='exact').eq('user_id', user_id).execute()
             existing_count = existing.count or 0
             if existing_count >= 1:
-                user_status = trial_limits_service.get_user_status(user_id)
-                user_role = user_status.get('role', 'free_trial')
-                if user_role not in ['enterprise', 'admin']:
+                # Check max_branches from user_profiles
+                profile_result = restaurant_service.supabase_client.table('user_profiles').select('max_branches, role').eq('user_id', user_id).execute()
+                if profile_result.data:
+                    profile = profile_result.data[0]
+                    max_branches = profile.get('max_branches', 1)
+                    user_role = profile.get('role', 'free_trial')
+                    # Admin always allowed
+                    if user_role != 'admin' and existing_count >= max_branches:
+                        raise HTTPException(
+                            status_code=403,
+                            detail=f"You have reached your branch limit ({max_branches}). Please contact admin to increase your limit."
+                        )
+                else:
+                    # No profile found, default to 1 branch
                     raise HTTPException(
                         status_code=403,
                         detail="Multi-branch support is only available in Enterprise plan. Please upgrade to add more restaurants."
@@ -5983,6 +5994,28 @@ async def admin_update_user(request: AdminUpdateUserRequest):
         updates['is_active'] = request.is_active
 
     result = admin_service.update_user(request.admin_user_id, request.target_user_id, updates)
+    if "error" in result:
+        raise HTTPException(status_code=403 if "Access denied" in result["error"] else 500, detail=result["error"])
+    return result
+
+
+class AdminUpdateBranchLimitRequest(BaseModel):
+    admin_user_id: str
+    target_user_id: str
+    max_branches: int
+
+
+@app.post("/api/admin/users/update-branch-limit", summary="Update User Branch Limit (Admin)")
+async def admin_update_branch_limit(request: AdminUpdateBranchLimitRequest):
+    """Update max_branches for a user"""
+    if request.max_branches < 1:
+        raise HTTPException(status_code=400, detail="max_branches must be at least 1")
+
+    result = admin_service.update_user(
+        request.admin_user_id,
+        request.target_user_id,
+        {'max_branches': request.max_branches}
+    )
     if "error" in result:
         raise HTTPException(status_code=403 if "Access denied" in result["error"] else 500, detail=result["error"])
     return result

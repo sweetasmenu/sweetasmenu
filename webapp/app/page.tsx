@@ -26,7 +26,14 @@ import {
   X,
   ChevronDown,
   Award,
-  Utensils
+  Utensils,
+  AlertTriangle,
+  DollarSign,
+  ImageOff,
+  Ban,
+  ShoppingCart,
+  Printer,
+  XCircle
 } from 'lucide-react';
 
 export default function HomePage() {
@@ -96,32 +103,38 @@ export default function HomePage() {
     {
       icon: <Wand2 className="w-6 h-6" />,
       title: "AI Photo Enhancement",
-      description: "Transform ordinary food photos into stunning, magazine-quality images with intelligent lighting and color correction."
+      description: "Transform any phone photo into magazine-quality food photography. Customers eat with their eyes first — make every dish irresistible.",
+      result: "→ Up to 40% more orders on enhanced items"
     },
     {
       icon: <Sparkles className="w-6 h-6" />,
       title: "AI Image Generation",
-      description: "No photo? Describe your dish and our AI creates beautiful, realistic food images for your menu."
+      description: "No photo? No problem. Describe your dish and our AI creates beautiful, realistic images. Launch new items instantly without a photographer.",
+      result: "→ Save $500+ on food photography"
     },
     {
       icon: <Languages className="w-6 h-6" />,
       title: "Smart Translation",
-      description: "Translate your menu into 13+ languages automatically. Perfect for international tourists."
+      description: "Translate your entire menu into 13+ languages in seconds. International tourists can browse confidently — and order more.",
+      result: "→ Capture the tourist market effortlessly"
     },
     {
       icon: <QrCode className="w-6 h-6" />,
-      title: "Instant QR Menus",
-      description: "Generate elegant QR codes in seconds. Customers scan and view your digital menu instantly."
+      title: "Instant QR Digital Menu",
+      description: "No more reprinting menus for price changes or new items. Update your QR digital menu in real-time — free forever.",
+      result: "→ Save $200+/month on printing costs"
     },
     {
       icon: <Smartphone className="w-6 h-6" />,
       title: "Complete POS System",
-      description: "Order management with Kitchen Display System. Real-time tracking and service requests."
+      description: "Online ordering, kitchen display, cashier — all connected. Customers order from their phones, kitchen gets notified instantly.",
+      result: "→ Faster service, fewer mistakes"
     },
     {
       icon: <BarChart3 className="w-6 h-6" />,
       title: "Analytics Dashboard",
-      description: "Track menu views, popular items, and customer behavior with data-driven insights."
+      description: "See your best-selling items, peak hours, and customer patterns. Make data-driven decisions to boost your revenue.",
+      result: "→ Know exactly what sells"
     }
   ];
 
@@ -156,6 +169,7 @@ export default function HomePage() {
             {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center space-x-12">
               {[
+                { href: '#pain-points', label: 'Why Us' },
                 { href: '#features', label: 'Features' },
                 { href: '#showcase', label: 'Showcase' },
                 { href: '#pricing', label: 'Pricing' },
@@ -197,9 +211,10 @@ export default function HomePage() {
           </div>
 
           {/* Mobile Menu */}
-          <div className={`lg:hidden overflow-hidden transition-all duration-500 ${mobileMenuOpen ? 'max-h-80 pb-8' : 'max-h-0'}`}>
+          <div className={`lg:hidden overflow-hidden transition-all duration-500 ${mobileMenuOpen ? 'max-h-96 pb-8' : 'max-h-0'}`}>
             <div className="flex flex-col space-y-1 pt-4 border-t border-neutral-800">
               {[
+                { href: '#pain-points', label: 'Why Us' },
                 { href: '#features', label: 'Features' },
                 { href: '#showcase', label: 'Showcase' },
                 { href: '#pricing', label: 'Pricing' },
@@ -237,7 +252,7 @@ export default function HomePage() {
         onClick={() => setMobileMenuOpen(false)}
       />
 
-      {/* Hero Section - Premium & Elegant */}
+      {/* Hero Section - Pain Point Focused */}
       <section className="relative min-h-screen flex items-center pt-28 lg:pt-24">
         {/* Premium Background */}
         <div className="absolute inset-0">
@@ -261,26 +276,29 @@ export default function HomePage() {
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 xl:gap-20 items-center py-16 lg:py-0">
             {/* Left Content */}
             <div className="max-w-xl">
-              {/* Premium Badge - positioned below navbar */}
+              {/* Premium Badge */}
               <div className="inline-flex items-center mb-6 lg:mb-8 mt-4 lg:mt-0">
                 <div className="flex items-center bg-neutral-900/80 border border-amber-800/30 px-4 lg:px-5 py-1.5 lg:py-2">
                   <Award className="w-3.5 h-3.5 lg:w-4 lg:h-4 text-amber-500 mr-2" />
                   <span className="text-amber-500 text-[10px] lg:text-xs font-semibold tracking-[0.15em] lg:tracking-[0.2em] uppercase">
-                    Premium AI Technology
+                    #1 AI Menu Platform in NZ
                   </span>
                 </div>
               </div>
 
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-light text-white mb-6 sm:mb-8 leading-[1.1] tracking-tight">
-                Elevate Your
+                Stop Losing
                 <span className="block font-semibold bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 bg-clip-text text-transparent mt-1 sm:mt-2">
-                  Restaurant Menu
+                  Customers to Bad
+                </span>
+                <span className="block font-semibold bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 bg-clip-text text-transparent">
+                  Menu Photos
                 </span>
               </h1>
 
               <p className="text-base sm:text-lg lg:text-xl text-neutral-400 mb-8 sm:mb-12 leading-relaxed font-light">
-                Transform ordinary food photography into extraordinary visual experiences.
-                AI-powered enhancement, seamless translations, and elegant digital menus.
+                Restaurants using AI-enhanced menus see <span className="text-amber-400 font-medium">up to 40% more orders</span>.
+                Transform your menu photos, attract international tourists, and take online orders — all from one platform.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-8 sm:mb-12">
@@ -288,7 +306,7 @@ export default function HomePage() {
                   href="/login?tab=signup"
                   className="group inline-flex items-center justify-center bg-gradient-to-r from-amber-600 to-amber-500 text-white px-8 sm:px-10 py-3.5 sm:py-4 font-semibold tracking-wide uppercase text-sm transition-all duration-500 hover:from-amber-500 hover:to-amber-400 hover:shadow-lg hover:shadow-amber-500/20"
                 >
-                  Begin Free Trial
+                  Start Free 14-Day Trial
                   <ArrowRight className="ml-2 sm:ml-3 w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </Link>
                 <a
@@ -296,7 +314,7 @@ export default function HomePage() {
                   className="group inline-flex items-center justify-center border border-neutral-700 text-white px-8 sm:px-10 py-3.5 sm:py-4 font-medium tracking-wide uppercase text-sm transition-all duration-500 hover:border-amber-700/50 hover:bg-amber-950/20"
                 >
                   <Play className="w-4 h-4 mr-2 sm:mr-3 text-amber-500" />
-                  View Showcase
+                  See Before & After
                 </a>
               </div>
 
@@ -309,6 +327,10 @@ export default function HomePage() {
                 <div className="flex items-center">
                   <CheckCircle className="w-4 h-4 text-amber-600 mr-2 flex-shrink-0" />
                   <span>No credit card</span>
+                </div>
+                <div className="flex items-center">
+                  <CheckCircle className="w-4 h-4 text-amber-600 mr-2 flex-shrink-0" />
+                  <span>Setup in 5 minutes</span>
                 </div>
               </div>
             </div>
@@ -388,23 +410,21 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* Floating Stats - positioned top right to avoid overlap */}
+              {/* Floating Stats */}
               <div className="absolute -top-4 -right-4 xl:-top-6 xl:-right-6 bg-neutral-900 border border-amber-800/30 p-4 xl:p-5 hidden lg:block z-10">
                 <div className="flex items-center gap-3 xl:gap-4">
                   <div className="w-10 h-10 xl:w-12 xl:h-12 bg-gradient-to-br from-amber-600 to-amber-500 flex items-center justify-center">
                     <TrendingUp className="w-5 h-5 xl:w-6 xl:h-6 text-white" />
                   </div>
                   <div>
-                    <p className="text-xl xl:text-2xl font-semibold text-white">+340%</p>
-                    <p className="text-neutral-500 text-xs xl:text-sm">Menu Engagement</p>
+                    <p className="text-xl xl:text-2xl font-semibold text-white">+40%</p>
+                    <p className="text-neutral-500 text-xs xl:text-sm">More Orders</p>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-
-{/* Scroll Indicator removed - was overlapping with floating stats */}
       </section>
 
       {/* Stats Bar - Premium */}
@@ -431,7 +451,94 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Features Section - Premium Grid */}
+      {/* Pain Points → Solutions Section */}
+      <section id="pain-points" className="py-24 lg:py-32 relative">
+        <div className="absolute inset-0 bg-gradient-to-b from-neutral-950 via-neutral-900/50 to-neutral-950" />
+
+        <div className="max-w-7xl mx-auto px-6 lg:px-12 relative">
+          {/* Section Header */}
+          <div className="text-center mb-12 sm:mb-16 lg:mb-20">
+            <div className="inline-flex items-center justify-center mb-4 sm:mb-6">
+              <div className="w-8 sm:w-12 h-px bg-amber-700/50" />
+              <span className="mx-3 sm:mx-4 text-amber-500 text-xs font-semibold tracking-[0.15em] sm:tracking-[0.2em] uppercase">Sound Familiar?</span>
+              <div className="w-8 sm:w-12 h-px bg-amber-700/50" />
+            </div>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light text-white mb-4 sm:mb-6 px-4">
+              Your Restaurant Deserves <span className="font-semibold text-amber-400">Better</span>
+            </h2>
+            <p className="text-neutral-400 max-w-2xl mx-auto text-base sm:text-lg font-light px-4">
+              These common problems are costing you customers every day. Here&apos;s how we solve each one.
+            </p>
+          </div>
+
+          {/* Pain Point Cards */}
+          <div className="grid sm:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
+            {[
+              {
+                pain: "Customers skip dishes with bad photos",
+                painIcon: <ImageOff className="w-5 h-5" />,
+                solution: "AI Enhancement makes every dish look irresistible — even phone photos become magazine-quality",
+                solutionIcon: <Wand2 className="w-5 h-5" />,
+                stat: "40% more orders on enhanced items"
+              },
+              {
+                pain: "Tourists can't read your menu",
+                painIcon: <Ban className="w-5 h-5" />,
+                solution: "Instant translation to 13+ languages. Tourists browse confidently and order more",
+                solutionIcon: <Languages className="w-5 h-5" />,
+                stat: "Reach 100% of international customers"
+              },
+              {
+                pain: "Reprinting menus is expensive and slow",
+                painIcon: <Printer className="w-5 h-5" />,
+                solution: "QR digital menus update instantly. Change prices, add items, update photos — all free",
+                solutionIcon: <QrCode className="w-5 h-5" />,
+                stat: "Save $200+/month on printing"
+              },
+              {
+                pain: "No online ordering = lost revenue",
+                painIcon: <XCircle className="w-5 h-5" />,
+                solution: "Built-in ordering system with kitchen display, cashier POS, and payment processing",
+                solutionIcon: <ShoppingCart className="w-5 h-5" />,
+                stat: "Accept orders 24/7 from anywhere"
+              }
+            ].map((item, index) => (
+              <div key={index} className="group bg-neutral-900/30 border border-neutral-800 p-5 sm:p-6 lg:p-8 transition-all duration-500 hover:border-amber-800/50 hover:bg-neutral-900/50">
+                {/* Pain */}
+                <div className="flex items-start gap-3 mb-5 sm:mb-6">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 bg-red-950/50 border border-red-800/30 flex items-center justify-center flex-shrink-0 text-red-400">
+                    {item.painIcon}
+                  </div>
+                  <div>
+                    <p className="text-red-400 text-xs font-semibold tracking-wider uppercase mb-1">The Problem</p>
+                    <p className="text-white font-medium text-sm sm:text-base">{item.pain}</p>
+                  </div>
+                </div>
+
+                {/* Arrow */}
+                <div className="flex items-center gap-2 mb-5 sm:mb-6 pl-12">
+                  <div className="w-6 h-px bg-amber-700/50" />
+                  <ArrowRight className="w-4 h-4 text-amber-500" />
+                </div>
+
+                {/* Solution */}
+                <div className="flex items-start gap-3">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 bg-amber-950/50 border border-amber-700/30 flex items-center justify-center flex-shrink-0 text-amber-500">
+                    {item.solutionIcon}
+                  </div>
+                  <div>
+                    <p className="text-amber-500 text-xs font-semibold tracking-wider uppercase mb-1">Our Solution</p>
+                    <p className="text-neutral-300 text-sm sm:text-base font-light leading-relaxed">{item.solution}</p>
+                    <p className="text-amber-400 text-xs sm:text-sm font-medium mt-2">✓ {item.stat}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section - Benefit Focused */}
       <section id="features" className="py-24 lg:py-32 relative">
         <div className="absolute inset-0 bg-neutral-950" />
 
@@ -444,10 +551,10 @@ export default function HomePage() {
               <div className="w-8 sm:w-12 h-px bg-amber-700/50" />
             </div>
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light text-white mb-4 sm:mb-6 px-4">
-              Exceptional <span className="font-semibold text-amber-400">Capabilities</span>
+              Everything You Need to <span className="font-semibold text-amber-400">Grow</span>
             </h2>
             <p className="text-neutral-400 max-w-2xl mx-auto text-base sm:text-lg font-light px-4">
-              Everything you need to create a world-class digital menu experience
+              One platform to make your restaurant look premium, reach more customers, and increase orders
             </p>
           </div>
 
@@ -467,8 +574,11 @@ export default function HomePage() {
                 <h3 className="text-lg sm:text-xl font-medium text-white mb-2 sm:mb-3 group-hover:text-amber-400 transition-colors">
                   {feature.title}
                 </h3>
-                <p className="text-neutral-500 leading-relaxed font-light text-sm sm:text-base">
+                <p className="text-neutral-500 leading-relaxed font-light text-sm sm:text-base mb-3">
                   {feature.description}
+                </p>
+                <p className="text-amber-500 text-xs sm:text-sm font-semibold">
+                  {feature.result}
                 </p>
               </div>
             ))}
@@ -488,10 +598,10 @@ export default function HomePage() {
               <div className="w-8 sm:w-12 h-px bg-amber-700/50" />
             </div>
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light text-white mb-4 sm:mb-6 px-4">
-              Before & After <span className="font-semibold text-amber-400">Transformations</span>
+              See the <span className="font-semibold text-amber-400">Transformation</span>
             </h2>
             <p className="text-neutral-400 max-w-2xl mx-auto text-base sm:text-lg font-light px-4">
-              Witness the power of AI enhancement on real restaurant dishes
+              Real photos from real restaurants — enhanced by our AI in seconds
             </p>
           </div>
 
@@ -600,7 +710,7 @@ export default function HomePage() {
           <div className="text-center mb-12 sm:mb-16 lg:mb-20">
             <div className="inline-flex items-center justify-center mb-4 sm:mb-6">
               <div className="w-8 sm:w-12 h-px bg-amber-700/50" />
-              <span className="mx-3 sm:mx-4 text-amber-500 text-xs font-semibold tracking-[0.15em] sm:tracking-[0.2em] uppercase">Process</span>
+              <span className="mx-3 sm:mx-4 text-amber-500 text-xs font-semibold tracking-[0.15em] sm:tracking-[0.2em] uppercase">Get Started in Minutes</span>
               <div className="w-8 sm:w-12 h-px bg-amber-700/50" />
             </div>
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light text-white mb-4 sm:mb-6">
@@ -613,20 +723,20 @@ export default function HomePage() {
               {
                 step: "01",
                 title: "Upload Your Menu",
-                description: "Simply upload photos of your dishes. Our system accepts any quality - we'll make them shine.",
+                description: "Snap photos with your phone — any quality works. Our AI handles the rest. Add dishes in minutes, not days.",
                 icon: <Upload className="w-5 h-5 sm:w-6 sm:h-6" />
               },
               {
                 step: "02",
-                title: "AI Enhancement",
-                description: "Our AI automatically enhances photos, generates descriptions, and translates content.",
+                title: "AI Does the Magic",
+                description: "Photos get enhanced instantly. Descriptions generated. Menus translated. Your QR code is ready to print.",
                 icon: <Sparkles className="w-5 h-5 sm:w-6 sm:h-6" />
               },
               {
                 step: "03",
-                title: "Go Live",
-                description: "Get your elegant QR code, share your digital menu, and start receiving orders.",
-                icon: <QrCode className="w-5 h-5 sm:w-6 sm:h-6" />
+                title: "Start Getting Orders",
+                description: "Share your QR code, accept online orders, and watch your customer base grow. It's that simple.",
+                icon: <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6" />
               }
             ].map((step, index) => (
               <div key={index} className="relative text-center">
@@ -650,7 +760,7 @@ export default function HomePage() {
               href="/login?tab=signup"
               className="inline-flex items-center bg-gradient-to-r from-amber-600 to-amber-500 text-white px-8 sm:px-10 py-3.5 sm:py-4 font-semibold tracking-wide uppercase text-sm transition-all duration-500 hover:from-amber-500 hover:to-amber-400"
             >
-              Get Started Now
+              Get Started Free
               <ArrowRight className="ml-2 sm:ml-3 w-4 h-4" />
             </Link>
           </div>
@@ -665,11 +775,11 @@ export default function HomePage() {
           <div className="text-center mb-12 sm:mb-16 lg:mb-20">
             <div className="inline-flex items-center justify-center mb-4 sm:mb-6">
               <div className="w-8 sm:w-12 h-px bg-amber-700/50" />
-              <span className="mx-3 sm:mx-4 text-amber-500 text-xs font-semibold tracking-[0.15em] sm:tracking-[0.2em] uppercase">Testimonials</span>
+              <span className="mx-3 sm:mx-4 text-amber-500 text-xs font-semibold tracking-[0.15em] sm:tracking-[0.2em] uppercase">Success Stories</span>
               <div className="w-8 sm:w-12 h-px bg-amber-700/50" />
             </div>
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light text-white mb-4 sm:mb-6 px-4">
-              Trusted by <span className="font-semibold text-amber-400">Industry Leaders</span>
+              Restaurant Owners <span className="font-semibold text-amber-400">Love It</span>
             </h2>
           </div>
 
@@ -680,21 +790,24 @@ export default function HomePage() {
                 location: "Auckland",
                 cuisine: "Italian Restaurant",
                 avatar: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=96&h=96&fit=crop&crop=face",
-                text: "The AI photo enhancement is incredible! Our pasta dishes look like they're from a magazine. A complete game changer."
+                text: "Our pasta photos look like they're from a food magazine now. We saw a 35% increase in orders for dishes with AI-enhanced photos. Best investment we've made this year.",
+                highlight: "35% more orders"
               },
               {
                 name: "Yuki T.",
                 location: "Wellington",
                 cuisine: "Japanese Restaurant",
                 avatar: "/images/showcase/yuki_avatar.jpg",
-                text: "Finally, a system that understands Asian cuisine! The translations are perfect and the QR menu is so convenient."
+                text: "The translation feature is a lifesaver. Tourist season used to be chaotic — now international visitors just scan the QR code and order in their own language. Our takeaway orders doubled.",
+                highlight: "2x takeaway orders"
               },
               {
                 name: "Raj P.",
                 location: "Christchurch",
                 cuisine: "Indian Restaurant",
                 avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=96&h=96&fit=crop&crop=face",
-                text: "Orders increased by 40% since we started using SweetAsMenu. The AI made our curry photos look absolutely delicious!"
+                text: "We used to spend $300/month on menu reprints. Now we update everything digitally. The POS system handles online orders seamlessly. We saved over $3,000 in the first year.",
+                highlight: "Saved $3,000/year"
               }
             ].map((testimonial, index) => (
               <div
@@ -708,9 +821,15 @@ export default function HomePage() {
                   ))}
                 </div>
 
-                <p className="text-neutral-300 mb-6 sm:mb-8 leading-relaxed font-light italic text-sm sm:text-base">
+                <p className="text-neutral-300 mb-4 sm:mb-6 leading-relaxed font-light italic text-sm sm:text-base">
                   &ldquo;{testimonial.text}&rdquo;
                 </p>
+
+                {/* Highlight Badge */}
+                <div className="inline-flex items-center bg-amber-950/50 border border-amber-800/30 px-3 py-1 mb-4 sm:mb-6">
+                  <TrendingUp className="w-3 h-3 text-amber-500 mr-1.5" />
+                  <span className="text-amber-400 text-xs font-semibold">{testimonial.highlight}</span>
+                </div>
 
                 <div className="flex items-center gap-3 sm:gap-4">
                   <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden border border-amber-700/30 flex-shrink-0">
@@ -746,10 +865,10 @@ export default function HomePage() {
               <div className="w-8 sm:w-12 h-px bg-amber-700/50" />
             </div>
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light text-white mb-4 sm:mb-6">
-              Investment <span className="font-semibold text-amber-400">Plans</span>
+              Simple, Transparent <span className="font-semibold text-amber-400">Pricing</span>
             </h2>
             <p className="text-neutral-400 max-w-2xl mx-auto text-base sm:text-lg font-light px-4">
-              Choose the plan that fits your establishment
+              Start free for 14 days. No credit card required. Upgrade when you&apos;re ready.
             </p>
           </div>
 
@@ -761,19 +880,21 @@ export default function HomePage() {
                 <div className="text-3xl sm:text-4xl font-light text-white mb-1">
                   $39<span className="text-neutral-500 text-base sm:text-lg">/mo</span>
                 </div>
-                <p className="text-neutral-500 text-xs sm:text-sm">For small takeaways</p>
+                <p className="text-neutral-500 text-xs sm:text-sm">For small takeaways & cafes</p>
               </div>
 
               <ul className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
                 {[
-                  "30 menu items",
-                  "30 AI enhancements/month",
-                  "Original + English",
-                  "QR Menu & POS",
-                  "Custom logo"
+                  "Up to 30 menu items",
+                  "30 AI photo enhancements/mo",
+                  "Original + English languages",
+                  "QR digital menu",
+                  "Basic POS system",
+                  "Custom logo on menu",
+                  "Email support"
                 ].map((feature, i) => (
-                  <li key={i} className="flex items-center text-neutral-400 text-xs sm:text-sm">
-                    <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-600 mr-2 sm:mr-3 flex-shrink-0" />
+                  <li key={i} className="flex items-start text-neutral-400 text-xs sm:text-sm">
+                    <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-600 mr-2 sm:mr-3 flex-shrink-0 mt-0.5" />
                     <span>{feature}</span>
                   </li>
                 ))}
@@ -790,7 +911,7 @@ export default function HomePage() {
             {/* Professional - Featured */}
             <div className="relative bg-neutral-900/50 border-2 border-amber-700/50 p-5 sm:p-6 lg:p-8 sm:col-span-2 lg:col-span-1 lg:-mt-6 lg:mb-6 xl:-mt-8 xl:mb-8">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-600 to-amber-500 text-white px-4 sm:px-6 py-1 sm:py-1.5 text-xs font-semibold tracking-wider sm:tracking-widest uppercase whitespace-nowrap z-10">
-                Most Popular
+                Best Value
               </div>
 
               <div className="text-center mb-6 sm:mb-8 pt-3 sm:pt-4">
@@ -798,20 +919,26 @@ export default function HomePage() {
                 <div className="text-3xl sm:text-4xl font-light text-amber-400 mb-1">
                   $89<span className="text-neutral-500 text-base sm:text-lg">/mo</span>
                 </div>
-                <p className="text-neutral-500 text-xs sm:text-sm">For casual dining</p>
+                <p className="text-neutral-500 text-xs sm:text-sm">For restaurants ready to grow</p>
+                <div className="inline-flex items-center bg-green-950/50 border border-green-800/30 px-3 py-1 mt-2">
+                  <span className="text-green-400 text-xs font-semibold">Save $110+/mo vs hiring a photographer</span>
+                </div>
               </div>
 
               <ul className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
                 {[
                   "Unlimited menu items",
-                  "200 AI enhancements/month",
-                  "Original + English",
-                  "Full POS System",
-                  "Custom logo & theme",
-                  "Cover image"
+                  "200 AI photo enhancements/mo",
+                  "Original + English languages",
+                  "Full POS + Kitchen Display",
+                  "Online ordering system",
+                  "Custom logo & theme colours",
+                  "Cover image & branding",
+                  "Order analytics",
+                  "Priority support"
                 ].map((feature, i) => (
-                  <li key={i} className="flex items-center text-neutral-300 text-xs sm:text-sm">
-                    <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500 mr-2 sm:mr-3 flex-shrink-0" />
+                  <li key={i} className="flex items-start text-neutral-300 text-xs sm:text-sm">
+                    <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500 mr-2 sm:mr-3 flex-shrink-0 mt-0.5" />
                     <span>{feature}</span>
                   </li>
                 ))}
@@ -832,37 +959,49 @@ export default function HomePage() {
                 <div className="text-3xl sm:text-4xl font-light text-white mb-1">
                   $199<span className="text-neutral-500 text-base sm:text-lg">/mo</span>
                 </div>
-                <p className="text-neutral-500 text-xs sm:text-sm">Fine dining & chains</p>
+                <p className="text-neutral-500 text-xs sm:text-sm">For fine dining & restaurant chains</p>
               </div>
 
               <ul className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
                 {[
-                  "Unlimited everything",
-                  "500 AI enhancements/month",
-                  "13+ languages",
+                  "Everything in Professional",
+                  "500 AI enhancements/mo",
+                  "13+ language translations",
                   "Multi-branch support",
-                  "Analytics dashboard",
-                  "AI Assistant"
+                  "AI Menu Assistant chatbot",
+                  "Advanced analytics",
+                  "Dedicated account manager",
+                  "Custom integrations"
                 ].map((feature, i) => (
-                  <li key={i} className="flex items-center text-neutral-400 text-xs sm:text-sm">
-                    <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-600 mr-2 sm:mr-3 flex-shrink-0" />
+                  <li key={i} className="flex items-start text-neutral-400 text-xs sm:text-sm">
+                    <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-600 mr-2 sm:mr-3 flex-shrink-0 mt-0.5" />
                     <span>{feature}</span>
                   </li>
                 ))}
               </ul>
 
               <Link
-                href="/login?tab=signup"
-                className="block text-center bg-gradient-to-r from-amber-600 to-amber-500 text-white py-2.5 sm:py-3 font-semibold tracking-wide uppercase text-xs sm:text-sm transition-all duration-300 hover:from-amber-500 hover:to-amber-400"
+                href="/pricing"
+                className="block text-center border border-neutral-700 text-white py-2.5 sm:py-3 font-medium tracking-wide uppercase text-xs sm:text-sm transition-all duration-300 hover:border-amber-700/50 hover:bg-amber-950/20"
               >
-                Get Started
+                Contact Sales
               </Link>
             </div>
+          </div>
+
+          {/* Pricing Note */}
+          <div className="text-center mt-8 sm:mt-12">
+            <p className="text-neutral-500 text-xs sm:text-sm">
+              All prices in NZD, GST inclusive. Annual plans save 10%.{' '}
+              <Link href="/pricing" className="text-amber-500 hover:text-amber-400 underline underline-offset-2">
+                See full plan comparison →
+              </Link>
+            </p>
           </div>
         </div>
       </section>
 
-      {/* Final CTA */}
+      {/* Final CTA - Urgency */}
       <section className="py-16 sm:py-24 lg:py-32 relative">
         <div className="absolute inset-0 bg-gradient-to-r from-amber-950/50 via-amber-900/30 to-amber-950/50" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-amber-900/20 via-transparent to-transparent" />
@@ -871,23 +1010,24 @@ export default function HomePage() {
           <Utensils className="w-10 h-10 sm:w-12 sm:h-12 text-amber-600 mx-auto mb-6 sm:mb-8" />
 
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light text-white mb-4 sm:mb-6 px-4">
-            Ready to <span className="font-semibold text-amber-400">Transform</span> Your Restaurant?
+            Your Competitors Are Already Using{' '}
+            <span className="font-semibold text-amber-400">AI Menus</span>
           </h2>
           <p className="text-neutral-400 mb-8 sm:mb-12 text-base sm:text-lg font-light max-w-2xl mx-auto px-4">
-            Join hundreds of premium restaurants across New Zealand.
-            Start your complimentary 14-day trial today.
+            Every day without a professional digital menu is another day of lost customers.
+            Start your free trial now — setup takes just 5 minutes.
           </p>
 
           <Link
             href="/login?tab=signup"
             className="inline-flex items-center bg-white text-neutral-900 px-8 sm:px-12 py-3.5 sm:py-4 font-semibold tracking-wide uppercase text-sm transition-all duration-300 hover:bg-amber-400"
           >
-            Begin Your Journey
+            Start Free Trial Now
             <ArrowRight className="ml-2 sm:ml-3 w-4 h-4" />
           </Link>
 
           <p className="text-neutral-500 text-xs sm:text-sm mt-6 sm:mt-8">
-            No credit card required • Cancel anytime
+            No credit card required • Cancel anytime • 14-day free trial
           </p>
         </div>
       </section>

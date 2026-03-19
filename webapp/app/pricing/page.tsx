@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Check, ChefHat, Sparkles, Zap, Crown, ArrowLeft, X, Languages, Wand2, QrCode, Smartphone } from 'lucide-react';
+import { Check, ChefHat, Sparkles, Zap, Crown, ArrowLeft, X, Languages, Wand2, QrCode, Smartphone, TrendingUp, Star } from 'lucide-react';
 import { SUBSCRIPTION_PLANS } from '@/lib/subscription/plans';
 
 export default function PricingPage() {
@@ -55,6 +55,14 @@ export default function PricingPage() {
     return colors[color as keyof typeof colors] || colors.blue;
   };
 
+  // "Who it's for" descriptions
+  const planTargets: Record<string, string> = {
+    free: 'Try everything free for 14 days — no credit card needed',
+    basic: 'Small takeaways, cafes, and food trucks getting started with digital menus',
+    pro: 'Growing restaurants that want professional branding, analytics, and online ordering',
+    enterprise: 'Fine dining, restaurant chains, and multi-location businesses needing full power',
+  };
+
   // Feature comparison table data
   const featureComparison = [
     {
@@ -63,6 +71,7 @@ export default function PricingPage() {
         { name: 'Menu Items', free: '20', starter: '30', pro: 'Unlimited', enterprise: 'Unlimited' },
         { name: 'Categories', free: '5', starter: '10', pro: 'Unlimited', enterprise: 'Unlimited' },
         { name: 'Menu Editing', free: true, starter: true, pro: true, enterprise: true },
+        { name: 'Real-time QR Menu Updates', free: true, starter: true, pro: true, enterprise: true },
       ]
     },
     {
@@ -70,36 +79,49 @@ export default function PricingPage() {
       features: [
         { name: 'AI Image Generation', free: '5/mo', starter: '30/mo', pro: '200/mo', enterprise: '500/mo' },
         { name: 'AI Photo Enhancement', free: '5/mo', starter: '30/mo', pro: '200/mo', enterprise: '500/mo' },
-        { name: 'AI Descriptions', free: true, starter: true, pro: true, enterprise: true },
+        { name: 'AI Menu Descriptions', free: true, starter: true, pro: true, enterprise: true },
+        { name: 'AI Menu Assistant (Chatbot)', free: false, starter: false, pro: false, enterprise: true },
       ]
     },
     {
-      category: 'Translation',
+      category: 'Translation & Languages',
       features: [
-        { name: 'Languages', free: '2', starter: '2', pro: '2', enterprise: '13+' },
+        { name: 'Languages Supported', free: '2', starter: '2', pro: '2', enterprise: '13+' },
         { name: 'Original + English', free: true, starter: true, pro: true, enterprise: true },
-        { name: 'Chinese, Japanese, Korean, etc.', free: false, starter: false, pro: false, enterprise: true },
+        { name: 'Chinese, Japanese, Korean', free: false, starter: false, pro: false, enterprise: true },
+        { name: 'Thai, Vietnamese, Hindi, etc.', free: false, starter: false, pro: false, enterprise: true },
       ]
     },
     {
-      category: 'Branding',
+      category: 'Branding & Customisation',
       features: [
         { name: 'Custom Logo', free: false, starter: 'Small', pro: 'Prominent', enterprise: 'Full' },
-        { name: 'Theme Color', free: false, starter: false, pro: true, enterprise: true },
+        { name: 'Theme Colour Customisation', free: false, starter: false, pro: true, enterprise: true },
         { name: 'Cover Image', free: false, starter: false, pro: true, enterprise: true },
       ]
     },
     {
-      category: 'Operations',
+      category: 'Ordering & POS',
       features: [
-        { name: 'Online Ordering & Payments', free: true, starter: true, pro: true, enterprise: true },
-        { name: 'QR Code Menu', free: true, starter: true, pro: true, enterprise: true },
+        { name: 'Online Ordering', free: true, starter: true, pro: true, enterprise: true },
+        { name: 'Card & EFTPOS Payments', free: true, starter: true, pro: true, enterprise: true },
+        { name: 'QR Code Digital Menu', free: true, starter: true, pro: true, enterprise: true },
         { name: 'POS System', free: 'Basic', starter: 'Basic', pro: 'Full', enterprise: 'Full' },
-        { name: 'Kitchen Display', free: true, starter: true, pro: true, enterprise: true },
+        { name: 'Kitchen Display System', free: true, starter: true, pro: true, enterprise: true },
+        { name: 'Cashier Terminal', free: true, starter: true, pro: true, enterprise: true },
+        { name: 'Thermal Receipt Printing', free: true, starter: true, pro: true, enterprise: true },
         { name: 'Staff Management', free: true, starter: true, pro: true, enterprise: true },
-        { name: 'Analytics Dashboard', free: false, starter: false, pro: true, enterprise: true },
-        { name: 'AI Assistant', free: false, starter: false, pro: false, enterprise: true },
-        { name: 'Multi-branch', free: false, starter: false, pro: false, enterprise: true },
+        { name: 'Order Analytics', free: false, starter: false, pro: true, enterprise: true },
+        { name: 'Advanced Analytics', free: false, starter: false, pro: false, enterprise: true },
+        { name: 'Multi-branch Support', free: false, starter: false, pro: false, enterprise: true },
+      ]
+    },
+    {
+      category: 'Support',
+      features: [
+        { name: 'Email Support', free: true, starter: true, pro: true, enterprise: true },
+        { name: 'Priority Support', free: false, starter: false, pro: true, enterprise: true },
+        { name: 'Dedicated Account Manager', free: false, starter: false, pro: false, enterprise: true },
       ]
     },
   ];
@@ -120,11 +142,14 @@ export default function PricingPage() {
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent leading-tight pb-2">
             Simple, Transparent Pricing
           </h1>
-          <p className="text-xl md:text-2xl text-gray-600 mb-4 font-medium">
+          <p className="text-xl md:text-2xl text-gray-600 mb-2 font-medium">
             Choose the perfect plan for your restaurant
           </p>
+          <p className="text-base text-gray-500 mb-2">
+            All prices in NZD, GST inclusive
+          </p>
           <p className="text-lg text-orange-600 font-semibold mb-8">
-            14-Day Free Trial • No Credit Card Required • Cancel Anytime
+            14-Day Free Trial &bull; No Credit Card Required &bull; Cancel Anytime
           </p>
 
           {/* Interval Toggle */}
@@ -160,6 +185,7 @@ export default function PricingPage() {
           {SUBSCRIPTION_PLANS.map((plan) => {
             const colors = getColorClasses(plan.color);
             const displayPrice = interval === 'year' ? Math.round(plan.price * 0.9) : plan.price;
+            const isBestValue = plan.id === 'pro';
 
             return (
               <div
@@ -168,31 +194,39 @@ export default function PricingPage() {
                   plan.popular ? 'ring-4 ring-orange-500 ring-opacity-50 lg:scale-105 z-10' : ''
                 }`}
               >
-                {/* Popular Badge */}
-                {plan.popular && (
+                {/* Best Value / Popular Badge */}
+                {isBestValue && (
+                  <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-orange-500 to-red-500 text-white py-2 text-sm font-semibold text-center flex items-center justify-center gap-2">
+                    <Star className="w-4 h-4 fill-current" />
+                    Best Value
+                    <Star className="w-4 h-4 fill-current" />
+                  </div>
+                )}
+
+                {plan.popular && !isBestValue && (
                   <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-orange-500 to-red-500 text-white py-2 text-sm font-semibold text-center">
                     Most Popular
                   </div>
                 )}
 
-                <div className={`p-6 ${plan.popular ? 'pt-12' : ''}`}>
+                <div className={`p-6 ${plan.popular || isBestValue ? 'pt-12' : ''}`}>
                   {/* Icon */}
                   <div className={`${colors.icon} w-14 h-14 rounded-2xl flex items-center justify-center mb-4`}>
                     {getIconForPlan(plan.id)}
                   </div>
 
                   {/* Plan Name */}
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">
+                  <h3 className="text-xl font-bold text-gray-900 mb-1">
                     {plan.name}
                   </h3>
 
-                  {/* Description */}
-                  <p className="text-gray-500 text-sm mb-4 min-h-[2.5rem]">
-                    {plan.description}
+                  {/* Who it's for */}
+                  <p className="text-gray-500 text-xs mb-4 min-h-[2.5rem] leading-relaxed">
+                    {planTargets[plan.id]}
                   </p>
 
                   {/* Price */}
-                  <div className="mb-5">
+                  <div className="mb-4">
                     <div className="flex items-baseline">
                       <span className="text-4xl font-bold text-gray-900">
                         ${displayPrice}
@@ -206,6 +240,12 @@ export default function PricingPage() {
                         Save ${(plan.price * 12 * 0.1).toFixed(0)}/year
                       </p>
                     )}
+                    {isBestValue && (
+                      <div className="inline-flex items-center bg-green-50 border border-green-200 rounded-full px-3 py-1 mt-2">
+                        <TrendingUp className="w-3 h-3 text-green-600 mr-1" />
+                        <span className="text-xs text-green-700 font-semibold">Save $110+/mo vs photographer</span>
+                      </div>
+                    )}
                   </div>
 
                   {/* CTA Button */}
@@ -213,13 +253,13 @@ export default function PricingPage() {
                     href={plan.price === 0 ? '/login?tab=signup' : `/checkout?plan=${plan.id}&interval=${interval}`}
                     className={`w-full bg-gradient-to-r ${colors.gradient} text-white py-3 rounded-xl font-semibold text-sm transition-all hover:shadow-lg mb-5 flex items-center justify-center`}
                   >
-                    {plan.price === 0 ? 'Start Free Trial' : 'Get Started'}
+                    {plan.price === 0 ? 'Start Free Trial' : isBestValue ? 'Start Free Trial' : 'Get Started'}
                   </Link>
 
                   {/* Features */}
                   <div className="space-y-2">
                     <p className="text-xs font-semibold text-gray-900 mb-3">
-                      What's included:
+                      What&apos;s included:
                     </p>
                     <div className="space-y-2">
                       {plan.features.map((feature, index) => (
@@ -248,6 +288,30 @@ export default function PricingPage() {
           })}
         </div>
 
+        {/* Value Proposition Banner */}
+        <div className="max-w-4xl mx-auto mb-16 bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 rounded-2xl p-6 md:p-8">
+          <h3 className="text-xl font-bold text-gray-900 mb-4 text-center">
+            Why Professional is the Best Value
+          </h3>
+          <div className="grid sm:grid-cols-3 gap-4 text-center">
+            <div>
+              <p className="text-2xl font-bold text-orange-600">$200+</p>
+              <p className="text-sm text-gray-600">Saved on menu printing per month</p>
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-orange-600">$500+</p>
+              <p className="text-sm text-gray-600">Saved on food photography</p>
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-orange-600">40%</p>
+              <p className="text-sm text-gray-600">More orders with AI-enhanced photos</p>
+            </div>
+          </div>
+          <p className="text-center text-sm text-gray-500 mt-4">
+            The Professional plan at $89/mo pays for itself within the first week.
+          </p>
+        </div>
+
         {/* Feature Comparison Table */}
         <div className="max-w-6xl mx-auto mb-20">
           <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">
@@ -262,7 +326,12 @@ export default function PricingPage() {
                     <th className="text-left py-4 px-6 font-semibold text-gray-900">Feature</th>
                     <th className="text-center py-4 px-4 font-semibold text-gray-900 min-w-[100px]">Free Trial</th>
                     <th className="text-center py-4 px-4 font-semibold text-gray-900 min-w-[100px]">Starter</th>
-                    <th className="text-center py-4 px-4 font-semibold text-orange-600 min-w-[100px]">Professional</th>
+                    <th className="text-center py-4 px-4 font-semibold text-orange-600 min-w-[100px]">
+                      <div className="flex flex-col items-center">
+                        <span className="text-[10px] bg-orange-500 text-white px-2 py-0.5 rounded-full mb-1">BEST VALUE</span>
+                        Professional
+                      </div>
+                    </th>
                     <th className="text-center py-4 px-4 font-semibold text-purple-600 min-w-[100px]">Enterprise</th>
                   </tr>
                 </thead>
@@ -370,7 +439,7 @@ export default function PricingPage() {
                 What languages are supported?
               </h3>
               <p className="text-gray-600 text-sm">
-                Free to Professional plans include Original + English (2 languages). Enterprise unlocks 13+ languages including Chinese, Japanese, Korean, Thai, and more.
+                Free to Professional plans include Original + English (2 languages). Enterprise unlocks 13+ languages including Chinese, Japanese, Korean, Thai, Vietnamese, Hindi, and more.
               </p>
             </div>
 
@@ -379,7 +448,7 @@ export default function PricingPage() {
                 How does AI photo enhancement work?
               </h3>
               <p className="text-gray-600 text-sm">
-                Upload your food photos and our AI enhances lighting, color, and presentation automatically. No editing skills required!
+                Upload your food photos and our AI enhances lighting, color, and presentation automatically. No editing skills required! Even phone photos become magazine-quality.
               </p>
             </div>
 
@@ -391,16 +460,37 @@ export default function PricingPage() {
                 Absolutely. Cancel anytime with no penalties. Your data will be available for 30 days after cancellation.
               </p>
             </div>
+
+            <div className="bg-white p-6 rounded-2xl shadow-md">
+              <h3 className="font-semibold text-gray-900 mb-2">
+                What is multi-branch support?
+              </h3>
+              <p className="text-gray-600 text-sm">
+                Enterprise users can manage multiple restaurant locations from a single account. Each branch gets its own menu, QR code, and POS system while sharing analytics and branding.
+              </p>
+            </div>
+
+            <div className="bg-white p-6 rounded-2xl shadow-md">
+              <h3 className="font-semibold text-gray-900 mb-2">
+                Do I need to install anything?
+              </h3>
+              <p className="text-gray-600 text-sm">
+                No installation needed! SweetAsMenu is fully web-based. Works on any device — phone, tablet, or computer. Your customers just scan the QR code.
+              </p>
+            </div>
           </div>
         </div>
 
         {/* CTA Section */}
         <div className="text-center bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 rounded-3xl p-12 shadow-2xl max-w-4xl mx-auto mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            Ready to Transform Your Restaurant?
+            Ready to Get More Customers?
           </h2>
-          <p className="text-xl text-white/90 mb-8">
-            Start your free 14-day trial today
+          <p className="text-xl text-white/90 mb-4">
+            Start your free 14-day trial today — setup takes just 5 minutes
+          </p>
+          <p className="text-sm text-white/70 mb-8">
+            Join 500+ restaurants already using SweetAsMenu
           </p>
           <Link
             href="/login?tab=signup"
@@ -409,7 +499,7 @@ export default function PricingPage() {
             Start Free Trial
           </Link>
           <p className="text-white/70 text-sm mt-4">
-            No credit card required • Cancel anytime
+            No credit card required &bull; Cancel anytime
           </p>
         </div>
       </div>

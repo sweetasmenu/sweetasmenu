@@ -210,7 +210,7 @@ class AdminService:
                 'role', 'email', 'restaurant_name', 'phone', 'address', 'city', 'country',
                 'subscription_status', 'plan', 'billing_interval', 'is_active', 'notes',
                 'trial_start_date', 'trial_end_date', 'subscription_start_date', 'subscription_end_date',
-                'next_billing_date', 'stripe_customer_id', 'stripe_subscription_id'
+                'next_billing_date', 'stripe_customer_id', 'stripe_subscription_id', 'max_branches'
             ]
             filtered_updates = {k: v for k, v in updates.items() if k in allowed_fields}
             filtered_updates['updated_at'] = datetime.now().isoformat()

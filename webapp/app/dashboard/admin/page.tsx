@@ -55,6 +55,7 @@ interface UserProfile {
   stripe_customer_id?: string;
   stripe_subscription_id?: string;
   cancel_at_period_end?: boolean;
+  max_branches?: number;
 }
 
 interface PendingPayment {
@@ -447,6 +448,7 @@ export default function AdminDashboardPage() {
           subscription_start_date: editForm.subscription_start_date,
           subscription_end_date: editForm.subscription_end_date,
           next_billing_date: editForm.next_billing_date,
+          max_branches: editForm.max_branches,
         })
       });
       const data = await response.json();
@@ -1320,7 +1322,12 @@ export default function AdminDashboardPage() {
                   </div>
                   <div className="bg-gray-50 rounded-lg p-4">
                     <label className="text-sm text-gray-500 mb-1 block">{t('customer.branchCount', lang)}</label>
-                    <p className="font-medium text-gray-900">{selectedUser.branch_count || 0}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium text-gray-900">{selectedUser.branch_count || 0}</p>
+                      <span className="text-gray-400">/</span>
+                      <p className="font-medium text-gray-900">{selectedUser.max_branches || 1}</p>
+                      <span className="text-xs text-gray-500">{lang === 'th' ? 'สาขาที่ใช้ / สูงสุด' : 'used / max'}</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1415,6 +1422,27 @@ export default function AdminDashboardPage() {
                         <option value="bank_transfer">{t('paymentMethods.bank_transfer', lang)}</option>
                       </select>
                     </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        {lang === 'th' ? 'จำนวนสาขาสูงสุด' : 'Max Branches'}
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="number"
+                          min={1}
+                          max={999}
+                          value={editForm.max_branches || 1}
+                          onChange={(e) => setEditForm({ ...editForm, max_branches: Math.max(1, Math.min(999, parseInt(e.target.value) || 1)) })}
+                          className="w-full px-3 py-2 border border-purple-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none bg-white"
+                        />
+                        <span className="text-xs text-gray-500 whitespace-nowrap">
+                          {lang === 'th' ? `ใช้แล้ว ${selectedUser.branch_count || 0}` : `${selectedUser.branch_count || 0} used`}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-400 mt-1">
+                        {lang === 'th' ? 'กำหนดจำนวนสาขาที่ user สามารถสร้างได้' : 'Set how many branches this user can create'}
+                      </p>
+                    </div>
                   </div>
                 ) : (
                   <div className="grid grid-cols-2 gap-4 text-sm">
@@ -1433,6 +1461,10 @@ export default function AdminDashboardPage() {
                     <div>
                       <p className="text-gray-500">{t('subscriptionActions.billingInterval', lang)}</p>
                       <p className="font-medium">{selectedUser.billing_interval || '-'}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-500">{lang === 'th' ? 'สาขาสูงสุด' : 'Max Branches'}</p>
+                      <p className="font-medium">{selectedUser.max_branches || 1}</p>
                     </div>
                   </div>
                 )}
