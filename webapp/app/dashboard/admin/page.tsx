@@ -1215,7 +1215,7 @@ export default function AdminDashboardPage() {
                   <Edit className="w-4 h-4" />
                   {editMode ? t('editUser.editMode', lang) : t('editUser.viewMode', lang)}
                 </button>
-                <button onClick={() => { setSelectedUser(null); setEditMode(false); }} className="p-2 hover:bg-gray-100 rounded-lg">
+                <button onClick={() => { setSelectedUser(null); setEditMode(false); }} className="p-2 hover:bg-gray-100 rounded-lg text-gray-700">
                   <X className="w-5 h-5" />
                 </button>
               </div>
@@ -1448,23 +1448,23 @@ export default function AdminDashboardPage() {
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <p className="text-gray-500">Role</p>
-                      <p className="font-medium">{selectedUser.role || '-'}</p>
+                      <p className="font-medium text-gray-900">{selectedUser.role || '-'}</p>
                     </div>
                     <div>
                       <p className="text-gray-500">{t('customer.plan', lang)}</p>
-                      <p className="font-medium">{t(`plans.${selectedUser.plan || 'free_trial'}`, lang)}</p>
+                      <p className="font-medium text-gray-900">{t(`plans.${selectedUser.plan || 'free_trial'}`, lang)}</p>
                     </div>
                     <div>
                       <p className="text-gray-500">{t('customer.paymentMethod', lang)}</p>
-                      <p className="font-medium">{selectedUser.payment_method ? t(`paymentMethods.${selectedUser.payment_method}`, lang) : '-'}</p>
+                      <p className="font-medium text-gray-900">{selectedUser.payment_method ? t(`paymentMethods.${selectedUser.payment_method}`, lang) : '-'}</p>
                     </div>
                     <div>
                       <p className="text-gray-500">{t('subscriptionActions.billingInterval', lang)}</p>
-                      <p className="font-medium">{selectedUser.billing_interval || '-'}</p>
+                      <p className="font-medium text-gray-900">{selectedUser.billing_interval || '-'}</p>
                     </div>
                     <div>
                       <p className="text-gray-500">{lang === 'th' ? 'สาขาสูงสุด' : 'Max Branches'}</p>
-                      <p className="font-medium">{selectedUser.max_branches || 1}</p>
+                      <p className="font-medium text-gray-900">{selectedUser.max_branches || 1}</p>
                     </div>
                   </div>
                 )}
