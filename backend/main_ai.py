@@ -5240,18 +5240,25 @@ async def create_restaurant(request: Dict[str, Any]):
             existing = restaurant_service.supabase_client.table('restaurants').select('id', count='exact').eq('user_id', user_id).execute()
             existing_count = existing.count or 0
             if existing_count >= 1:
-                # Check max_branches from user_profiles
-                profile_result = restaurant_service.supabase_client.table('user_profiles').select('max_branches, role').eq('user_id', user_id).execute()
+                # Check max_branches and branch_creation_enabled from user_profiles
+                profile_result = restaurant_service.supabase_client.table('user_profiles').select('max_branches, role, branch_creation_enabled').eq('user_id', user_id).execute()
                 if profile_result.data:
                     profile = profile_result.data[0]
                     max_branches = profile.get('max_branches', 1)
                     user_role = profile.get('role', 'free_trial')
+                    branch_creation_enabled = profile.get('branch_creation_enabled', True)
                     # Admin always allowed
-                    if user_role != 'admin' and existing_count >= max_branches:
-                        raise HTTPException(
-                            status_code=403,
-                            detail=f"You have reached your branch limit ({max_branches}). Please contact admin to increase your limit."
-                        )
+                    if user_role != 'admin':
+                        if not branch_creation_enabled:
+                            raise HTTPException(
+                                status_code=403,
+                                detail="Branch creation is currently disabled for your account. Please contact admin."
+                            )
+                        if existing_count >= max_branches:
+                            raise HTTPException(
+                                status_code=403,
+                                detail=f"You have reached your branch limit ({max_branches}). Please contact admin to increase your limit."
+                            )
                 else:
                     # No profile found, default to 1 branch
                     raise HTTPException(

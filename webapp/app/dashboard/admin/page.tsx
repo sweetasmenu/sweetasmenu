@@ -56,6 +56,7 @@ interface UserProfile {
   stripe_subscription_id?: string;
   cancel_at_period_end?: boolean;
   max_branches?: number;
+  branch_creation_enabled?: boolean;
 }
 
 interface PendingPayment {
@@ -449,6 +450,7 @@ export default function AdminDashboardPage() {
           subscription_end_date: editForm.subscription_end_date,
           next_billing_date: editForm.next_billing_date,
           max_branches: editForm.max_branches,
+          branch_creation_enabled: editForm.branch_creation_enabled,
         })
       });
       const data = await response.json();
@@ -1422,27 +1424,6 @@ export default function AdminDashboardPage() {
                         <option value="bank_transfer">{t('paymentMethods.bank_transfer', lang)}</option>
                       </select>
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        {lang === 'th' ? 'จำนวนสาขาสูงสุด' : 'Max Branches'}
-                      </label>
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="number"
-                          min={1}
-                          max={999}
-                          value={editForm.max_branches || 1}
-                          onChange={(e) => setEditForm({ ...editForm, max_branches: Math.max(1, Math.min(999, parseInt(e.target.value) || 1)) })}
-                          className="w-full px-3 py-2 border border-purple-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none bg-white"
-                        />
-                        <span className="text-xs text-gray-500 whitespace-nowrap">
-                          {lang === 'th' ? `ใช้แล้ว ${selectedUser.branch_count || 0}` : `${selectedUser.branch_count || 0} used`}
-                        </span>
-                      </div>
-                      <p className="text-xs text-gray-400 mt-1">
-                        {lang === 'th' ? 'กำหนดจำนวนสาขาที่ user สามารถสร้างได้' : 'Set how many branches this user can create'}
-                      </p>
-                    </div>
                   </div>
                 ) : (
                   <div className="grid grid-cols-2 gap-4 text-sm">
@@ -1462,12 +1443,140 @@ export default function AdminDashboardPage() {
                       <p className="text-gray-500">{t('subscriptionActions.billingInterval', lang)}</p>
                       <p className="font-medium text-gray-900">{selectedUser.billing_interval || '-'}</p>
                     </div>
-                    <div>
-                      <p className="text-gray-500">{lang === 'th' ? 'สาขาสูงสุด' : 'Max Branches'}</p>
-                      <p className="font-medium text-gray-900">{selectedUser.max_branches || 1}</p>
-                    </div>
                   </div>
                 )}
+              </div>
+
+              {/* Branch Control - Always interactive */}
+              <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                  <Store className="w-5 h-5 text-blue-600" />
+                  {lang === 'th' ? 'การจัดการสาขา' : 'Branch Control'}
+                </h4>
+                <div className="space-y-4">
+                  {/* Toggle: Enable/Disable branch creation */}
+                  <div className="flex items-center justify-between bg-white rounded-lg p-3 border border-blue-100">
+                    <div>
+                      <p className="font-medium text-gray-900 text-sm">
+                        {lang === 'th' ? 'อนุญาตให้สร้างสาขาเพิ่ม' : 'Allow Branch Creation'}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        {lang === 'th' ? 'เปิด/ปิด การสร้างร้านอาหารสาขาใหม่' : 'Enable or disable creating new restaurant branches'}
+                      </p>
+                    </div>
+                    <button
+                      onClick={async () => {
+                        const newVal = !(selectedUser.branch_creation_enabled !== false);
+                        try {
+                          const response = await fetch(`${API_URL}/api/admin/users/update`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                              admin_user_id: adminUserId,
+                              target_user_id: selectedUser.user_id,
+                              branch_creation_enabled: newVal,
+                            })
+                          });
+                          const data = await response.json();
+                          if (data.success) {
+                            setSelectedUser({ ...selectedUser, branch_creation_enabled: newVal });
+                            setEditForm((prev: any) => ({ ...prev, branch_creation_enabled: newVal }));
+                          } else {
+                            alert(data.error || 'Failed to update');
+                          }
+                        } catch (err) {
+                          alert('Failed to update branch setting');
+                        }
+                      }}
+                      className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors ${
+                        selectedUser.branch_creation_enabled !== false ? 'bg-blue-600' : 'bg-gray-300'
+                      }`}
+                    >
+                      <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-md transition-transform ${
+                        selectedUser.branch_creation_enabled !== false ? 'translate-x-6' : 'translate-x-1'
+                      }`} />
+                    </button>
+                  </div>
+
+                  {/* Max Branches Control */}
+                  <div className="bg-white rounded-lg p-3 border border-blue-100">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-gray-900 text-sm">
+                          {lang === 'th' ? 'จำนวนสาขาสูงสุด' : 'Max Branches'}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-0.5">
+                          {lang === 'th'
+                            ? `ใช้แล้ว ${selectedUser.branch_count || 0} จาก ${selectedUser.max_branches || 1} สาขา`
+                            : `${selectedUser.branch_count || 0} of ${selectedUser.max_branches || 1} branches used`}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={async () => {
+                            const newVal = Math.max(1, (selectedUser.max_branches || 1) - 1);
+                            try {
+                              const response = await fetch(`${API_URL}/api/admin/users/update-branch-limit`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                  admin_user_id: adminUserId,
+                                  target_user_id: selectedUser.user_id,
+                                  max_branches: newVal,
+                                })
+                              });
+                              const data = await response.json();
+                              if (data.success) {
+                                setSelectedUser({ ...selectedUser, max_branches: newVal });
+                                setEditForm((prev: any) => ({ ...prev, max_branches: newVal }));
+                              }
+                            } catch (err) { /* ignore */ }
+                          }}
+                          disabled={(selectedUser.max_branches || 1) <= 1}
+                          className="w-8 h-8 flex items-center justify-center rounded-lg bg-blue-100 text-blue-700 font-bold hover:bg-blue-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                        >
+                          -
+                        </button>
+                        <span className="text-lg font-bold text-gray-900 w-10 text-center">{selectedUser.max_branches || 1}</span>
+                        <button
+                          onClick={async () => {
+                            const newVal = Math.min(999, (selectedUser.max_branches || 1) + 1);
+                            try {
+                              const response = await fetch(`${API_URL}/api/admin/users/update-branch-limit`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                  admin_user_id: adminUserId,
+                                  target_user_id: selectedUser.user_id,
+                                  max_branches: newVal,
+                                })
+                              });
+                              const data = await response.json();
+                              if (data.success) {
+                                setSelectedUser({ ...selectedUser, max_branches: newVal });
+                                setEditForm((prev: any) => ({ ...prev, max_branches: newVal }));
+                              }
+                            } catch (err) { /* ignore */ }
+                          }}
+                          className="w-8 h-8 flex items-center justify-center rounded-lg bg-blue-100 text-blue-700 font-bold hover:bg-blue-200 transition-colors"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                    {/* Progress bar */}
+                    <div className="mt-2">
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div
+                          className={`h-2 rounded-full transition-all ${
+                            (selectedUser.branch_count || 0) >= (selectedUser.max_branches || 1) ? 'bg-red-500' : 'bg-blue-500'
+                          }`}
+                          style={{ width: `${Math.min(100, ((selectedUser.branch_count || 0) / (selectedUser.max_branches || 1)) * 100)}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {/* Subscription Dates */}
